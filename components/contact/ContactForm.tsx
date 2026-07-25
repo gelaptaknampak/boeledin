@@ -26,10 +26,6 @@ export default function ContactForm() {
     resolver: zodResolver(contactSchema),
   })
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
-  })
-
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true)
     try {
