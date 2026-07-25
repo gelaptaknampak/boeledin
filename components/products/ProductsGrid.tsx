@@ -107,80 +107,107 @@ export default function ProductsGrid() {
   return (
     <section className="py-12 md:py-16 bg-background">
       <div className="container mx-auto px-4">
-        {/* Filters */}
-        <div className="mb-12 space-y-6 bg-card p-6 rounded-lg border border-border">
-          {/* Brand Filter */}
-          <div>
-            <label className="block text-sm font-semibold mb-3">Filter Merek</label>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { value: 'all', label: 'Semua Merek' },
-                { value: 'boe', label: 'BOE' },
-                { value: 'boeled', label: 'BOELED' },
-                { value: 'fbi', label: 'FBI' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setBrandFilter(option.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    brandFilter === option.value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-accent text-foreground hover:bg-primary/20'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+        {/* Main Layout: Sidebar + Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar Filters */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6 bg-card p-6 rounded-lg border border-border">
+              {/* Brand Filter */}
+              <div>
+                <label className="block text-sm font-semibold mb-4">Filter Merek</label>
+                <div className="space-y-2 flex flex-col">
+                  {[
+                    { value: 'all', label: 'Semua Merek' },
+                    { value: 'boe', label: 'BOE' },
+                    { value: 'boeled', label: 'BOELED' },
+                    { value: 'fbi', label: 'FBI' },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setBrandFilter(option.value)}
+                      className={`text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        brandFilter === option.value
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-accent text-foreground hover:bg-accent/80'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="h-px bg-border" />
+
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-semibold mb-4">Filter Jenis Produk</label>
+                <div className="space-y-2 flex flex-col">
+                  {[
+                    { value: 'all', label: 'Semua Jenis' },
+                    { value: 'signage', label: 'Digital Signage' },
+                    { value: 'ifp', label: 'Interactive Flat Panel' },
+                    { value: 'led', label: 'LED' },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setCategoryFilter(option.value)}
+                      className={`text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        categoryFilter === option.value
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-accent text-foreground hover:bg-accent/80'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="h-px bg-border" />
+
+              {/* Search */}
+              <div>
+                <label className="block text-sm font-semibold mb-3">Cari Produk</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Cari model..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 border border-border rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              {/* Reset Button */}
+              <button
+                onClick={() => {
+                  setBrandFilter('all')
+                  setCategoryFilter('all')
+                  setSearchQuery('')
+                }}
+                className="w-full px-4 py-2 text-sm font-medium bg-accent text-foreground hover:bg-accent/80 rounded-lg transition-colors"
+              >
+                Reset Filter
+              </button>
             </div>
           </div>
 
-          {/* Category Filter */}
-          <div>
-            <label className="block text-sm font-semibold mb-3">Filter Jenis Produk</label>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { value: 'all', label: 'Semua Jenis' },
-                { value: 'signage', label: 'Digital Signage' },
-                { value: 'ifp', label: 'Interactive Flat Panel' },
-                { value: 'led', label: 'LED' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setCategoryFilter(option.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    categoryFilter === option.value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-accent text-foreground hover:bg-primary/20'
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+          {/* Content Area */}
+          <div className="lg:col-span-3">
+            {/* Results Count */}
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground">
+                Menampilkan <span className="font-semibold text-foreground">{filteredProducts.length}</span> dari <span className="font-semibold text-foreground">{products.length}</span> produk
+              </p>
             </div>
-          </div>
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Cari model, mis. 'FBI-43Q6'"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
-
-        {/* Results Count */}
-        <div className="mb-8">
-          <p className="text-sm text-muted-foreground">
-            Menampilkan {filteredProducts.length} dari {products.length} produk
-          </p>
-        </div>
-
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Product Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredProducts.map((product) => (
             <div key={product.id} className="group border border-border rounded-lg overflow-hidden hover:border-primary transition-colors bg-card">
               {/* Image */}
@@ -222,21 +249,23 @@ export default function ProductsGrid() {
           ))}
         </div>
 
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Tidak ada produk yang sesuai dengan filter Anda</p>
-            <button
-              onClick={() => {
-                setBrandFilter('all')
-                setCategoryFilter('all')
-                setSearchQuery('')
-              }}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Reset Filter
-            </button>
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12 col-span-full">
+                <p className="text-muted-foreground mb-4">Tidak ada produk yang sesuai dengan filter Anda</p>
+                <button
+                  onClick={() => {
+                    setBrandFilter('all')
+                    setCategoryFilter('all')
+                    setSearchQuery('')
+                  }}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Reset Filter
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </section>
   )

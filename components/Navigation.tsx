@@ -58,7 +58,14 @@ export default function Navigation() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link
+              href="/admin/login"
+              className="hidden md:inline-flex px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Admin
+            </Link>
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-accent transition-colors"
@@ -111,6 +118,13 @@ export default function Navigation() {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                href="/admin/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Admin Login
+              </Link>
             </div>
           </div>
         )}
