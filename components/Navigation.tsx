@@ -2,31 +2,21 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Search, Moon, Sun } from 'lucide-react'
+import { Menu, X, Search, Globe } from 'lucide-react'
 import { usePathname } from 'next/navigation'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const { t, language, toggleLanguage } = useTranslation()
   const pathname = usePathname()
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/products', label: 'Products' },
-    { href: '/news', label: 'News' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/', label: t('nav.home') },
+    { href: '/about', label: t('nav.about') },
+    { href: '/products', label: t('nav.products') },
+    { href: '/news', label: t('nav.news') },
+    { href: '/contact', label: t('nav.contact') },
   ]
 
   const isActive = (path: string) => pathname === path
@@ -63,19 +53,19 @@ export default function Navigation() {
               href="/admin/login"
               className="hidden md:inline-flex px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
-              Admin
+              {t('nav.admin')}
             </Link>
 
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-accent transition-colors"
-              aria-label="Toggle theme"
+              onClick={toggleLanguage}
+              className="p-2 rounded-lg hover:bg-accent transition-colors flex items-center gap-2"
+              aria-label={t('common.language')}
+              title={t('common.language')}
             >
-              {theme === 'light' ? (
-                <Moon className="w-5 h-5" />
-              ) : (
-                <Sun className="w-5 h-5" />
-              )}
+              <Globe className="w-5 h-5" />
+              <span className="text-sm font-medium hidden md:inline">
+                {language === 'en' ? 'EN' : 'ID'}
+              </span>
             </button>
 
             <button
@@ -123,8 +113,15 @@ export default function Navigation() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
               >
-                Admin Login
+                {t('nav.adminLogin')}
               </Link>
+              <button
+                onClick={toggleLanguage}
+                className="text-sm font-medium bg-accent text-foreground px-4 py-2 rounded-lg hover:bg-accent/80 transition-colors flex items-center gap-2 justify-center"
+              >
+                <Globe className="w-4 h-4" />
+                {language === 'en' ? t('common.english') : t('common.indonesian')}
+              </button>
             </div>
           </div>
         )}

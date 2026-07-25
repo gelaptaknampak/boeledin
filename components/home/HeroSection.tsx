@@ -1,6 +1,11 @@
+'use client'
+
 import Link from 'next/link'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function HeroSection() {
+  const { t } = useTranslation()
+
   return (
     <section className="relative min-h-screen flex items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
       {/* Background Image Overlay */}
@@ -13,16 +18,16 @@ export default function HeroSection() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="mb-6 inline-block">
             <span className="text-sm font-semibold text-blue-300 bg-blue-950 px-4 py-2 rounded-full">
-              Solusi Tampilan Digital • Sejak 2014
+              {t('home.heroTitle')}
             </span>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-balance">
-            Setiap piksel dirancang untuk dipercaya.
+            {t('home.heroSubtitle')}
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto text-balance">
-            PT Future Boeled Indonesia merancang dan mengintegrasikan LED display, digital signage, dan interactive flat panel untuk bandara, korporasi, ritel, dan instansi publik di seluruh Indonesia.
+            {t('home.servicesSubtitle')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -30,13 +35,13 @@ export default function HeroSection() {
               href="/products"
               className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
             >
-              Lihat Katalog Produk
+              {t('home.heroCta')}
             </Link>
             <Link
               href="/contact"
               className="px-8 py-4 border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-slate-900 font-semibold rounded-lg transition-colors"
             >
-              Konsultasi Proyek
+              {t('home.heroCtaSecondary')}
             </Link>
           </div>
 

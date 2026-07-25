@@ -6,20 +6,26 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import toast from 'react-hot-toast'
 import { Phone, Mail, MapPin } from 'lucide-react'
-
-const contactSchema = z.object({
-  name: z.string().min(2, 'Nama harus minimal 2 karakter'),
-  email: z.string().email('Email tidak valid'),
-  phone: z.string().optional(),
-  company: z.string().optional(),
-  interest: z.string(),
-  message: z.string().min(10, 'Pesan harus minimal 10 karakter'),
-})
-
-type ContactFormData = z.infer<typeof contactSchema>
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function ContactForm() {
+  const { t } = useTranslation()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const contactSchema = z.object({
+    name: z.string().min(2, t('contact.form.nameRequired')),
+    email: z.string().email(t('contact.form.emailInvalid')),
+    phone: z.string().optional(),
+    company: z.string().optional(),
+    interest: z.string(),
+    message: z.string().min(10, t('contact.form.messageRequired')),
+  })
+
+  type ContactFormData = z.infer<typeof contactSchema>
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+  })
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   })
@@ -30,10 +36,10 @@ export default function ContactForm() {
       // Simulasi pengiriman ke API
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      toast.success('Pesan berhasil dikirim! Tim kami akan menghubungi Anda segera.')
+      toast.success(t('contact.form.success'))
       reset()
     } catch (error) {
-      toast.error('Terjadi kesalahan saat mengirim pesan. Coba lagi.')
+      toast.error(t('contact.form.error'))
     } finally {
       setIsSubmitting(false)
     }

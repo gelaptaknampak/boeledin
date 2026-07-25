@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function ProductsGrid() {
+  const { t } = useTranslation()
   const [brandFilter, setBrandFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -114,10 +116,10 @@ export default function ProductsGrid() {
             <div className="sticky top-24 space-y-6 bg-card p-6 rounded-lg border border-border">
               {/* Brand Filter */}
               <div>
-                <label className="block text-sm font-semibold mb-4">Filter Merek</label>
+                <label className="block text-sm font-semibold mb-4">{t('products.filterBrand')}</label>
                 <div className="space-y-2 flex flex-col">
                   {[
-                    { value: 'all', label: 'Semua Merek' },
+                    { value: 'all', label: t('products.allBrands') },
                     { value: 'boe', label: 'BOE' },
                     { value: 'boeled', label: 'BOELED' },
                     { value: 'fbi', label: 'FBI' },
@@ -142,13 +144,13 @@ export default function ProductsGrid() {
 
               {/* Category Filter */}
               <div>
-                <label className="block text-sm font-semibold mb-4">Filter Jenis Produk</label>
+                <label className="block text-sm font-semibold mb-4">{t('products.filterCategory')}</label>
                 <div className="space-y-2 flex flex-col">
                   {[
-                    { value: 'all', label: 'Semua Jenis' },
-                    { value: 'signage', label: 'Digital Signage' },
-                    { value: 'ifp', label: 'Interactive Flat Panel' },
-                    { value: 'led', label: 'LED' },
+                    { value: 'all', label: t('products.allCategories') },
+                    { value: 'signage', label: t('products.digitalSignage') },
+                    { value: 'ifp', label: t('products.interactiveFlatPanel') },
+                    { value: 'led', label: t('products.led') },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -170,12 +172,12 @@ export default function ProductsGrid() {
 
               {/* Search */}
               <div>
-                <label className="block text-sm font-semibold mb-3">Cari Produk</label>
+                <label className="block text-sm font-semibold mb-3">{t('products.searchLabel')}</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Cari model..."
+                    placeholder={t('products.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-9 pr-4 py-2 border border-border rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -192,7 +194,7 @@ export default function ProductsGrid() {
                 }}
                 className="w-full px-4 py-2 text-sm font-medium bg-accent text-foreground hover:bg-accent/80 rounded-lg transition-colors"
               >
-                Reset Filter
+                {t('products.resetFilter')}
               </button>
             </div>
           </div>
@@ -202,7 +204,7 @@ export default function ProductsGrid() {
             {/* Results Count */}
             <div className="mb-6">
               <p className="text-sm text-muted-foreground">
-                Menampilkan <span className="font-semibold text-foreground">{filteredProducts.length}</span> dari <span className="font-semibold text-foreground">{products.length}</span> produk
+                {t('products.showing')} <span className="font-semibold text-foreground">{filteredProducts.length}</span> {t('products.of')} <span className="font-semibold text-foreground">{products.length}</span> {t('products.products')}
               </p>
             </div>
 
@@ -251,7 +253,7 @@ export default function ProductsGrid() {
 
             {filteredProducts.length === 0 && (
               <div className="text-center py-12 col-span-full">
-                <p className="text-muted-foreground mb-4">Tidak ada produk yang sesuai dengan filter Anda</p>
+                <p className="text-muted-foreground mb-4">{t('products.noResults')}</p>
                 <button
                   onClick={() => {
                     setBrandFilter('all')
@@ -260,7 +262,7 @@ export default function ProductsGrid() {
                   }}
                   className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                 >
-                  Reset Filter
+                  {t('products.resetFilter')}
                 </button>
               </div>
             )}
