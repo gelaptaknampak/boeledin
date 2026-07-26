@@ -11,32 +11,36 @@ export default function NewsSection() {
       id: 1,
       category: 'Digital Signage',
       title: 'Apa Itu Digital Signage dan Mengapa Bisnis Anda Membutuhkannya',
-      readTime: '6 min read',
+      readTime: '6 min baca',
       href: '/news',
     },
     {
       id: 2,
       category: 'LED Display',
       title: 'Memahami Pixel Pitch pada LED Display: Panduan Memilih Jarak Piksel',
-      readTime: '7 min read',
+      readTime: '7 min baca',
       href: '/news',
     },
     {
       id: 3,
-      category: 'Technology Trends',
+      category: 'Tren Teknologi',
       title: 'Tren Digital Signage 2026: AI, IoT, dan Konten Real-Time',
-      readTime: '5 min read',
+      readTime: '5 min baca',
       href: '/news',
     },
   ]
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-20 md:py-28">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="text-sm font-semibold text-primary mb-3">{t('home.newsEyebrow')}</div>
-          <h2 className="text-3xl md:text-4xl font-bold">{t('home.newsTitle')}</h2>
+        <div className="mb-16">
+          <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
+            Wawasan & Berita
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold">
+            Terbaru dari BOELEDIN
+          </h2>
         </div>
 
         {/* News Grid */}

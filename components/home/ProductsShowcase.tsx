@@ -13,31 +13,31 @@ export default function ProductsShowcase() {
       model: 'FBI-43Q6',
       category: 'Signage',
       title: 'Ultra-Slim 4K Digital Signage',
-      description: 'Ultra-thin 6.9mm bezel, brightness up to 1500 nits, OD12 design without rear cover.',
+      description: 'Bezel ultra-tipis 6.9mm, kecerahan hingga 1500 nits, desain OD12 tanpa penutup belakang.',
       specs: [
-        { label: 'Size', value: '43"' },
-        { label: 'Resolution', value: '4K UHD' },
+        { label: 'Ukuran', value: '43"' },
+        { label: 'Resolusi', value: '4K UHD' },
       ],
     },
     {
       id: 2,
       brand: 'FBI',
-      model: 'FBI-A5',
+      model: 'FBI-A5 Series',
       category: 'IFP',
       title: 'Interactive Flat Panel Collaboration',
-      description: '4K UHD, Android 15, 40-point multi-touch, smart whiteboard, 48MP AI camera for modern meeting rooms.',
+      description: '4K UHD, Android 15, 40-point multi-touch, smart whiteboard, kamera AI 48MP untuk ruang rapat modern.',
       specs: [
-        { label: 'Size', value: '65"–110"' },
+        { label: 'Ukuran', value: '65"–110"' },
         { label: 'Touch', value: '40-Point' },
       ],
     },
     {
       id: 3,
       brand: 'BOE',
-      model: 'BYH Pro',
+      model: 'BYH Pro Series',
       category: 'LED',
       title: 'Ultra Fine-Pitch COB LED',
-      description: 'Pixel pitch up to 0.9375mm with COB technology, ideal for command centers and data visualization rooms.',
+      description: 'Pixel pitch hingga 0.9375mm dengan teknologi COB, ideal untuk command center dan ruang visualisasi data.',
       specs: [
         { label: 'Pitch', value: 'P0.9375–P1.56' },
         { label: 'Brightness', value: 'Peak 1500 nits' },
@@ -46,52 +46,60 @@ export default function ProductsShowcase() {
   ]
 
   return (
-    <section className="py-16 md:py-24 bg-accent/5">
+    <section className="py-20 md:py-28 bg-accent/5">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <div className="text-sm font-semibold text-primary mb-3">{t('home.productsEyebrow')}</div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('home.productsTitle')}</h2>
-          <p className="text-muted-foreground text-lg">{t('home.productsSubtitle')}</p>
+        <div className="mb-16">
+          <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
+            Katalog Unggulan
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Produk yang kami rekomendasikan
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-3xl">
+            Model paling banyak diminati dari lini Digital Signage, Interactive Flat Panel, dan LED Display kami — gambar diambil langsung dari spec sheet resmi produk.
+          </p>
         </div>
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {products.map((product) => (
-            <div key={product.id} className="bg-background rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow">
-              {/* Product Badge & Image */}
-              <div className="relative h-48 bg-accent/10 flex items-center justify-center overflow-hidden">
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
+            <div key={product.id} className="bg-card rounded-lg border border-border overflow-hidden hover:border-primary transition-colors">
+              {/* Product Visual */}
+              <div className="relative h-56 bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center overflow-hidden">
+                <span className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
                   {product.brand} · {product.category}
-                </div>
+                </span>
                 <div className="text-center">
-                  <div className="text-sm text-muted-foreground mb-2">Featured Product</div>
-                  <div className="text-2xl font-bold text-primary">{product.model}</div>
+                  <div className="text-sm text-gray-400 mb-2">Product Image</div>
                 </div>
               </div>
 
-              {/* Product Info */}
+              {/* Product Body */}
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
-                <p className="text-muted-foreground mb-4 text-sm">{product.description}</p>
+                <span className="text-xs text-primary font-semibold uppercase tracking-wider">{product.model}</span>
+                <h3 className="text-lg font-bold mt-2 mb-3">{product.title}</h3>
+                <p className="text-muted-foreground text-sm mb-6">{product.description}</p>
 
                 {/* Specs */}
-                <div className="space-y-2 mb-6">
+                <ul className="space-y-2 mb-6 pb-6 border-b border-border">
                   {product.specs.map((spec, idx) => (
-                    <div key={idx} className="flex justify-between text-sm">
+                    <li key={idx} className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{spec.label}</span>
                       <span className="font-semibold">{spec.value}</span>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
 
-                {/* CTA */}
-                <Link
-                  href="/products"
-                  className="block w-full py-2 px-4 text-center border border-border rounded-lg hover:bg-accent transition-colors text-sm font-medium"
-                >
-                  View Details
-                </Link>
+                {/* Product Actions */}
+                <div className="flex gap-2">
+                  <Link
+                    href="/products"
+                    className="flex-1 px-4 py-2 text-center border border-border rounded-lg hover:bg-accent transition-colors text-sm font-medium"
+                  >
+                    Lihat Detail
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

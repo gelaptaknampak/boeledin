@@ -10,26 +10,26 @@ export default function ServicesSection() {
     {
       num: '01',
       icon: Zap,
-      title: t('home.serviceSignage'),
-      desc: t('home.serviceSignageDesc'),
+      title: 'Digital Signage & FIDS',
+      desc: 'Perangkat layar bermitra dengan merek ternama seperti BOE untuk fasilitas publik, termasuk implementasi Flight Information Display System (FIDS) di bandara.',
     },
     {
       num: '02',
       icon: Settings,
-      title: t('home.serviceIT'),
-      desc: t('home.serviceITDesc'),
+      title: 'Integrasi IT & Software',
+      desc: 'Menggabungkan perangkat keras layar dengan perangkat lunak pendukung agar informasi dapat disampaikan secara real-time.',
     },
     {
       num: '03',
       icon: Grid3x3,
-      title: t('home.serviceCommand'),
-      desc: t('home.serviceCommandDesc'),
+      title: 'Smart Command Center',
+      desc: 'Membantu dunia usaha hingga instansi pemerintah membangun pusat kendali yang membutuhkan visualisasi data berskala besar.',
     },
     {
       num: '04',
       icon: Lightbulb,
-      title: t('home.serviceImmersive'),
-      desc: t('home.serviceImmersiveDesc'),
+      title: 'Pengalaman Immersive',
+      desc: 'Menciptakan instalasi visual atau LED interaktif untuk keperluan promosi dan branding perusahaan.',
     },
   ]
 
@@ -38,13 +38,13 @@ export default function ServicesSection() {
       <div className="container mx-auto px-4">
         <div className="mb-16">
           <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
-            {t('home.servicesEyebrow')}
+            Fokus Layanan Utama
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            {t('home.servicesTitle')}
+            Empat pilar solusi tampilan digital kami
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl">
-            {t('home.servicesSubtitle')}
+            Dari bandara hingga command center, kami merancang sistem yang bekerja tanpa henti — 7 hari seminggu, 24 jam sehari.
           </p>
         </div>
 

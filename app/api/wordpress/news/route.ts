@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
-import { getNews } from '@/lib/wordpress'
+import { getPosts } from '@/lib/wordpress'
 
 export async function GET(request: NextRequest) {
   try {
-    const news = await getNews()
+    const news = await getPosts({ per_page: 10 })
     return Response.json(news)
   } catch (error) {
     console.error('Error fetching news:', error)

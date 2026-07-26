@@ -2,7 +2,7 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import ContactHero from '@/components/contact/ContactHero'
 import ContactForm from '@/components/contact/ContactForm'
-import ContactMap from '@/components/contact/ContactMap'
+import ContactMapWrapper from '@/components/contact/ContactMapWrapper'
 
 export const metadata = {
   title: 'Hubungi Kami — BOELEDIN',
@@ -31,7 +31,7 @@ export default function ContactPage() {
                 <div>
                   <h2 className="text-3xl font-bold mb-6">Lokasi Kami</h2>
                   <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden border border-border">
-                    <ContactMap />
+                    <ContactMapWrapper />
                   </div>
                 </div>
 

@@ -1,28 +1,23 @@
-'use client'
-
 import Link from 'next/link'
-import { useTranslation } from '@/hooks/useTranslation'
 
 export default function CtaSection() {
-  const { t } = useTranslation()
-
   return (
-    <section className="py-20 md:py-28 bg-primary text-primary-foreground">
+    <section className="py-16 md:py-20 bg-slate-900">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+        <div className="bg-slate-800/50 rounded-lg border border-slate-700/50 p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-8">
           <div className="flex-1">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              {t('home.ctaTitle')}
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Siap merancang sistem tampilan Anda?
             </h2>
-            <p className="text-lg opacity-95">
-              {t('home.ctaSubtitle')}
+            <p className="text-gray-300">
+              Tim kami siap membantu, dari konsultasi kebutuhan hingga instalasi dan pemeliharaan.
             </p>
           </div>
           <Link
             href="/contact"
-            className="inline-block px-8 py-4 bg-accent-2 text-primary font-semibold rounded-lg hover:bg-accent-2/90 transition-all whitespace-nowrap"
+            className="inline-block px-8 py-3 bg-yellow-400 text-slate-900 font-semibold rounded hover:bg-yellow-300 transition-colors whitespace-nowrap"
           >
-            {t('home.ctaButton')}
+            Hubungi Tim Kami
           </Link>
         </div>
       </div>

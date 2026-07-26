@@ -6,10 +6,10 @@ export default function StatsSection() {
   const { t } = useTranslation()
 
   const stats = [
-    { number: '10+', label: t('home.heroStat1l') },
-    { number: '500+', label: 'Employees' },
-    { number: '100+', label: t('home.heroStat2l') },
-    { number: '10M+', label: 'Units Shipped' },
+    { number: '10+', label: 'Tahun Beroperasi' },
+    { number: '500+', label: 'Karyawan' },
+    { number: '100+', label: 'Mitra' },
+    { number: '10M+', label: 'Unit Terkirim' },
   ]
 
   const partners = [
@@ -20,14 +20,14 @@ export default function StatsSection() {
   ]
 
   return (
-    <section className="py-16 md:py-24 bg-accent/5">
+    <section className="py-20 md:py-28 bg-accent/5">
       <div className="container mx-auto px-4">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           {stats.map((stat, idx) => (
             <div key={idx} className="text-center">
               <div className="text-4xl md:text-5xl font-bold text-primary mb-2">{stat.number}</div>
-              <div className="text-muted-foreground">{stat.label}</div>
+              <div className="text-muted-foreground text-sm">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -37,8 +37,10 @@ export default function StatsSection() {
 
         {/* Partners */}
         <div>
-          <div className="text-sm font-semibold text-primary mb-6">Supported By</div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="inline-block mb-6 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
+            Didukung Oleh
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {partners.map((partner, idx) => (
               <div
                 key={idx}
