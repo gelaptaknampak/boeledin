@@ -7,67 +7,66 @@ export default function HeroSection() {
   const { t } = useTranslation()
 
   return (
-    <section className="relative min-h-screen flex items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
-      {/* Background Image Overlay */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMiIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNhKSIvPjwvc3ZnPg==')] opacity-40" />
+    <section className="hero-media relative w-full bg-black text-white overflow-hidden">
+      {/* Background with overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40 z-10" />
+      
+      <div className="absolute inset-0">
+        <div className="w-full h-full bg-slate-900" style={{
+          backgroundImage: 'linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,41,59,0.8) 50%, rgba(51,65,85,0.7) 100%)',
+        }} />
       </div>
 
       {/* Content */}
-      <div className="relative container mx-auto px-4 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="mb-6 inline-block">
-            <span className="text-sm font-semibold text-blue-300 bg-blue-950 px-4 py-2 rounded-full">
+      <div className="relative z-20 py-32 md:py-48">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <div className="mb-6 inline-block">
+              <span className="text-sm font-semibold text-blue-300 bg-blue-950/50 px-4 py-2 rounded-full border border-blue-800/30">
+                {t('home.heroEyebrow')}
+              </span>
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-balance">
               {t('home.heroTitle')}
-            </span>
-          </div>
+            </h1>
 
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-balance">
-            {t('home.heroSubtitle')}
-          </h1>
+            <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed max-w-2xl text-balance">
+              {t('home.heroDescription')}
+            </p>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto text-balance">
-            {t('home.servicesSubtitle')}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link
-              href="/products"
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              {t('home.heroCta')}
-            </Link>
-            <Link
-              href="/contact"
-              className="px-8 py-4 border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-slate-900 font-semibold rounded-lg transition-colors"
-            >
-              {t('home.heroCtaSecondary')}
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-lg mx-auto">
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-400">10+</div>
-              <p className="text-gray-300 text-sm md:text-base">Tahun Pengalaman</p>
+            <div className="flex flex-col sm:flex-row gap-4 mb-16">
+              <Link
+                href="/products"
+                className="inline-flex px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors w-fit"
+              >
+                {t('home.heroCta')}
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex px-8 py-4 border-2 border-gray-400/40 text-white hover:border-white hover:bg-white/10 font-semibold rounded-lg transition-colors w-fit"
+              >
+                {t('home.heroCtaSecondary')}
+              </Link>
             </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-400">100+</div>
-              <p className="text-gray-300 text-sm md:text-base">Mitra & Klien</p>
-            </div>
-            <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-400">10M+</div>
-              <p className="text-gray-300 text-sm md:text-base">Unit Terkirim</p>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-600/30">
+              <div>
+                <div className="text-4xl font-bold text-blue-400">{t('home.heroStat1n')}</div>
+                <p className="text-gray-400 text-sm mt-2">{t('home.heroStat1l')}</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-blue-400">{t('home.heroStat2n')}</div>
+                <p className="text-gray-400 text-sm mt-2">{t('home.heroStat2l')}</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-blue-400">{t('home.heroStat3n')}</div>
+                <p className="text-gray-400 text-sm mt-2">{t('home.heroStat3l')}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-gray-400">
-        <svg className="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
       </div>
     </section>
   )
