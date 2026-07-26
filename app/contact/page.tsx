@@ -15,32 +15,45 @@ export default function ContactPage() {
       <Navigation />
       <main>
         <ContactHero />
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Hubungi Kami</h2>
-              <ContactForm />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Lokasi Kami</h2>
-              <ContactMap />
-              <div className="mt-6 space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Alamat</p>
-                  <p className="font-semibold">Jl. Sudirman No. 123, Jakarta Selatan 12190</p>
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+              {/* Form Column */}
+              <div className="flex flex-col justify-start">
+                <h2 className="text-3xl font-bold mb-8">Hubungi Kami</h2>
+                <div className="w-full">
+                  <ContactForm />
                 </div>
+              </div>
+
+              {/* Map & Info Column */}
+              <div className="flex flex-col gap-8">
                 <div>
-                  <p className="text-sm text-muted-foreground">Telepon</p>
-                  <p className="font-semibold">+62 21 1234 5678</p>
+                  <h2 className="text-3xl font-bold mb-6">Lokasi Kami</h2>
+                  <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden border border-border">
+                    <ContactMap />
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-semibold">info@boeled.co.id</p>
+
+                {/* Contact Info */}
+                <div className="space-y-6">
+                  <div className="p-4 bg-card rounded-lg border border-border">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Alamat</p>
+                    <p className="font-semibold text-base">Jl. Sudirman No. 123, Jakarta Selatan 12190, Indonesia</p>
+                  </div>
+                  <div className="p-4 bg-card rounded-lg border border-border">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Telepon</p>
+                    <p className="font-semibold text-base">+62 21 1234 5678</p>
+                  </div>
+                  <div className="p-4 bg-card rounded-lg border border-border">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Email</p>
+                    <p className="font-semibold text-base">info@boeled.co.id</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
       <Footer />
     </>

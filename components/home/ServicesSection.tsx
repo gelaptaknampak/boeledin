@@ -34,46 +34,33 @@ export default function ServicesSection() {
   ]
 
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="mb-16">
           <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
             {t('home.servicesEyebrow')}
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
             {t('home.servicesTitle')}
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl">
             {t('home.servicesSubtitle')}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service) => {
             const Icon = service.icon
             return (
-              <div
-                key={service.num}
-                className="group p-8 rounded-lg bg-card border border-border hover:border-primary transition-colors"
-              >
-                <div className="flex items-start gap-6 mb-4">
-                  <div className="text-4xl font-bold text-muted-foreground group-hover:text-primary transition-colors">
-                    {service.num}
-                  </div>
-                  <div className="p-3 rounded-lg bg-accent group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <Icon className="w-6 h-6" />
-                  </div>
+              <div key={service.num} className="group">
+                <div className="mb-6 inline-block p-4 bg-accent/10 rounded-lg border border-accent/20 group-hover:border-primary/50 group-hover:bg-accent/20 transition-all">
+                  <Icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                  {service.title}
-                </h3>
-                <p className="text-muted-foreground mb-4 leading-relaxed">
-                  {service.desc}
-                </p>
-                <div className="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-sm font-semibold">Pelajari Lebih Lanjut</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
+
+                <span className="text-5xl font-bold text-primary/10 block mb-2">{service.num}</span>
+
+                <h3 className="text-lg font-bold mb-4">{service.title}</h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">{service.desc}</p>
               </div>
             )
           })}
