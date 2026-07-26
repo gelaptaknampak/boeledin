@@ -1,32 +1,35 @@
 'use client'
 
-import { ArrowRight, Zap, Settings, Users, Lightbulb } from 'lucide-react'
+import { ArrowRight, Zap, Settings, Grid3x3, Lightbulb } from 'lucide-react'
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function ServicesSection() {
+  const { t } = useTranslation()
+
   const services = [
     {
       num: '01',
       icon: Zap,
-      title: 'Digital Signage & FIDS',
-      desc: 'Perangkat layar bermitra dengan merek ternama seperti BOE untuk fasilitas publik, termasuk implementasi Flight Information Display System (FIDS) di bandara.',
+      title: t('home.serviceSignage'),
+      desc: t('home.serviceSignageDesc'),
     },
     {
       num: '02',
       icon: Settings,
-      title: 'Integrasi IT & Software',
-      desc: 'Menggabungkan perangkat keras layar dengan perangkat lunak pendukung agar informasi dapat disampaikan secara real-time dan efisien.',
+      title: t('home.serviceIT'),
+      desc: t('home.serviceITDesc'),
     },
     {
       num: '03',
-      icon: Users,
-      title: 'Instalasi & Customization',
-      desc: 'Tim ahli kami menangani pemasangan, kalibrasi, dan kustomisasi sesuai kebutuhan spesifik proyek Anda di lokasi manapun.',
+      icon: Grid3x3,
+      title: t('home.serviceCommand'),
+      desc: t('home.serviceCommandDesc'),
     },
     {
       num: '04',
       icon: Lightbulb,
-      title: 'Konsultasi Teknis',
-      desc: 'Dapatkan rekomendasi solusi terbaik dari konsultan berpengalaman kami untuk proyek digital signage dan display Anda.',
+      title: t('home.serviceImmersive'),
+      desc: t('home.serviceImmersiveDesc'),
     },
   ]
 
@@ -35,13 +38,13 @@ export default function ServicesSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
-            Fokus Layanan Utama
+            {t('home.servicesEyebrow')}
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Empat pilar solusi tampilan digital kami
+            {t('home.servicesTitle')}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Dari bandara hingga command center, kami merancang sistem yang bekerja tanpa henti — 7 hari seminggu, 24 jam sehari.
+            {t('home.servicesSubtitle')}
           </p>
         </div>
 

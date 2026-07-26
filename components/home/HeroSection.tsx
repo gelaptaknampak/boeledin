@@ -18,16 +18,16 @@ export default function HeroSection() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="mb-6 inline-block">
             <span className="text-sm font-semibold text-blue-300 bg-blue-950 px-4 py-2 rounded-full">
-              {t('home.heroTitle')}
+              {t('home.heroEyebrow')}
             </span>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-balance">
-            {t('home.heroSubtitle')}
+            {t('home.heroTitle')}
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto text-balance">
-            {t('home.servicesSubtitle')}
+            {t('home.heroDescription')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -48,16 +48,16 @@ export default function HeroSection() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-lg mx-auto">
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-400">10+</div>
-              <p className="text-gray-300 text-sm md:text-base">Tahun Pengalaman</p>
+              <div className="text-3xl md:text-4xl font-bold text-blue-400">{t('home.heroStat1n')}</div>
+              <p className="text-gray-300 text-sm md:text-base">{t('home.heroStat1l')}</p>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-400">100+</div>
-              <p className="text-gray-300 text-sm md:text-base">Mitra & Klien</p>
+              <div className="text-3xl md:text-4xl font-bold text-blue-400">{t('home.heroStat2n')}</div>
+              <p className="text-gray-300 text-sm md:text-base">{t('home.heroStat2l')}</p>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-400">10M+</div>
-              <p className="text-gray-300 text-sm md:text-base">Unit Terkirim</p>
+              <div className="text-3xl md:text-4xl font-bold text-blue-400">{t('home.heroStat3n')}</div>
+              <p className="text-gray-300 text-sm md:text-base">{t('home.heroStat3l')}</p>
             </div>
           </div>
         </div>
