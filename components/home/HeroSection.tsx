@@ -53,16 +53,16 @@ export default function HeroSection() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-600/30">
               <div>
-                <div className="text-4xl font-bold text-blue-400">{t('home.heroStat1n')}</div>
-                <p className="text-gray-400 text-sm mt-2">{t('home.heroStat1l')}</p>
+                <div className="text-4xl font-bold text-blue-400">10+</div>
+                <p className="text-gray-400 text-sm mt-2">Tahun Pengalaman</p>
               </div>
               <div>
-                <div className="text-4xl font-bold text-blue-400">{t('home.heroStat2n')}</div>
-                <p className="text-gray-400 text-sm mt-2">{t('home.heroStat2l')}</p>
+                <div className="text-4xl font-bold text-blue-400">100+</div>
+                <p className="text-gray-400 text-sm mt-2">Mitra & Klien</p>
               </div>
               <div>
-                <div className="text-4xl font-bold text-blue-400">{t('home.heroStat3n')}</div>
-                <p className="text-gray-400 text-sm mt-2">{t('home.heroStat3l')}</p>
+                <div className="text-4xl font-bold text-blue-400">10M+</div>
+                <p className="text-gray-400 text-sm mt-2">Unit Terkirim Global</p>
               </div>
             </div>
           </div>
