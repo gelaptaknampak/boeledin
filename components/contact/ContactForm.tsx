@@ -5,20 +5,17 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import toast from 'react-hot-toast'
-import { Phone, Mail, MapPin } from 'lucide-react'
-import { useTranslation } from '@/hooks/useTranslation'
 
 export default function ContactForm() {
-  const { t } = useTranslation()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const contactSchema = z.object({
-    name: z.string().min(2, t('contact.form.nameRequired')),
-    email: z.string().email(t('contact.form.emailInvalid')),
+    name: z.string().min(2, 'Nama lengkap harus diisi'),
+    email: z.string().email('Email tidak valid'),
     phone: z.string().optional(),
     company: z.string().optional(),
     interest: z.string(),
-    message: z.string().min(10, t('contact.form.messageRequired')),
+    message: z.string().min(10, 'Pesan minimal 10 karakter'),
   })
 
   type ContactFormData = z.infer<typeof contactSchema>
@@ -32,24 +29,19 @@ export default function ContactForm() {
       // Simulasi pengiriman ke API
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      toast.success(t('contact.form.success'))
+      toast.success('Terima kasih! Pesan Anda telah kami terima.')
       reset()
     } catch (error) {
-      toast.error(t('contact.form.error'))
+      toast.error('Gagal mengirim pesan. Silakan coba lagi.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <section className="py-12 md:py-20 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-card border border-border p-8 rounded-lg">
-              <h2 className="text-2xl font-bold mb-8">Form Inquiry</h2>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="bg-card border border-border p-8 rounded-lg">
+      <h3 className="text-2xl font-bold mb-8">Form Inquiry</h3>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {/* Name & Company */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -146,86 +138,5 @@ export default function ContactForm() {
                 </button>
               </form>
             </div>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h2 className="text-2xl font-bold mb-8">Informasi Kontak</h2>
-            <p className="font-semibold mb-8">PT Future Boeled Indonesia</p>
-
-            <div className="space-y-8">
-              {/* Address */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="p-3 rounded-lg bg-accent">
-                    <MapPin className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Alamat Kantor</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Jl. Sudirman No. 123<br />
-                    Jakarta Selatan 12190<br />
-                    Indonesia
-                  </p>
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="p-3 rounded-lg bg-accent">
-                    <Phone className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Telepon</h3>
-                  <p className="text-sm text-muted-foreground">
-                    <a href="tel:+622112345678" className="hover:text-primary transition-colors">
-                      +62 21 1234 5678
-                    </a>
-                    <br />
-                    <a href="tel:+622187654321" className="hover:text-primary transition-colors">
-                      +62 21 8765 4321
-                    </a>
-                  </p>
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="p-3 rounded-lg bg-accent">
-                    <Mail className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Email</h3>
-                  <p className="text-sm text-muted-foreground">
-                    <a href="mailto:info@boeledin.com" className="hover:text-primary transition-colors">
-                      info@boeledin.com
-                    </a>
-                    <br />
-                    <a href="mailto:sales@boeledin.com" className="hover:text-primary transition-colors">
-                      sales@boeledin.com
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Operating Hours */}
-            <div className="mt-8 p-6 bg-card border border-border rounded-lg">
-              <h3 className="font-semibold mb-3">Jam Operasional</h3>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>Senin - Jumat: 08:00 - 17:00 WIB</p>
-                <p>Sabtu: 09:00 - 13:00 WIB</p>
-                <p>Minggu & Hari Libur: Tutup</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   )
 }
