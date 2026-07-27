@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, Search, Globe } from "lucide-react";
+import { Menu, X, Globe, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useTheme } from "@/hooks/useTheme";
+import ProductSearch from "./ProductSearch";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t, language, toggleLanguage } = useTranslation();
+  const { theme, toggleTheme, mounted } = useTheme();
   const pathname = usePathname();
 
   const navLinks = [
@@ -26,8 +30,14 @@ export default function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-primary">
-            BOELEDIN
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BOELED__WHITE.png-LFHUF6l0Vd7a0Ypw1enFpWXI3TyDVs.jpeg"
+              alt="BOELEDIN"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -47,12 +57,20 @@ export default function Navigation() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            <Link
-              href="/admin/login"
-              className="hidden md:inline-flex px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              {t("nav.admin")}
-            </Link>
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-accent transition-colors"
+                aria-label="Toggle theme"
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
+              </button>
+            )}
 
             <button
               onClick={toggleLanguage}
@@ -66,12 +84,7 @@ export default function Navigation() {
               </span>
             </button>
 
-            <button
-              className="p-2 rounded-lg hover:bg-accent transition-colors"
-              aria-label="Search"
-            >
-              <Search className="w-5 h-5" />
-            </button>
+            <ProductSearch />
 
             {/* Mobile Menu Toggle */}
             <button
@@ -106,22 +119,36 @@ export default function Navigation() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/admin/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                {t("nav.adminLogin")}
-              </Link>
-              <button
-                onClick={toggleLanguage}
-                className="text-sm font-medium bg-accent text-foreground px-4 py-2 rounded-lg hover:bg-accent/80 transition-colors flex items-center gap-2 justify-center"
-              >
-                <Globe className="w-4 h-4" />
-                {language === "en"
-                  ? t("common.english")
-                  : t("common.indonesian")}
-              </button>
+              <div className="flex gap-2 px-4 py-2">
+                {mounted && (
+                  <button
+                    onClick={toggleTheme}
+                    className="flex-1 text-sm font-medium bg-accent text-foreground px-4 py-2 rounded-lg hover:bg-accent/80 transition-colors flex items-center gap-2 justify-center"
+                    title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  >
+                    {theme === 'dark' ? (
+                      <>
+                        <Sun className="w-4 h-4" />
+                        Light Mode
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="w-4 h-4" />
+                        Dark Mode
+                      </>
+                    )}
+                  </button>
+                )}
+                <button
+                  onClick={toggleLanguage}
+                  className="flex-1 text-sm font-medium bg-accent text-foreground px-4 py-2 rounded-lg hover:bg-accent/80 transition-colors flex items-center gap-2 justify-center"
+                >
+                  <Globe className="w-4 h-4" />
+                  {language === "en"
+                    ? t("common.english")
+                    : t("common.indonesian")}
+                </button>
+              </div>
             </div>
           </div>
         )}
