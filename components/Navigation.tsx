@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, Globe, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -29,8 +30,14 @@ export default function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-primary">
-            BOELEDIN
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BOELED__WHITE.png-LFHUF6l0Vd7a0Ypw1enFpWXI3TyDVs.jpeg"
+              alt="BOELEDIN"
+              width={120}
+              height={40}
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}

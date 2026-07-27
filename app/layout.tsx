@@ -11,26 +11,13 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BOELEDIN - Jaminan Kualitas Terbaik",
+  title: "BOELEDIN - Solusi Display Digital Terkemuka",
   description:
-    "Website CMS BOELEDIN dengan integrasi WordPress untuk mengelola semua konten",
+    "BOELEDIN Indonesia menyediakan solusi teknologi display terkemuka termasuk Digital Signage, Interactive Flat Panel, dan LED Display berkualitas tinggi.",
   generator: "v0.app",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo_fix.png-mokTXw13uwHxazyPxZTavgDsUeqdWC.jpeg",
+    apple: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo_fix.png-mokTXw13uwHxazyPxZTavgDsUeqdWC.jpeg",
   },
 };
 
