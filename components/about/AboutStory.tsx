@@ -1,11 +1,11 @@
 export default function AboutStory() {
   return (
-    <section className="py-16 md:py-24 bg-background">
+    <section className="py-16 md:py-24 bg-accent/5">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '56px', alignItems: 'flex-start' }}>
           {/* Story */}
-          <div className="lg:col-span-2">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">Cerita Kami</h2>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-6">Cerita Kami</h2>
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p>
                 BOELEDIN Indonesia — sebuah unit usaha di bawah PT Future Boeled Indonesia — didirikan dengan visi menjadi penyedia solusi teknologi display terkemuka di Asia Tenggara. Sebagai bagian dari jaringan global BOE Technology Group, kami menghadirkan inovasi kelas dunia ke pasar Indonesia.
@@ -19,44 +19,27 @@ export default function AboutStory() {
             </div>
           </div>
 
-          {/* Vision & Mission */}
-          <div className="space-y-8">
-            <div className="bg-card border border-border p-8 rounded-lg">
-              <div className="inline-block mb-4 px-3 py-1 bg-accent rounded-full text-sm font-semibold text-primary">
+          {/* Vision & Mission Card */}
+          <div className="bg-card border border-border p-8 rounded-lg">
+            <div className="mb-6">
+              <div className="inline-block mb-3 px-3 py-1 bg-accent rounded-full text-xs font-semibold text-primary uppercase tracking-wider">
                 Visi
               </div>
-              <p className="text-foreground leading-relaxed">
+              <p className="text-foreground text-sm leading-relaxed">
                 Menjadi mitra teknologi tampilan yang paling terpercaya dan inovatif di Indonesia, memungkinkan bisnis dan konsumen mengalami masa depan teknologi visual hari ini.
               </p>
             </div>
 
-            <div className="bg-card border border-border p-8 rounded-lg">
-              <div className="inline-block mb-4 px-3 py-1 bg-accent rounded-full text-sm font-semibold text-primary">
+            <div className="h-px bg-border my-6" />
+
+            <div>
+              <div className="inline-block mb-3 px-3 py-1 bg-accent rounded-full text-xs font-semibold text-primary uppercase tracking-wider">
                 Misi
               </div>
-              <p className="text-foreground leading-relaxed">
+              <p className="text-foreground text-sm leading-relaxed">
                 Menghadirkan solusi display dan semikonduktor mutakhir yang mendorong inovasi, meningkatkan pengalaman pengguna, dan menciptakan nilai jangka panjang bagi klien serta mitra kami.
               </p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="mt-16 pt-16 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { num: '10+', label: 'Tahun Keunggulan' },
-              { num: '500+', label: 'Karyawan' },
-              { num: '100+', label: 'Mitra' },
-              { num: '10M+', label: 'Produk Terkirim' },
-            ].map((stat, idx) => (
-              <div key={idx} className="text-center">
-                <div className="text-4xl font-bold text-primary mb-2">{stat.num}</div>
-                <p className="text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </div>
