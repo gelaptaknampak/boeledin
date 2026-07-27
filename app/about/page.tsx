@@ -2,7 +2,10 @@ import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
 import AboutHero from '@/components/about/AboutHero'
 import AboutStory from '@/components/about/AboutStory'
+import AboutStats from '@/components/about/AboutStats'
 import AboutValues from '@/components/about/AboutValues'
+import AboutJourney from '@/components/about/AboutJourney'
+import AboutCTA from '@/components/about/AboutCTA'
 
 export const metadata = {
   title: 'Tentang Kami — BOELEDIN Indonesia',
@@ -16,7 +19,10 @@ export default function AboutPage() {
       <main>
         <AboutHero />
         <AboutStory />
+        <AboutStats />
         <AboutValues />
+        <AboutJourney />
+        <AboutCTA />
       </main>
       <Footer />
     </>
