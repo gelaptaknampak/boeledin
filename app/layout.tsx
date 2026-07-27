@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   generator: "v0.app",
   icons: {
     icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo_fix.png-mokTXw13uwHxazyPxZTavgDsUeqdWC.jpeg",
-    apple: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo_fix.png-mokTXw13uwHxazyPxZTavgDsUeqdWC.jpeg",
+    apple:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo_fix.png-mokTXw13uwHxazyPxZTavgDsUeqdWC.jpeg",
   },
 };
 
@@ -35,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <body
         className={`${ibmPlexMono.className} antialiased bg-background text-foreground`}
       >
