@@ -1,8 +1,8 @@
-import Link from 'next/link'
-import { Mail, Phone, MapPin } from 'lucide-react'
+import Link from "next/link";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-card border-t border-border mt-auto">
@@ -42,7 +42,7 @@ export default function Footer() {
               >
                 <span className="text-sm font-bold">📷</span>
               </a>
-              <a
+              {/* <a
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -50,36 +50,51 @@ export default function Footer() {
                 aria-label="LinkedIn"
               >
                 <span className="text-sm font-bold">in</span>
-              </a>
+              </a> */}
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
+            <h4 className="font-semibold mb-4">Navigasi</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/about"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/products"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Products
                 </Link>
               </li>
               <li>
-                <Link href="/news" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/news"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   News
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/contact"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   Contact
                 </Link>
               </li>
@@ -88,26 +103,38 @@ export default function Footer() {
 
           {/* Products */}
           <div>
-            <h4 className="font-semibold mb-4">Products</h4>
+            <h4 className="font-semibold mb-4">Layanan</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/products?category=electronics" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Electronics
+                <Link
+                  href="/products?category=electronics"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Digital Signage & FIDS
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=accessories" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Accessories
+                <Link
+                  href="/products?category=accessories"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Smart Command Center
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=home" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Home & Living
+                <Link
+                  href="/products?category=home"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Pengalaman Immersive
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=fashion" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Fashion
+                <Link
+                  href="/products?category=fashion"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Integrasi IT & Software
                 </Link>
               </li>
             </ul>
@@ -119,17 +146,23 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Jl. Example No. 123, Jakarta, Indonesia 12345</span>
+                <span>Jl. Sudirman No. 123, Jakarta Selatan 12190</span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <a href="tel:+6221234567890" className="hover:text-primary transition-colors">
+                <a
+                  href="tel:+6221234567890"
+                  className="hover:text-primary transition-colors"
+                >
                   +62 21 2345 67890
                 </a>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <a href="mailto:info@boeledin.com" className="hover:text-primary transition-colors">
+                <a
+                  href="mailto:info@boeledin.com"
+                  className="hover:text-primary transition-colors"
+                >
                   info@boeledin.com
                 </a>
               </li>
@@ -143,17 +176,23 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground text-center md:text-left">
               &copy; {currentYear} BOELEDIN. All rights reserved.
             </p>
-            <div className="flex gap-6">
-              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            {/* <div className="flex gap-6">
+              <Link
+                href="/privacy"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                href="/terms"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
                 Terms of Service
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }
