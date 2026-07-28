@@ -45,7 +45,7 @@ export default function ServicesSection() {
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl">
             Dari bandara hingga command center, kami merancang sistem yang
-            bekerja tanpa henti — 7 hari seminggu, 24 jam sehari.
+            bekerja tanpa henti 7 hari seminggu, 24 jam sehari.
           </p>
         </div>
 

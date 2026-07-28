@@ -15,8 +15,8 @@ export default function AboutStory() {
             <h2 className="text-xl md:text-3xl font-bold mb-6">Cerita Kami</h2>
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p>
-                BOELEDIN Indonesia — sebuah unit usaha di bawah PT Future Boeled
-                Indonesia — didirikan dengan visi menjadi penyedia solusi
+                BOELEDIN Indonesia sebuah unit usaha di bawah PT Future Boeled
+                Indonesia didirikan dengan visi menjadi penyedia solusi
                 teknologi display terkemuka di Asia Tenggara. Sebagai bagian
                 dari jaringan global BOE Technology Group, kami menghadirkan
                 inovasi kelas dunia ke pasar Indonesia.
@@ -27,9 +27,9 @@ export default function AboutStory() {
                 solusi sensor, konektivitas IoT, dan aplikasi smart healthcare.
               </p>
               <p>
-                Hari ini, kami melayani berbagai industri — mulai dari fasilitas
+                Hari ini, kami melayani berbagai industri mulai dari fasilitas
                 publik seperti bandara, korporasi, ritel, hingga instansi
-                pemerintah — dengan solusi yang memenuhi standar kualitas dan
+                pemerintah dengan solusi yang memenuhi standar kualitas dan
                 performa tertinggi.
               </p>
             </div>

@@ -11,16 +11,20 @@ export default function AboutHero() {
               Memelopori teknologi display di Indonesia.
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Kami berkomitmen menghadirkan solusi tampilan digital dan semikonduktor yang inovatif — mengubah cara industri berkomunikasi dan menyampaikan informasi.
+              Kami berkomitmen menghadirkan solusi tampilan digital dan
+              semikonduktor yang inovatif mengubah cara industri berkomunikasi
+              dan menyampaikan informasi.
             </p>
           </div>
           <div className="bg-accent rounded-lg overflow-hidden h-80 md:h-96">
             <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-100 flex items-center justify-center">
-              <span className="text-muted-foreground">Instalasi Command Center</span>
+              <span className="text-muted-foreground">
+                Instalasi Command Center
+              </span>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

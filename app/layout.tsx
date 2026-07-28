@@ -2,16 +2,16 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import { IBM_Plex_Mono } from "next/font/google";
+import { Montserrat } from "next/font/google";
 
-const ibmPlexMono = IBM_Plex_Mono({
+const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "BOELEDIN - Solusi Display Digital Terkemuka",
+  title: "BOELEDIN Solusi Display Digital Terkemuka",
   description:
     "BOELEDIN Indonesia menyediakan solusi teknologi display terkemuka termasuk Digital Signage, Interactive Flat Panel, dan LED Display berkualitas tinggi.",
   icons: {
@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body
-        className={`${ibmPlexMono.className} antialiased bg-background text-foreground`}
+        className={`${montserrat.className} antialiased bg-background text-foreground`}
       >
         <Providers>{children}</Providers>
         {process.env.NODE_ENV === "production" && <Analytics />}

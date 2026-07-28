@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useTranslation } from '@/hooks/useTranslation'
+import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function CaseStudy() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   return (
     <section className="py-20 md:py-28">
@@ -15,9 +15,15 @@ export default function CaseStudy() {
             <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
               Studi Kasus
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Flight Information Display System — Bandara SMB II</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Flight Information Display System Bandara SMB II
+            </h2>
             <p className="text-muted-foreground text-lg mb-8">
-              Salah satu implementasi kami yang menonjol adalah pemasangan Flight Information Display System (FIDS) di Bandara Internasional Sultan Mahmud Badaruddin II — sistem yang menyampaikan informasi penerbangan secara real-time, 24 jam nonstop, dengan standar keandalan bandara internasional.
+              Salah satu implementasi kami yang menonjol adalah pemasangan
+              Flight Information Display System (FIDS) di Bandara Internasional
+              Sultan Mahmud Badaruddin II sistem yang menyampaikan informasi
+              penerbangan secara real-time, 24 jam nonstop, dengan standar
+              keandalan bandara internasional.
             </p>
             <Link
               href="/contact"
@@ -38,5 +44,5 @@ export default function CaseStudy() {
         </div>
       </div>
     </section>
-  )
+  );
 }

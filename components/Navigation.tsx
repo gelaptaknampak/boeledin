@@ -32,17 +32,19 @@ export default function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BOELED__WHITE.png-LFHUF6l0Vd7a0Ypw1enFpWXI3TyDVs.jpeg"
+              src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
               alt="BOELEDIN"
-              width={170}
+              width={110}
               height={55}
               className="
-h-8
-sm:h-9
-lg:h-10
-w-auto
-transition-all
-"
+              h-5
+              sm:h-6
+              md:h-8
+              lg:h-9
+              xl:h-10
+              w-auto
+              transition-all
+            "
             />
           </Link>
 
@@ -92,8 +94,8 @@ lg:gap-3"
               aria-label={t("common.language")}
               title={t("common.language")}
             >
-              <Globe className="w-5 h-5" />
-              <span className="text-sm font-medium hidden md:inline">
+              {/* <Globe className="w-5 h-5" /> */}
+              <span className="text-sm font-medium md:inline">
                 {language === "en" ? "EN" : "ID"}
               </span>
             </button>

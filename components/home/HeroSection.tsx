@@ -22,7 +22,7 @@ export default function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-20 py-20 sm:py-24 md:py-32 lg:py-40">
+      <div className="relative z-20 py-20 sm:py-24 md:py-20 lg:py-20">
         <div className="container mx-auto px-5 sm:px-6 lg:px-8">
           <div className="max-w-xl md:max-w-2xl lg:max-w-3xl">
             <div className="mb-5 inline-block">
