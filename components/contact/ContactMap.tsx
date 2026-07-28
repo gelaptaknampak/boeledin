@@ -18,8 +18,9 @@ const icon = L.icon({
 
 export default function ContactMap() {
   // Jakarta office coordinates
-  const lat = -6.1944
-  const lng = 106.8296
+  // BOELEDIN Office coordinates
+  const lat = -6.219342
+  const lng = 106.813970
 
   return (
     <div className="w-full h-96 rounded-lg overflow-hidden border border-border">

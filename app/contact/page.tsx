@@ -38,7 +38,7 @@ export default function ContactPage() {
                     {/* Address */}
                     <div className="flex gap-4">
                       <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                        <MapPin className="w-5 h-5 text-primary mt-2" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-1">Alamat Kantor</h4>
@@ -51,7 +51,7 @@ export default function ContactPage() {
                     {/* Phone */}
                     <div className="flex gap-4">
                       <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <Phone className="w-5 h-5 text-primary" />
+                        <Phone className="w-5 h-5 text-primary mt-2" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-1">Telepon</h4>
@@ -66,7 +66,7 @@ export default function ContactPage() {
                     {/* Email */}
                     <div className="flex gap-4">
                       <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <Mail className="w-5 h-5 text-primary" />
+                        <Mail className="w-5 h-5 text-primary mt-2" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-1">Email</h4>
@@ -81,7 +81,7 @@ export default function ContactPage() {
                     {/* Hours */}
                     <div className="flex gap-4">
                       <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <Clock className="w-5 h-5 text-primary" />
+                        <Clock className="w-5 h-5 text-primary mt-2" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-1">Jam Operasional</h4>
