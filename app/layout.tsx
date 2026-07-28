@@ -14,7 +14,6 @@ export const metadata: Metadata = {
   title: "BOELEDIN - Solusi Display Digital Terkemuka",
   description:
     "BOELEDIN Indonesia menyediakan solusi teknologi display terkemuka termasuk Digital Signage, Interactive Flat Panel, dan LED Display berkualitas tinggi.",
-  generator: "v0.app",
   icons: {
     icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo_fix.png-mokTXw13uwHxazyPxZTavgDsUeqdWC.jpeg",
     apple:
