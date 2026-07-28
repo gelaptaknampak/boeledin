@@ -1,23 +1,22 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import AdminLayout from '@/components/admin/AdminLayout'
-import PagesManagement from '@/components/admin/PagesManagement'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import AdminLayout from "@/components/admin/AdminLayout";
+import PagesManagement from "@/components/admin/PagesManagement";
 
 export const metadata = {
-  title: 'Kelola Halaman — Admin BOELEDIN',
-}
+  title: "Kelola Halaman — Admin BOELEDIN",
+};
 
 export default async function PagesManagementPage() {
-  const session = await getServerSession(authOptions)
+  const token = (await cookies()).get("wp_token");
 
-  if (!session) {
-    redirect('/admin/login')
+  if (!token) {
+    redirect("/admin/login");
   }
 
   return (
     <AdminLayout>
       <PagesManagement />
     </AdminLayout>
-  )
+  );
 }

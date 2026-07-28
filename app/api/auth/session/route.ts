@@ -1,18 +1,18 @@
-import { NextRequest } from 'next/server'
-import { cookies } from 'next/headers'
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('wp_token')?.value
+export async function GET() {
+  const cookieStore = await cookies();
+
+  const token = cookieStore.get("token");
 
   if (!token) {
-    return Response.json({ session: null })
+    return NextResponse.json({
+      authenticated: false,
+    });
   }
 
-  return Response.json({
-    session: {
-      token,
-      authenticated: true,
-    },
-  })
+  return NextResponse.json({
+    authenticated: true,
+  });
 }

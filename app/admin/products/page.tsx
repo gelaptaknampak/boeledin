@@ -1,23 +1,24 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import AdminLayout from '@/components/admin/AdminLayout'
-import ProductsManagement from '@/components/admin/ProductsManagement'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import AdminLayout from "@/components/admin/AdminLayout";
+import ProductsManagement from "@/components/admin/ProductsManagement";
 
 export const metadata = {
-  title: 'Kelola Produk — Admin BOELEDIN',
-}
+  title: "Kelola Produk — Admin BOELEDIN",
+};
 
 export default async function ProductsManagementPage() {
-  const session = await getServerSession(authOptions)
+  const token = (await cookies()).get("wp_token");
 
-  if (!session) {
-    redirect('/admin/login')
+  if (!token) {
+    redirect("/admin/login");
   }
+
+  console.log(token);
 
   return (
     <AdminLayout>
       <ProductsManagement />
     </AdminLayout>
-  )
+  );
 }

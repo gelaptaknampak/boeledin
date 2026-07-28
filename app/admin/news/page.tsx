@@ -1,23 +1,22 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import AdminLayout from '@/components/admin/AdminLayout'
-import NewsManagement from '@/components/admin/NewsManagement'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import AdminLayout from "@/components/admin/AdminLayout";
+import NewsManagement from "@/components/admin/NewsManagement";
 
 export const metadata = {
-  title: 'Kelola Berita — Admin BOELEDIN',
-}
+  title: "Kelola Berita — Admin BOELEDIN",
+};
 
 export default async function NewsManagementPage() {
-  const session = await getServerSession(authOptions)
+  const token = (await cookies()).get("wp_token");
 
-  if (!session) {
-    redirect('/admin/login')
+  if (!token) {
+    redirect("/admin/login");
   }
 
   return (
     <AdminLayout>
       <NewsManagement />
     </AdminLayout>
-  )
+  );
 }

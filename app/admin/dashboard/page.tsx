@@ -1,23 +1,25 @@
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import AdminLayout from '@/components/admin/AdminLayout'
-import DashboardOverview from '@/components/admin/DashboardOverview'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+import AdminLayout from "@/components/admin/AdminLayout";
+import DashboardOverview from "@/components/admin/DashboardOverview";
 
 export const metadata = {
-  title: 'Admin Dashboard — BOELEDIN CMS',
-}
+  title: "Admin Dashboard — BOELEDIN CMS",
+};
 
 export default async function AdminDashboardPage() {
-  const session = await getServerSession(authOptions)
+  const cookieStore = await cookies();
 
-  if (!session) {
-    redirect('/admin/login')
+  const token = cookieStore.get("wp_token");
+
+  if (!token) {
+    redirect("/admin/login");
   }
 
   return (
     <AdminLayout>
       <DashboardOverview />
     </AdminLayout>
-  )
+  );
 }

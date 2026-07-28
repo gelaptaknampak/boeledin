@@ -1,9 +1,12 @@
-import { NextRequest } from 'next/server'
-import { cookies } from 'next/headers'
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
-  const cookieStore = await cookies()
-  cookieStore.delete('wp_token')
+export async function POST() {
+  const cookieStore = await cookies();
 
-  return Response.json({ success: true })
+  cookieStore.delete("token");
+
+  return NextResponse.json({
+    success: true,
+  });
 }

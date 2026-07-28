@@ -1,167 +1,317 @@
-import axios from 'axios'
+import axios from "axios";
 
-const WORDPRESS_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || 'http://localhost/wordpress'
-const WORDPRESS_API = `${WORDPRESS_URL}/wp-json/wp/v2`
-const ACF_API = `${WORDPRESS_URL}/wp-json/acf/v3`
+const WORDPRESS_URL = "https://wp.boeledin.com";
+const WORDPRESS_API = `${WORDPRESS_URL}/wp-json/wp/v2`;
+const ACF_API = `${WORDPRESS_URL}/wp-json/acf/v3`;
 
 export const wpClient = axios.create({
   baseURL: WORDPRESS_API,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
-})
+});
 
 // Posts & Pages
 export async function getPosts(params?: any) {
   try {
-    const response = await wpClient.get('/posts', { params })
-    return response.data
+    const response = await wpClient.get("/posts", { params });
+    return response.data;
   } catch (error) {
-    console.error('Error fetching posts:', error)
-    return []
+    console.error("Error fetching posts:", error);
+    return [];
   }
 }
 
 export async function getPostById(id: number) {
   try {
-    const response = await wpClient.get(`/posts/${id}`)
-    return response.data
+    const response = await wpClient.get(`/posts/${id}`);
+    return response.data;
   } catch (error) {
-    console.error('Error fetching post:', error)
-    return null
+    console.error("Error fetching post:", error);
+    return null;
   }
 }
 
 export async function getPages(params?: any) {
   try {
-    const response = await wpClient.get('/pages', { params })
-    return response.data
+    const response = await wpClient.get("/pages", { params });
+    return response.data;
   } catch (error) {
-    console.error('Error fetching pages:', error)
-    return []
+    console.error("Error fetching pages:", error);
+    return [];
   }
 }
 
 export async function getPageById(id: number) {
   try {
-    const response = await wpClient.get(`/pages/${id}`)
-    return response.data
+    const response = await wpClient.get(`/pages/${id}`);
+    return response.data;
   } catch (error) {
-    console.error('Error fetching page:', error)
-    return null
+    console.error("Error fetching page:", error);
+    return null;
   }
 }
 
 // Custom Post Types (Products, News)
 export async function getCustomPosts(postType: string, params?: any) {
   try {
-    const response = await wpClient.get(`/${postType}`, { params })
-    return response.data
+    const response = await wpClient.get(`/${postType}`, { params });
+    return response.data;
   } catch (error) {
-    console.error(`Error fetching ${postType}:`, error)
-    return []
+    console.error(`Error fetching ${postType}:`, error);
+    return [];
   }
 }
 
 export async function getCustomPostById(postType: string, id: number) {
   try {
-    const response = await wpClient.get(`/${postType}/${id}`)
-    return response.data
+    const response = await wpClient.get(`/${postType}/${id}`);
+    return response.data;
   } catch (error) {
-    console.error(`Error fetching ${postType}:`, error)
-    return null
+    console.error(`Error fetching ${postType}:`, error);
+    return null;
   }
 }
 
 // Categories & Taxonomies
-export async function getCategories(postType: string = 'post', params?: any) {
+export async function getCategories(postType: string = "post", params?: any) {
   try {
     const response = await wpClient.get(
-      postType === 'post' ? '/categories' : `/${postType}_category`,
-      { params }
-    )
-    return response.data
+      postType === "post" ? "/categories" : `/${postType}_category`,
+      { params },
+    );
+    return response.data;
   } catch (error) {
-    console.error('Error fetching categories:', error)
-    return []
+    console.error("Error fetching categories:", error);
+    return [];
   }
 }
 
 // Search
 export async function searchContent(search: string, postType?: string) {
   try {
-    const params: any = { search }
-    if (postType) params.type = postType
-    
-    const response = await wpClient.get('/search', { params })
-    return response.data
+    const params: any = { search };
+    if (postType) params.type = postType;
+
+    const response = await wpClient.get("/search", { params });
+    return response.data;
   } catch (error) {
-    console.error('Error searching:', error)
-    return []
+    console.error("Error searching:", error);
+    return [];
   }
 }
 
 // Media
 export async function getMedia(params?: any) {
   try {
-    const response = await wpClient.get('/media', { params })
-    return response.data
+    const response = await wpClient.get("/media", { params });
+    return response.data;
   } catch (error) {
-    console.error('Error fetching media:', error)
-    return []
+    console.error("Error fetching media:", error);
+    return [];
   }
 }
 
 export async function uploadMedia(file: File) {
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    const response = await wpClient.post('/media', formData, {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await wpClient.post("/media", formData, {
       headers: {
-        'Content-Disposition': `attachment; filename="${file.name}"`,
+        "Content-Disposition": `attachment; filename="${file.name}"`,
       },
-    })
-    return response.data
+    });
+    return response.data;
   } catch (error) {
-    console.error('Error uploading media:', error)
-    return null
+    console.error("Error uploading media:", error);
+    return null;
   }
 }
 
 // ACF Fields
 export async function getACFFields(postType: string, postId: number) {
   try {
-    const response = await axios.get(
-      `${ACF_API}/${postType}/${postId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    return response.data
+    const response = await axios.get(`${ACF_API}/${postType}/${postId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
   } catch (error) {
-    console.error('Error fetching ACF fields:', error)
-    return null
+    console.error("Error fetching ACF fields:", error);
+    return null;
   }
 }
 
-export async function updateACFFields(postType: string, postId: number, fields: any) {
+export async function updateACFFields(
+  postType: string,
+  postId: number,
+  fields: any,
+) {
   try {
     const response = await axios.post(
       `${ACF_API}/${postType}/${postId}`,
       fields,
       {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.WORDPRESS_JWT_TOKEN}`,
         },
-      }
-    )
-    return response.data
+      },
+    );
+    return response.data;
   } catch (error) {
-    console.error('Error updating ACF fields:', error)
-    return null
+    console.error("Error updating ACF fields:", error);
+    return null;
+  }
+}
+
+// ===============================
+// Authentication
+// ===============================
+
+export async function loginWordPress(username: string, password: string) {
+  try {
+    const response = await axios.post(
+      `${WORDPRESS_URL}/wp-json/jwt-auth/v1/token`,
+      {
+        username,
+        password,
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error(error);
+
+    return null;
+  }
+}
+
+function authHeader(token: string) {
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+}
+
+// product
+export async function getProducts(params?: any) {
+  try {
+    const response = await wpClient.get("/products", {
+      params: {
+        _embed: true,
+        ...params,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+export async function getProduct(id: number) {
+  try {
+    const response = await wpClient.get(`/products/${id}?_embed`);
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export async function createProduct(title: string, fields: any, token: string) {
+  try {
+    const response = await axios.post(
+      `${WORDPRESS_URL}/wp-json/wp/v2/products`,
+      {
+        title,
+        status: "publish",
+        acf: fields,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error(error.response?.data || error);
+
+    return null;
+  }
+}
+
+export async function updateProduct(
+  id: number,
+  title: string,
+  fields: any,
+  token: string,
+) {
+  try {
+    const response = await axios.post(
+      `${WORDPRESS_URL}/wp-json/wp/v2/products/${id}`,
+      {
+        title,
+        acf: fields,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error(error.response?.data);
+
+    return null;
+  }
+}
+
+export async function deleteProduct(id: number, token: string) {
+  try {
+    const response = await axios.delete(
+      `${WORDPRESS_API}/products/${id}?force=true`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export async function uploadProductImage(file: File, token: string) {
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  try {
+    const response = await axios.post(`${WORDPRESS_API}/media`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Disposition": `attachment; filename="${file.name}"`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+
+    return null;
   }
 }

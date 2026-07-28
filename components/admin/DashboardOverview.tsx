@@ -1,46 +1,82 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { FileText, ShoppingCart, Newspaper, TrendingUp } from 'lucide-react'
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { FileText, ShoppingCart, Newspaper, TrendingUp } from "lucide-react";
 
 interface DashboardStats {
-  totalPages: number
-  totalProducts: number
-  totalNews: number
-  recentItems: Array<{ id: number; title: string; type: string; date: string }>
+  totalPages: number;
+  totalProducts: number;
+  totalNews: number;
+  recentItems: Array<{ id: number; title: string; type: string; date: string }>;
 }
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState<DashboardStats>({
-    totalPages: 5,
-    totalProducts: 8,
-    totalNews: 6,
-    recentItems: [
-      { id: 1, title: 'Tentang Kami', type: 'page', date: '2024-02-15' },
-      { id: 2, title: 'Ultra-Slim 4K Commercial Display', type: 'product', date: '2024-02-14' },
-      { id: 3, title: 'Memahami Pixel Pitch pada LED Display', type: 'news', date: '2024-02-10' },
-    ],
-  })
+    totalPages: 0,
+    totalProducts: 0,
+    totalNews: 0,
+    recentItems: [],
+  });
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  async function fetchDashboard() {
+    try {
+      const res = await fetch("/api/wordpress/dashboard");
+
+      if (!res.ok) {
+        throw new Error("Gagal mengambil dashboard");
+      }
+
+      const data = await res.json();
+
+      setStats(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   const cards = [
-    { icon: FileText, label: 'Total Halaman', value: stats.totalPages, href: '/admin/pages', color: 'bg-blue-500' },
-    { icon: ShoppingCart, label: 'Total Produk', value: stats.totalProducts, href: '/admin/products', color: 'bg-green-500' },
-    { icon: Newspaper, label: 'Total Berita', value: stats.totalNews, href: '/admin/news', color: 'bg-purple-500' },
-  ]
+    {
+      icon: FileText,
+      label: "Total Halaman",
+      value: stats.totalPages,
+      href: "/admin/pages",
+      color: "bg-blue-500",
+    },
+    {
+      icon: ShoppingCart,
+      label: "Total Produk",
+      value: stats.totalProducts,
+      href: "/admin/products",
+      color: "bg-green-500",
+    },
+    {
+      icon: Newspaper,
+      label: "Total Berita",
+      value: stats.totalNews,
+      href: "/admin/news",
+      color: "bg-purple-500",
+    },
+  ];
 
   return (
     <div className="space-y-8">
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {cards.map((card) => {
-          const Icon = card.icon
+          const Icon = card.icon;
           return (
             <Link key={card.href} href={card.href}>
               <div className="bg-card border border-border rounded-lg p-6 hover:border-primary transition-colors cursor-pointer group">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm mb-2">{card.label}</p>
+                    <p className="text-muted-foreground text-sm mb-2">
+                      {card.label}
+                    </p>
                     <p className="text-4xl font-bold text-foreground group-hover:text-primary transition-colors">
                       {card.value}
                     </p>
@@ -51,7 +87,7 @@ export default function DashboardOverview() {
                 </div>
               </div>
             </Link>
-          )
+          );
         })}
       </div>
 
@@ -69,12 +105,16 @@ export default function DashboardOverview() {
             </p>
           </div>
           <div className="p-4 bg-accent rounded-lg">
-            <p className="text-muted-foreground text-sm mb-1">Terakhir Diupdate</p>
+            <p className="text-muted-foreground text-sm mb-1">
+              Terakhir Diupdate
+            </p>
             <p className="text-sm text-foreground">15 Feb 2024</p>
           </div>
           <div className="p-4 bg-accent rounded-lg">
             <p className="text-muted-foreground text-sm mb-1">Status</p>
-            <p className="text-sm text-green-600 dark:text-green-400 font-semibold">✓ Semua Baik</p>
+            <p className="text-sm text-green-600 dark:text-green-400 font-semibold">
+              ✓ Semua Baik
+            </p>
           </div>
         </div>
       </div>
@@ -86,10 +126,18 @@ export default function DashboardOverview() {
           <table className="w-full text-sm">
             <thead className="border-b border-border">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Judul</th>
-                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Tipe</th>
-                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Tanggal</th>
-                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Aksi</th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
+                  Judul
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
+                  Tipe
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
+                  Tanggal
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
+                  Aksi
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -98,10 +146,16 @@ export default function DashboardOverview() {
                   <td className="px-4 py-3 font-medium">{item.title}</td>
                   <td className="px-4 py-3">
                     <span className="inline-block px-3 py-1 bg-accent rounded-full text-xs font-semibold text-primary">
-                      {item.type === 'page' ? 'Halaman' : item.type === 'product' ? 'Produk' : 'Berita'}
+                      {item.type === "page"
+                        ? "Halaman"
+                        : item.type === "product"
+                          ? "Produk"
+                          : "Berita"}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{item.date}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {item.date}
+                  </td>
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/${item.type}s/${item.id}/edit`}
@@ -119,15 +173,21 @@ export default function DashboardOverview() {
 
       {/* WordPress Connection Info */}
       <div className="bg-accent border border-primary/30 rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-4">Informasi Koneksi WordPress</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          Informasi Koneksi WordPress
+        </h2>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">WordPress URL:</span>
-            <span className="font-mono text-foreground">{process.env.NEXT_PUBLIC_WORDPRESS_URL}</span>
+            <span className="font-mono text-foreground">
+              {process.env.NEXT_PUBLIC_WORDPRESS_URL}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">API Status:</span>
-            <span className="text-green-600 dark:text-green-400 font-semibold">✓ Connected</span>
+            <span className="text-green-600 dark:text-green-400 font-semibold">
+              ✓ Connected
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Data Sinkronisasi:</span>
@@ -136,5 +196,5 @@ export default function DashboardOverview() {
         </div>
       </div>
     </div>
-  )
+  );
 }
