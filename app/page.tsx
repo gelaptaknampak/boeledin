@@ -20,7 +20,7 @@ export default function Home() {
       <Navigation />
       <main>
         <HeroSection />
-        <SpecStrip />
+        {/* <SpecStrip /> */}
         <ServicesSection />
         <ProductsShowcase />
         <CaseStudy />

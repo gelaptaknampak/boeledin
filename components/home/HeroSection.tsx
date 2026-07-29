@@ -1,79 +1,135 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useTranslation } from "@/hooks/useTranslation";
+
+import MosaicTransition from "./MosaicTransition";
+import AnimatedGrid from "./AnimatedGrid";
+
+const images = ["/hero1.jpg", "/hero2.jpg", "/hero3.jpg", "/hero4.jpg"];
 
 export default function HeroSection() {
   const { t } = useTranslation();
 
   return (
-    <section className="hero-media relative w-full bg-black text-white overflow-hidden">
-      {/* Background with overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40 z-10" />
+    <section className="relative min-h-screen overflow-hidden bg-black text-white">
+      {/* Animated Background */}
+      <MosaicTransition images={images} interval={7000} />
 
-      <div className="absolute inset-0">
-        <div
-          className="w-full h-full bg-slate-900"
-          style={{
-            backgroundImage:
-              "linear-gradient(135deg, rgba(15,23,42,0.9) 0%, rgba(30,41,59,0.8) 50%, rgba(51,65,85,0.7) 100%)",
-          }}
-        />
-      </div>
+      {/* Futuristic Grid */}
+      <AnimatedGrid />
+
+      {/* Extra Overlay */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/85 via-black/55 to-black/20" />
 
       {/* Content */}
-      <div className="relative z-20 py-20 sm:py-24 md:py-20 lg:py-20">
-        <div className="container mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="max-w-xl md:max-w-2xl lg:max-w-3xl">
-            <div className="mb-5 inline-block">
-              <span className="text-sm font-semibold text-blue-300 bg-blue-950/50 px-4 py-2 rounded-full border border-blue-800/30">
+      <div className="relative z-20 flex min-h-screen items-center">
+        <div className="container mx-auto px-6 lg:px-8 xl:px-16">
+          <div className="max-w-2xl">
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="mb-6 inline-block"
+            >
+              <span className="rounded-full border border-blue-400/20 bg-blue-600/10 px-3 py-1.5 text-[10px] font-medium tracking-[0.2em] uppercase text-blue-300 backdrop-blur-md sm:text-[11px]">
                 {t("home.heroEyebrow")}
               </span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-balance">
+            {/* Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 35 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="
+                text-balance
+                font-bold
+                leading-[1.08]
+                tracking-[-0.03em]
+                text-2xl
+                sm:text-3xl
+                md:text-5xl
+                max-w-2xl
+                "
+            >
               {t("home.heroTitle")}
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed max-w-2xl text-balance">
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 35 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="mt-6 max-w-2xl text-base leading-relaxed text-gray-300 sm:text-md lg:text-lg"
+            >
               {t("home.heroDescription")}
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-16">
+            {/* Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 35 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.45 }}
+              className="mt-8 flex flex-col gap-4 sm:flex-row"
+            >
               <Link
                 href="/products"
-                className="inline-flex px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors w-fit"
+                className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-7 py-3.5 text-sm font-semibold transition-all duration-300 hover:scale-105 hover:bg-blue-500 hover:shadow-[0_0_35px_rgba(59,130,246,.45)]"
               >
                 {t("home.heroCta")}
               </Link>
+
               <Link
                 href="/contact"
-                className="inline-flex px-8 py-4 border-2 border-gray-400/40 text-white hover:border-white hover:bg-white/10 font-semibold rounded-lg transition-colors w-fit"
+                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-8 py-4 font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-white/60 hover:bg-white/10"
               >
                 {t("home.heroCtaSecondary")}
               </Link>
-            </div>
+            </motion.div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-600/30">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="mt-10 grid grid-cols-3 gap-6 border-t border-white/10 pt-8"
+            >
               <div>
-                <div className="text-4xl font-bold text-blue-400">10+</div>
-                <p className="text-gray-400 text-sm mt-2">Tahun Pengalaman</p>
+                <h3 className="text-xl font-bold text-blue-400 sm:text-2xl lg:text-3xl">
+                  10+
+                </h3>
+                <p className="mt-2 text-[11px] text-white sm:text-xs">
+                  Tahun Pengalaman
+                </p>
               </div>
+
               <div>
-                <div className="text-4xl font-bold text-blue-400">100+</div>
-                <p className="text-gray-400 text-sm mt-2">Mitra & Klien</p>
+                <h3 className="text-xl font-bold text-blue-400 sm:text-2xl lg:text-3xl">
+                  100+
+                </h3>
+                <p className="mt-2 text-[11px] text-white sm:text-xs">
+                  Mitra & Klien
+                </p>
               </div>
+
               <div>
-                <div className="text-4xl font-bold text-blue-400">10M+</div>
-                <p className="text-gray-400 text-sm mt-2">
+                <h3 className="text-xl font-bold text-blue-400 sm:text-2xl lg:text-3xl">
+                  10M+
+                </h3>
+                <p className="mt-2 text-[11px] text-white sm:text-xs">
                   Unit Terkirim Global
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
+
+      {/* Bottom Fade */}
+      <div className="absolute inset-x-0 bottom-0 z-20 h-40 bg-gradient-to-t from-black via-black/70 to-transparent" />
     </section>
   );
 }
