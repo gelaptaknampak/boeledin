@@ -81,77 +81,79 @@
   color-scheme: dark;
 
   /* Background */
-  --background: #1f2937;
-  --foreground: #ffffff;
+  --background: #040b14;
+  --foreground: #f8fafc;
 
-  /* Card */
-  --card: #273549;
-  --card-foreground: #ffffff;
+  /* Surface */
+  --card: #091523;
+  --card-foreground: #f8fafc;
 
-  /* Popover */
-  --popover: #273549;
-  --popover-foreground: #ffffff;
+  --popover: #091523;
+  --popover-foreground: #f8fafc;
 
   /* Brand */
-  --primary: #ef4444;
+  --primary: #3ea8ff;
   --primary-foreground: #ffffff;
 
   /* Secondary */
-  --secondary: #334155;
-  --secondary-foreground: #ffffff;
+  --secondary: #102033;
+  --secondary-foreground: #f8fafc;
 
   /* Muted */
-  --muted: #334155;
-  --muted-foreground: #d1d5db;
+  --muted: #0d1b2c;
+  --muted-foreground: #b8c5d3;
 
   /* Accent */
-  --accent: #374151;
-  --accent-foreground: #ffffff;
+  --accent: #12263d;
+  --accent-foreground: #5db8ff;
 
   /* Border */
-  --border: #475569;
-  --input: #475569;
-  --ring: #ef4444;
+  --border: #1b3856;
+  --input: #1b3856;
+  --ring: #3ea8ff;
 
   /* Sidebar */
-  --sidebar: #273549;
+  --sidebar: #091523;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ef4444;
+
+  --sidebar-primary: #3ea8ff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #374151;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #475569;
-  --sidebar-ring: #ef4444;
+
+  --sidebar-accent: #12263d;
+  --sidebar-accent-foreground: #5db8ff;
+
+  --sidebar-border: #1b3856;
+  --sidebar-ring: #3ea8ff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     color-scheme: dark;
 
-    --background: #071827;
+    --background: #040b14;
     --foreground: #f8fafc;
 
-    --card: #0d2238;
+    --card: #091523;
     --card-foreground: #f8fafc;
 
-    --popover: #0d2238;
+    --popover: #091523;
     --popover-foreground: #f8fafc;
 
-    --primary: #4fb6ff;
+    --primary: #3ea8ff;
     --primary-foreground: #ffffff;
 
-    --secondary: #15314d;
+    --secondary: #102033;
     --secondary-foreground: #f8fafc;
 
-    --muted: #132a42;
-    --muted-foreground: #cbd5e1;
+    --muted: #0d1b2c;
+    --muted-foreground: #b8c5d3;
 
-    --accent: #183b5b;
-    --accent-foreground: #4fb6ff;
+    --accent: #12263d;
+    --accent-foreground: #5db8ff;
 
-    --border: #254c73;
-    --input: #254c73;
-    --ring: #4fb6ff;
+    --border: #1b3856;
+    --input: #1b3856;
+    --ring: #3ea8ff;
   }
 }
 
