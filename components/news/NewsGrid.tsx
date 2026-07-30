@@ -1,75 +1,98 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
-import { Clock } from 'lucide-react'
+import Link from "next/link";
+import { formatDate } from "@/lib/utils";
+import { Clock } from "lucide-react";
+import Image from "next/image";
 
 export default function NewsGrid() {
   const news = [
     {
       id: 1,
-      title: 'Apa Itu Digital Signage dan Mengapa Bisnis Anda Membutuhkannya',
-      category: 'Digital Signage',
-      excerpt: 'Kenali definisi, jenis, dan manfaat digital signage bagi bisnis ritel, perkantoran, dan fasilitas publik di Indonesia.',
-      readTime: '6 min',
-      date: new Date('2024-01-15'),
-      slug: 'digital-signage-guide',
+      title: "Apa Itu Digital Signage dan Mengapa Bisnis Anda Membutuhkannya",
+      category: "Digital Signage",
+      excerpt:
+        "Kenali definisi, jenis, dan manfaat digital signage bagi bisnis ritel, perkantoran, dan fasilitas publik di Indonesia.",
+      readTime: "6 min",
+      date: new Date("2024-01-15"),
+      slug: "digital-signage-guide",
+      image: "news-digital_signage.jpg",
     },
     {
       id: 2,
-      title: 'Interactive Flat Panel vs Proyektor: Mana yang Tepat untuk Ruang Rapat Modern',
-      category: 'Interactive Flat Panel',
-      excerpt: 'Perbandingan interactive flat panel dan proyektor dari sisi kualitas gambar, interaktivitas, biaya perawatan, dan pengalaman kolaborasi.',
-      readTime: '7 min',
-      date: new Date('2024-01-20'),
-      slug: 'ifp-vs-projector',
+      title:
+        "Interactive Flat Panel vs Proyektor: Mana yang Tepat untuk Ruang Rapat Modern",
+      category: "Interactive Flat Panel",
+      excerpt:
+        "Perbandingan interactive flat panel dan proyektor dari sisi kualitas gambar, interaktivitas, biaya perawatan, dan pengalaman kolaborasi.",
+      readTime: "7 min",
+      date: new Date("2024-01-20"),
+      slug: "ifp-vs-projector",
+      image: "news-interactive_flat_panel.jpg",
     },
     {
       id: 3,
-      title: 'Memahami Pixel Pitch pada LED Display: Panduan Memilih Jarak Piksel',
-      category: 'LED Display',
-      excerpt: 'Panduan lengkap memahami pixel pitch LED display dan cara menentukan jarak piksel yang tepat berdasarkan jarak pandang.',
-      readTime: '7 min',
-      date: new Date('2024-01-25'),
-      slug: 'pixel-pitch-guide',
+      title:
+        "Memahami Pixel Pitch pada LED Display: Panduan Memilih Jarak Piksel",
+      category: "LED Display",
+      excerpt:
+        "Panduan lengkap memahami pixel pitch LED display dan cara menentukan jarak piksel yang tepat berdasarkan jarak pandang.",
+      readTime: "7 min",
+      date: new Date("2024-01-25"),
+      slug: "pixel-pitch-guide",
+      image: "news-pixel_pitch.jpg",
     },
     {
       id: 4,
-      title: 'FIDS (Flight Information Display System): Standar Baru Informasi Bandara',
-      category: 'Digital Signage',
-      excerpt: 'Mengenal Flight Information Display System, komponen utamanya, dan bagaimana sistem ini mendukung operasional bandara 24 jam.',
-      readTime: '6 min',
-      date: new Date('2024-02-01'),
-      slug: 'fids-airport-standard',
+      title:
+        "FIDS (Flight Information Display System): Standar Baru Informasi Bandara",
+      category: "Digital Signage",
+      excerpt:
+        "Mengenal Flight Information Display System, komponen utamanya, dan bagaimana sistem ini mendukung operasional bandara 24 jam.",
+      readTime: "6 min",
+      date: new Date("2024-02-01"),
+      slug: "fids-airport-standard",
+      image: "news-FIDS.webp",
     },
     {
       id: 5,
-      title: 'Teknologi COB vs SMD LED Display: Perbedaan dan Keunggulan Masing-Masing',
-      category: 'LED Display',
-      excerpt: 'Analisis mendalam tentang perbedaan teknologi COB dan SMD pada LED display, termasuk keunggulan, kelemahan, dan aplikasi ideal untuk masing-masing.',
-      readTime: '8 min',
-      date: new Date('2024-02-05'),
-      slug: 'cob-vs-smd-led',
+      title:
+        "Teknologi COB vs SMD LED Display: Perbedaan dan Keunggulan Masing-Masing",
+      category: "LED Display",
+      excerpt:
+        "Analisis mendalam tentang perbedaan teknologi COB dan SMD pada LED display.",
+      readTime: "8 min",
+      date: new Date("2024-02-05"),
+      slug: "cob-vs-smd-led",
+      image: "news-COB_LED.webp",
     },
     {
       id: 6,
-      title: 'Tren 2024: Interactive Displays Mendominasi Ruang Kolaborasi Modern',
-      category: 'Interactive Flat Panel',
-      excerpt: 'Perkembangan terbaru dalam industri interactive displays dan bagaimana teknologi ini mengubah cara tim berkolaborasi di era digital.',
-      readTime: '6 min',
-      date: new Date('2024-02-10'),
-      slug: 'interactive-displays-2024',
+      title:
+        "Tren 2024: Interactive Displays Mendominasi Ruang Kolaborasi Modern",
+      category: "Interactive Flat Panel",
+      excerpt: "Perkembangan terbaru dalam industri interactive displays.",
+      readTime: "6 min",
+      date: new Date("2024-02-10"),
+      slug: "interactive-displays-2024",
+      image: "news-tren.jpg",
     },
-  ]
+  ];
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'Digital Signage': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200',
-      'Interactive Flat Panel': 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200',
-      'LED Display': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200',
-    }
-    return colors[category] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
-  }
+      "Digital Signage":
+        "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200",
+      "Interactive Flat Panel":
+        "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200",
+      "LED Display":
+        "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200",
+    };
+    return (
+      colors[category] ||
+      "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200"
+    );
+  };
 
   return (
     <section className="py-12 md:py-20 bg-background">
@@ -81,18 +104,27 @@ export default function NewsGrid() {
               href={`/news/${article.slug}`}
               className="group bg-card border border-border rounded-lg overflow-hidden hover:border-primary transition-all hover:shadow-lg hover:-translate-y-1"
             >
-              {/* Placeholder Image */}
-              <div className="relative bg-accent h-48 overflow-hidden flex items-center justify-center">
-                <div className="text-4xl text-muted-foreground group-hover:scale-110 transition-transform duration-300">
-                  📰
-                </div>
+              {/* News Image */}
+              <div className="relative h-48 overflow-hidden">
+                <Image
+                  src={article.image}
+                  alt={article.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
               </div>
 
               {/* Content */}
               <div className="p-6 flex flex-col h-full">
                 {/* Category */}
                 <div className="mb-3">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(article.category)}`}>
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(article.category)}`}
+                  >
                     {article.category}
                   </span>
                 </div>
@@ -120,5 +152,5 @@ export default function NewsGrid() {
         </div>
       </div>
     </section>
-  )
+  );
 }

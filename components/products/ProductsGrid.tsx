@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import Image from "next/image";
 
 export default function ProductsGrid() {
   const { t } = useTranslation();
@@ -17,7 +18,7 @@ export default function ProductsGrid() {
       model: "FBI-43Q6",
       brand: "fbi",
       category: "signage",
-      image: "/api/placeholder/300/200",
+      image: "/product-digital signage.png",
       specs: {
         size: '43"',
         resolution: "4K UHD",
@@ -33,7 +34,7 @@ export default function ProductsGrid() {
       model: "SR Series (SRAA05)",
       brand: "boeled",
       category: "signage",
-      image: "/api/placeholder/300/200",
+      image: "/product-digital signage.png",
       specs: {
         brightness: "700 nits",
         frame: "Aluminum",
@@ -49,7 +50,7 @@ export default function ProductsGrid() {
       model: "BTQ Series (P1.25)",
       brand: "boe",
       category: "led",
-      image: "/api/placeholder/300/200",
+      image: "/product-LED.png",
       specs: {
         pitch: "P1.25",
         brightness: "3000 nits",
@@ -65,7 +66,7 @@ export default function ProductsGrid() {
       model: "FBI-65IFP",
       brand: "fbi",
       category: "ifp",
-      image: "/api/placeholder/300/200",
+      image: "/product-interactif flat panel.png",
       specs: {
         size: '65"',
         resolution: "4K",
@@ -81,7 +82,7 @@ export default function ProductsGrid() {
       model: "BSL-A Series (P2.6)",
       brand: "boe",
       category: "led",
-      image: "/api/placeholder/300/200",
+      image: "/product-LED.png",
       specs: {
         pitch: "P2.6",
         brightness: "4000+ nits",
@@ -97,7 +98,7 @@ export default function ProductsGrid() {
       model: "SA Series (SAAA03)",
       brand: "boeled",
       category: "signage",
-      image: "/api/placeholder/300/200",
+      image: "/product-digital signage.png",
       specs: {
         brightness: "500 nits",
         resolution: "1080p/4K",
@@ -113,7 +114,7 @@ export default function ProductsGrid() {
       model: "BYH Pro (P0.9375)",
       brand: "boe",
       category: "led",
-      image: "/api/placeholder/300/200",
+      image: "/product-LED.png",
       specs: {
         pitch: "P0.9375",
         brightness: "2000+ nits",
@@ -129,7 +130,7 @@ export default function ProductsGrid() {
       model: "FBI-55IFP-V2",
       brand: "fbi",
       category: "ifp",
-      image: "/api/placeholder/300/200",
+      image: "/product-interactif flat panel.png",
       specs: {
         size: '55"',
         resolution: "4K UHD",
@@ -278,10 +279,12 @@ export default function ProductsGrid() {
                 >
                   {/* Image */}
                   <div className="relative bg-accent h-48 overflow-hidden">
-                    <img
+                    <Image
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-3 left-3 px-3 py-1 bg-black/50 text-white text-xs font-semibold rounded-full backdrop-blur-sm">
                       {product.brand.toUpperCase()} ·{" "}

@@ -1,34 +1,38 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { useTranslation } from '@/hooks/useTranslation'
+import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
+import Image from "next/image";
 
 export default function NewsSection() {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   const news = [
     {
       id: 1,
-      category: 'Digital Signage',
-      title: 'Apa Itu Digital Signage dan Mengapa Bisnis Anda Membutuhkannya',
-      readTime: '6 min baca',
-      href: '/news',
+      category: "Digital Signage",
+      title: "...",
+      readTime: "6 min baca",
+      href: "/news",
+      image: "news-digital_signage.jpg",
     },
     {
       id: 2,
-      category: 'LED Display',
-      title: 'Memahami Pixel Pitch pada LED Display: Panduan Memilih Jarak Piksel',
-      readTime: '7 min baca',
-      href: '/news',
+      category: "LED Display",
+      title: "...",
+      readTime: "7 min baca",
+      href: "/news",
+      image: "news-COB_LED.webp",
     },
     {
       id: 3,
-      category: 'Tren Teknologi',
-      title: 'Tren Digital Signage 2026: AI, IoT, dan Konten Real-Time',
-      readTime: '5 min baca',
-      href: '/news',
+      category: "Tren Teknologi",
+      title: "...",
+      readTime: "5 min baca",
+      href: "/news",
+      image: "news-tren.jpg",
     },
-  ]
+  ];
 
   return (
     <section className="py-20 md:py-28">
@@ -52,25 +56,34 @@ export default function NewsSection() {
               className="group bg-background rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all"
             >
               {/* Thumbnail */}
-              <div className="h-40 bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center group-hover:from-accent/30 group-hover:to-accent/10 transition-colors">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">📊</div>
-                  <div className="text-xs text-muted-foreground">{article.category}</div>
-                </div>
+              <div className="relative h-48 overflow-hidden">
+                <Image
+                  src={article.image}
+                  alt={article.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
+                />
+
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
               </div>
 
               {/* Content */}
               <div className="p-6">
-                <div className="text-xs font-semibold text-primary mb-2">{article.category}</div>
+                <div className="text-xs font-semibold text-primary mb-2">
+                  {article.category}
+                </div>
                 <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
                   {article.title}
                 </h3>
-                <div className="text-xs text-muted-foreground">{article.readTime}</div>
+                <div className="text-xs text-muted-foreground">
+                  {article.readTime}
+                </div>
               </div>
             </Link>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

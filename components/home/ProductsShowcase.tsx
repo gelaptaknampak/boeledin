@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
+import Image from "next/image";
 
 export default function ProductsShowcase() {
   const { t } = useTranslation();
@@ -12,6 +13,7 @@ export default function ProductsShowcase() {
       brand: "FBI",
       model: "FBI-43Q6",
       category: "Signage",
+      image: "product-digital signage.png",
       title: "Ultra-Slim 4K Digital Signage",
       description:
         "Bezel ultra-tipis 6.9mm, kecerahan hingga 1500 nits, desain OD12 tanpa penutup belakang.",
@@ -25,6 +27,7 @@ export default function ProductsShowcase() {
       brand: "FBI",
       model: "FBI-A5 Series",
       category: "IFP",
+      image: "product-interactif flat panel.png",
       title: "Interactive Flat Panel Collaboration",
       description:
         "4K UHD, Android 15, 40-point multi-touch, smart whiteboard, kamera AI 48MP untuk ruang rapat modern.",
@@ -38,6 +41,7 @@ export default function ProductsShowcase() {
       brand: "BOE",
       model: "BYH Pro Series",
       category: "LED",
+      image: "product-LED.png",
       title: "Ultra Fine-Pitch COB LED",
       description:
         "Pixel pitch hingga 0.9375mm dengan teknologi COB, ideal untuk command center dan ruang visualisasi data.",
@@ -74,15 +78,20 @@ export default function ProductsShowcase() {
               className="bg-card rounded-lg border border-border overflow-hidden hover:border-primary transition-colors"
             >
               {/* Product Visual */}
-              <div className="relative h-56 bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center overflow-hidden">
+              <div className="relative h-56 overflow-hidden">
+                <Image
+                  src={product.image}
+                  alt={product.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
+                />
+
+                <div className="absolute inset-0 bg-black/15 group-hover:bg-black/25 transition-colors" />
+
                 <span className="absolute top-4 left-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold">
                   {product.brand} · {product.category}
                 </span>
-                <div className="text-center">
-                  <div className="text-sm text-gray-400 mb-2">
-                    Product Image
-                  </div>
-                </div>
               </div>
 
               {/* Product Body */}
