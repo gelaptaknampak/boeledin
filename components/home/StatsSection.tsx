@@ -33,10 +33,10 @@ export default function StatsSection() {
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-border my-12" />
+        {/* <div className="h-px bg-border my-12" /> */}
 
         {/* Partners */}
-        <div>
+        {/* <div>
           <div className="inline-block mb-6 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
             Didukung Oleh
           </div>
@@ -50,7 +50,7 @@ export default function StatsSection() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   )

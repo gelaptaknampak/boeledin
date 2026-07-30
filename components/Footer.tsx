@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
+import Image from "next/image";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { theme, toggleTheme, mounted } = useTheme();
 
   return (
     <footer className="bg-card border-t border-border mt-auto">
@@ -10,7 +15,22 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold text-primary mb-4">BOELEDIN</h3>
+            <Image
+              src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
+              alt="BOELEDIN"
+              width={70}
+              height={70}
+              className="
+                          h-4
+                          sm:h-4
+                          md:h-5
+                          lg:h-6
+                          xl:h-7
+                          mb-3
+                          w-auto
+                          transition-all
+                        "
+            />
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.
             </p>
@@ -146,15 +166,19 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Jl. Sudirman No. 123, Jakarta Selatan 12190</span>
+                <span>
+                  Rukan Exclusive, Jl. Bukit Golf Mediterania, Pantai Indah
+                  Kapuk No.1A Blok G, RT.7/RW.2, Kamal Muara, Penjaringan,
+                  Jakarta Utara, DKI Jakarta 14470
+                </span>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="w-4 h-4 flex-shrink-0" />
                 <a
-                  href="tel:+6221234567890"
+                  href="tel:+6281319060606"
                   className="hover:text-primary transition-colors"
                 >
-                  +62 21 2345 67890
+                  +62 813-1906-0606
                 </a>
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">

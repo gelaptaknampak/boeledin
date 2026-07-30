@@ -32,16 +32,16 @@ export default function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src={theme === "dark" ? "/logo-navwhite.png" : "/logo-navcolor.png"}
+              src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
               alt="BOELEDIN"
               width={70}
               height={70}
               className="
-              h-5
-              sm:h-6
-              md:h-8
-              lg:h-9
-              xl:h-10
+              h-4
+              sm:h-4
+              md:h-5
+              lg:h-6
+              xl:h-7
               w-auto
               transition-all
             "

@@ -27,69 +27,69 @@ export default function ContactPage() {
 
               {/* Info Column */}
               <div className="flex flex-col gap-8">
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Informasi Kontak</h3>
-                  <p className="text-muted-foreground mb-6">
-                    PT Future Boeled Indonesia
-                  </p>
+                <div className="flex flex-col gap-8">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">
+                      Informasi Kontak
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      PT Future Boeled Indonesia
+                    </p>
 
-                  {/* Contact Items */}
-                  <div className="space-y-5">
-                    {/* Address */}
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <MapPin className="w-5 h-5 text-primary mt-2" />
+                    {/* Contact Items */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Address */}
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
+                          <MapPin className="w-5 h-5 text-primary mt-2" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Rukan Exclusive, Jl. Bukit Golf Mediterania, Pantai
+                            Indah Kapuk No.1A Blok G, RT.7/RW.2, Kamal Muara,
+                            Penjaringan, Jakarta Utara, DKI Jakarta 14470
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Alamat Kantor</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Jl. Sudirman No. 123, Jakarta Selatan 12190, Indonesia
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Phone */}
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <Phone className="w-5 h-5 text-primary mt-2" />
+                      {/* Email */}
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
+                          <Mail className="w-5 h-5 text-primary mt-2" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            info@boeled.co.id
+                            <br />
+                            sales@boeled.co.id
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Telepon</h4>
-                        <p className="text-sm text-muted-foreground">
-                          +62 21 1234 5678
-                          <br />
-                          +62 21 8765 4321
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Email */}
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <Mail className="w-5 h-5 text-primary mt-2" />
+                      {/* Phone */}
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
+                          <Phone className="w-5 h-5 text-primary mt-2" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            +62 813-1906-0606
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Email</h4>
-                        <p className="text-sm text-muted-foreground">
-                          info@boeled.co.id
-                          <br />
-                          sales@boeled.co.id
-                        </p>
-                      </div>
-                    </div>
 
-                    {/* Hours */}
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
-                        <Clock className="w-5 h-5 text-primary mt-2" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Jam Operasional</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Senin – Jumat: 09.00 – 18.00
-                          <br />
-                          Sabtu: 09.00 – 13.00
-                        </p>
+                      {/* Hours */}
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex items-start justify-center w-10 h-10 rounded-lg border border-border bg-accent/5">
+                          <Clock className="w-5 h-5 text-primary mt-2" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Senin – Jumat: 09.00 – 18.00
+                            <br />
+                            Sabtu: 09.00 – 13.00
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -97,8 +97,7 @@ export default function ContactPage() {
 
                 {/* Map */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Lokasi Kami</h3>
-                  <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden border border-border">
+                  <div className="w-full mt-5 h-64 md:h-80 rounded-lg overflow-hidden border border-border">
                     <ContactMapWrapper />
                   </div>
                 </div>
