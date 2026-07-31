@@ -1,9 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import {
-  getCustomPosts,
-  createProduct,
-} from "@/lib/wordpress";
+import { getCustomPosts, createProduct } from "@/lib/wordpress";
 
 export async function GET() {
   const products = await getCustomPosts("products");
