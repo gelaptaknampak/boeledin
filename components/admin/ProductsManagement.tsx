@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import toast from "react-hot-toast";
+import BrandManager from "./BrandManager";
+import CategoryManager from "./CategoryManager";
 
 export default function ProductsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +46,12 @@ export default function ProductsManagement() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/wordpress/products");
+      const res = await fetch(
+        `https://wp.boeledin.com/wp-json/wp/v2/products?_embed&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        },
+      );
 
       const data = await res.json();
 
@@ -114,6 +121,12 @@ export default function ProductsManagement() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
         />
+      </div>
+
+      {/* brand / category */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <BrandManager />
+        <CategoryManager />
       </div>
 
       {/* Table */}

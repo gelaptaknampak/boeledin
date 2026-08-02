@@ -165,3 +165,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ck-editor__editable {
+  min-height: 500px;
+}
+
+.ck-content {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.ck.ck-editor {
+  border-radius: 12px;
+}

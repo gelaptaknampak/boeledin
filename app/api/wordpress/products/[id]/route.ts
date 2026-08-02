@@ -74,15 +74,20 @@ export async function PUT(
   const product = await updateProduct(
     Number(id),
     body.nama_produk,
+
     {
       nama_produk: body.nama_produk,
       model_produk: body.model_produk,
-      brand: body.brand,
-      jenis_produk: body.jenis_produk,
       short_description: body.short_description,
       description: body.description,
       spesifikasi: body.spesifikasi,
+      feature_image: body.feature_image,
+      download_brosur: body.download_brosur,
     },
+
+    body.brand,
+    body.jenis_produk,
+
     token.value,
   );
 

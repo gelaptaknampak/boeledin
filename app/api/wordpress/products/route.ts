@@ -3,9 +3,23 @@ import { NextResponse } from "next/server";
 import { getCustomPosts, createProduct } from "@/lib/wordpress";
 
 export async function GET() {
-  const products = await getCustomPosts("products");
+  try {
+    const products = await getCustomPosts("products");
 
-  return NextResponse.json(products);
+    return NextResponse.json(products);
+  } catch (e) {
+    console.error(e);
+
+    return NextResponse.json(
+      {
+        message: "WordPress Error",
+        error: String(e),
+      },
+      {
+        status: 500,
+      },
+    );
+  }
 }
 
 export async function POST(req: Request) {
@@ -26,15 +40,22 @@ export async function POST(req: Request) {
 
   const product = await createProduct(
     body.nama_produk,
+
     {
       nama_produk: body.nama_produk,
       model_produk: body.model_produk,
-      brand: body.brand,
-      jenis_produk: body.jenis_produk,
+
       short_description: body.short_description,
       description: body.description,
       spesifikasi: body.spesifikasi,
+
+      feature_image: body.feature_image,
+      download_brosur: body.download_brosur,
     },
+
+    body.brand,
+    body.jenis_produk,
+
     token.value,
   );
 

@@ -1,61 +1,166 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Plus, Edit, Trash2, Search } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Plus, Edit, Trash2, Search } from "lucide-react";
+import toast from "react-hot-toast";
+
+interface Category {
+  id: number;
+  name: string;
+  count: number;
+}
+
+interface News {
+  id: number;
+  title: {
+    rendered: string;
+  };
+  categories: number[];
+  status: string;
+  date: string;
+  author_name?: string;
+}
 
 export default function NewsManagement() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [newsItems, setNewsItems] = useState([
-    {
-      id: 1,
-      title: 'Apa Itu Digital Signage dan Mengapa Bisnis Anda Membutuhkannya',
-      category: 'Digital Signage',
-      status: 'publish',
-      author: 'Admin',
-      date: '2024-01-15',
-    },
-    {
-      id: 2,
-      title: 'Interactive Flat Panel vs Proyektor: Mana yang Tepat untuk Ruang Rapat Modern',
-      category: 'Interactive Flat Panel',
-      status: 'publish',
-      author: 'Admin',
-      date: '2024-01-20',
-    },
-    {
-      id: 3,
-      title: 'Memahami Pixel Pitch pada LED Display: Panduan Memilih Jarak Piksel',
-      category: 'LED Display',
-      status: 'draft',
-      author: 'Admin',
-      date: '2024-01-25',
-    },
-  ])
+  const [searchQuery, setSearchQuery] = useState("");
+  const [newsItems, setNewsItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryName, setCategoryName] = useState("");
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [loadingCategory, setLoadingCategory] = useState(false);
+
+  useEffect(() => {
+    fetchPosts();
+    fetchCategories();
+  }, []);
+
+  async function fetchCategories() {
+    const res = await fetch("/api/wordpress/post-categories");
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    setCategories(data);
+  }
+
+  async function fetchPosts() {
+    try {
+      setLoading(true);
+
+      const res = await fetch(`/api/wordpress/posts?_embed&_=${Date.now()}`, {
+        cache: "no-store",
+      });
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      setNewsItems(data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal mengambil berita");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function createCategory() {
+    if (!categoryName.trim()) return;
+
+    setLoadingCategory(true);
+
+    const res = await fetch("/api/wordpress/post-categories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: categoryName,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Kategori berhasil dibuat");
+      setCategoryName("");
+      fetchCategories();
+    }
+
+    setLoadingCategory(false);
+  }
+
+  async function updateCategory(id: number) {
+    const res = await fetch(`/api/wordpress/post-categories/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: categoryName,
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Kategori berhasil diupdate");
+      setEditingCategory(null);
+      setCategoryName("");
+      fetchCategories();
+    }
+  }
+
+  async function deleteCategory(id: number) {
+    if (!confirm("Hapus kategori?")) return;
+
+    const res = await fetch(`/api/wordpress/post-categories/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      toast.success("Kategori dihapus");
+      fetchCategories();
+    }
+  }
 
   const filteredNews = newsItems.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+    item.title.rendered.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
-  const handleDelete = (id: number) => {
-    if (confirm('Yakin ingin menghapus berita ini?')) {
-      setNewsItems(newsItems.filter((item) => item.id !== id))
-      toast.success('Berita berhasil dihapus')
+  async function handleDelete(id: number) {
+    if (!confirm("Yakin ingin menghapus berita ini?")) return;
+
+    try {
+      const res = await fetch(`/api/wordpress/posts/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error();
+
+      toast.success("Berita berhasil dihapus");
+
+      fetchPosts();
+    } catch {
+      toast.error("Gagal menghapus berita");
     }
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
+
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2">Kelola Berita</h1>
-          <p className="text-muted-foreground">Kelola semua artikel dan berita dari WordPress CMS</p>
+
+          <p className="text-muted-foreground">
+            Kelola semua artikel WordPress
+          </p>
         </div>
+
         <Link
           href="/admin/news/new"
-          className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+          className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-semibold"
         >
           <Plus className="w-5 h-5" />
           Tambah Berita
@@ -63,87 +168,178 @@ export default function NewsManagement() {
       </div>
 
       {/* Search */}
+
       <div className="relative">
         <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+
         <input
-          type="text"
-          placeholder="Cari berita..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Cari berita..."
+          className="w-full border rounded-lg pl-10 pr-4 py-2"
         />
       </div>
 
+      <div className="bg-card rounded-xl border p-6 mb-6">
+        <h2 className="font-bold text-lg mb-4">Kelola Kategori</h2>
+
+        <div className="flex gap-3">
+          <input
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+            placeholder="Nama kategori..."
+            className="flex-1 border rounded-lg px-4 py-2"
+          />
+
+          <button
+            type="button"
+            disabled={loadingCategory}
+            onClick={() => {
+              editingCategory
+                ? updateCategory(editingCategory.id)
+                : createCategory();
+            }}
+          >
+            {loadingCategory
+              ? "Loading..."
+              : editingCategory
+                ? "Update"
+                : "Tambah"}
+          </button>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mt-5">
+          {categories.map((category) => (
+            <div
+              key={category.id}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-accent"
+            >
+              <span>
+                {category.name} ({category.count})
+              </span>
+
+              <button
+                onClick={() => {
+                  setEditingCategory(category);
+                  setCategoryName(category.name);
+                }}
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+
+              <button onClick={() => deleteCategory(category.id)}>
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+
+      <div className="bg-card border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-accent border-b border-border">
+            <thead className="bg-accent border-b">
               <tr>
-                <th className="px-6 py-4 text-left font-semibold">Judul</th>
-                <th className="px-6 py-4 text-left font-semibold">Kategori</th>
-                <th className="px-6 py-4 text-left font-semibold">Penulis</th>
-                <th className="px-6 py-4 text-left font-semibold">Status</th>
-                <th className="px-6 py-4 text-left font-semibold">Tanggal</th>
-                <th className="px-6 py-4 text-left font-semibold">Aksi</th>
+                <th className="px-6 py-4 text-left">Judul</th>
+
+                <th className="px-6 py-4 text-left">Kategori</th>
+
+                <th className="px-6 py-4 text-left">Penulis</th>
+
+                <th className="px-6 py-4 text-left">Status</th>
+
+                <th className="px-6 py-4 text-left">Tanggal</th>
+
+                <th className="px-6 py-4 text-left">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {filteredNews.map((item) => (
-                <tr key={item.id} className="hover:bg-accent/50 transition-colors">
-                  <td className="px-6 py-4 font-medium max-w-xs truncate">{item.title}</td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{item.category}</td>
-                  <td className="px-6 py-4 text-sm">{item.author}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        item.status === 'publish'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}
-                    >
-                      {item.status === 'publish' ? 'Dipublikasikan' : 'Draft'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{item.date}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/news/${item.id}/edit`}
-                        className="p-2 rounded-lg hover:bg-accent transition-colors"
-                        title="Edit"
-                      >
-                        <Edit className="w-4 h-4 text-primary" />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="p-2 rounded-lg hover:bg-accent transition-colors"
-                        title="Hapus"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+
+            <tbody className="divide-y">
+              {!loading &&
+                filteredNews.map((item) => {
+                  const category =
+                    item._embedded?.["wp:term"]?.[0]?.[0]?.name ?? "-";
+
+                  const author = item._embedded?.author?.[0]?.name ?? "-";
+
+                  return (
+                    <tr key={item.id} className="hover:bg-accent/50">
+                      <td className="px-6 py-4 font-medium max-w-md">
+                        {item.title.rendered}
+                      </td>
+
+                      <td className="px-6 py-4">{category}</td>
+
+                      <td className="px-6 py-4">{author}</td>
+
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                            item.status === "publish"
+                              ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                              : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                          }`}
+                        >
+                          {item.status === "publish"
+                            ? "Dipublikasikan"
+                            : "Draft"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-sm">
+                        {new Date(item.date).toLocaleDateString("id-ID")}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/news/${item.id}/edit`}
+                            className="p-2 rounded-lg hover:bg-accent"
+                          >
+                            <Edit className="w-4 h-4 text-primary" />
+                          </Link>
+
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-2 rounded-lg hover:bg-accent"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
 
-        {filteredNews.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Tidak ada berita ditemukan</p>
+        {!loading && filteredNews.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            Tidak ada berita ditemukan.
+          </div>
+        )}
+
+        {loading && (
+          <div className="text-center py-12 text-muted-foreground">
+            Memuat data...
           </div>
         )}
       </div>
 
-      {/* Info Box */}
+      {/* Info */}
+
       <div className="bg-accent border border-primary/30 rounded-lg p-6">
         <h3 className="font-semibold mb-2">Informasi</h3>
+
         <p className="text-sm text-muted-foreground">
-          Kelola semua artikel berita dari dashboard ini. Setiap artikel akan langsung ditampilkan di halaman Berita website.
+          Semua artikel pada halaman ini langsung terhubung dengan WordPress
+          Post. Perubahan yang dilakukan melalui CMS Next.js akan otomatis
+          tersimpan di WordPress.
         </p>
       </div>
     </div>
-  )
+  );
 }

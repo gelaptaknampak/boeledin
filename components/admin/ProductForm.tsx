@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { uploadProductImage } from "@/lib/wordpress";
 
 interface ProductFormProps {
   mode: "create" | "edit";
@@ -12,26 +13,58 @@ interface ProductFormProps {
 interface ProductFormData {
   nama_produk: string;
   model_produk: string;
-  brand: string;
-  jenis_produk: string;
+  brand: number;
+  jenis_produk: number;
   short_description: string;
   description: string;
   spesifikasi: string;
+
+  feature_image: number | File | null;
+  feature_image_url: string;
+
+  download_brosur: number | File | null;
+  download_brosur_url: string;
 }
 
 export default function ProductForm({ mode, productId }: ProductFormProps) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  async function fetchBrands() {
+    const res = await fetch("/api/wordpress/brands");
+    const data = await res.json();
+
+    setBrands(data);
+  }
+
+  async function fetchCategories() {
+    const res = await fetch("/api/wordpress/product-types");
+    const data = await res.json();
+
+    setCategories(data);
+  }
+
+  useEffect(() => {
+    fetchBrands();
+    fetchCategories();
+  }, []);
 
   const [form, setForm] = useState<ProductFormData>({
     nama_produk: "",
     model_produk: "",
-    brand: "",
-    jenis_produk: "",
+    brand: 0,
+    jenis_produk: 0,
     short_description: "",
     description: "",
     spesifikasi: "",
+    feature_image: null,
+    feature_image_url: "",
+
+    download_brosur: null,
+    download_brosur_url: "",
   });
 
   function handleChange(
@@ -39,17 +72,25 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const target = e.target;
+    const name = target.name as keyof ProductFormData;
+    const value = target.value;
+
+    setForm(
+      (prev) =>
+        ({
+          ...prev,
+          [name]:
+            name === "brand" || name === "jenis_produk" ? Number(value) : value,
+        }) as ProductFormData,
+    );
   }
 
   useEffect(() => {
     if (mode === "edit" && productId) {
       fetchProduct();
     }
-  }, []);
+  }, [mode, productId]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -62,17 +103,49 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           ? "/api/wordpress/products"
           : `/api/wordpress/products/${productId}`;
 
-      const method = mode === "create" ? "POST" : "PUT";
+      let imageId = form.feature_image;
+
+      if (form.feature_image instanceof File) {
+        const image = await uploadMedia(form.feature_image);
+
+        imageId = image.id;
+      }
+
+      let pdfId = form.download_brosur;
+
+      if (form.download_brosur instanceof File) {
+        const pdf = await uploadMedia(form.download_brosur);
+
+        pdfId = pdf.id;
+      }
+
+      const payload = {
+        nama_produk: form.nama_produk,
+        model_produk: form.model_produk,
+        brand: form.brand,
+        "jenis-produk": form.jenis_produk,
+        short_description: form.short_description,
+        description: form.description,
+        spesifikasi: form.spesifikasi,
+        feature_image: imageId,
+        download_brosur: pdfId,
+      };
 
       const res = await fetch(url, {
-        method,
+        method: mode === "create" ? "POST" : "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
+
+      if (res.status === 401) {
+        toast.error("Sesi login telah habis. Silakan login kembali.");
+        router.push("/admin/login");
+        return;
+      }
 
       if (!res.ok) {
         toast.error(data.message || "Terjadi kesalahan");
@@ -95,6 +168,23 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     }
   }
 
+  async function uploadMedia(file: File) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const res = await fetch("/api/wordpress/media", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Upload media gagal");
+    }
+
+    return await res.json();
+  }
+
   async function fetchProduct() {
     try {
       setLoading(true);
@@ -105,18 +195,18 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
 
       setForm({
         nama_produk: product.acf.nama_produk ?? "",
-
         model_produk: product.acf.model_produk ?? "",
-
-        brand: product.acf.brand ?? "",
-
-        jenis_produk: product.acf.jenis_produk ?? "",
-
+        brand: product.brand?.[0] ?? 0,
+        jenis_produk: product["jenis-produk"]?.[0] ?? 0,
         short_description: product.acf.short_description ?? "",
-
         description: product.acf.description ?? "",
-
         spesifikasi: product.acf.spesifikasi ?? "",
+
+        feature_image: product.acf.feature_image?.id ?? null,
+        feature_image_url: product.acf.feature_image?.url ?? "",
+
+        download_brosur: product.acf.download_brosur?.id ?? null,
+        download_brosur_url: product.acf.download_brosur?.url ?? "",
       });
     } catch (err) {
       console.error(err);
@@ -168,15 +258,15 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           name="brand"
           value={form.brand}
           onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
+          className="px-4 py-2 border rounded-lg w-full bg-white text-black"
         >
           <option value="">Pilih Brand</option>
 
-          <option value="BOE">BOE</option>
-
-          <option value="BOELED">BOELED</option>
-
-          <option value="FBI">FBI</option>
+          {brands.map((brand: any) => (
+            <option key={brand.id} value={brand.id}>
+              {brand.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -189,15 +279,15 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           name="jenis_produk"
           value={form.jenis_produk}
           onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
+          className="px-4 py-2 border rounded-lg w-full bg-white text-black"
         >
           <option value="">Pilih Jenis</option>
 
-          <option value="Digital Signage">Digital Signage</option>
-
-          <option value="Interactive Flat Panel">Interactive Flat Panel</option>
-
-          <option value="LED Display">LED Display</option>
+          {categories.map((cat: any) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -241,6 +331,64 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           onChange={handleChange}
           className="w-full border rounded-lg px-4 py-2"
         />
+      </div>
+
+      {/* Gambar Produk */}
+      <div>
+        <label>Gambar Produk</label>
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (!file) return;
+
+            setForm({
+              ...form,
+              feature_image: file,
+              feature_image_url: URL.createObjectURL(file),
+            });
+          }}
+        />
+        {form.feature_image_url && (
+          <img
+            src={form.feature_image_url}
+            alt="Preview"
+            className="mt-3 w-48 rounded border"
+          />
+        )}
+      </div>
+
+      {/* Download Brosur */}
+      <div>
+        <label>Download Brosur</label>
+
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (!file) return;
+
+            setForm({
+              ...form,
+              download_brosur: file,
+              download_brosur_url: URL.createObjectURL(file),
+            });
+          }}
+        />
+        {form.download_brosur_url && (
+          <a
+            href={form.download_brosur_url}
+            target="_blank"
+            className="text-blue-600 underline block mt-2"
+          >
+            Lihat Brosur Saat Ini
+          </a>
+        )}
       </div>
 
       <button
