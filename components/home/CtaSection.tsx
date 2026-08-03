@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 export default function AboutCTA() {
   return (
@@ -10,17 +10,18 @@ export default function AboutCTA() {
               Siap merancang sistem tampilan Anda?
             </h2>
             <p className="text-gray-300">
-              Tim kami siap membantu, dari konsultasi kebutuhan hingga instalasi dan pemeliharaan.
+              Tim kami siap membantu, dari konsultasi kebutuhan hingga instalasi
+              dan pemeliharaan.
             </p>
           </div>
           <Link
             href="/contact"
-            className="inline-block px-8 py-3 bg-yellow-400 text-slate-900 font-semibold rounded hover:bg-yellow-300 transition-colors whitespace-nowrap"
+            className="inline-block px-8 py-3 bg-slate-900 text-white font-semibold rounded hover:bg-slate-700 transition-colors whitespace-nowrap"
           >
             Hubungi Kami
           </Link>
         </div>
       </div>
     </section>
-  )
+  );
 }

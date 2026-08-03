@@ -49,20 +49,14 @@ export default async function NewsDetail({ params }: Props) {
         </div> */}
 
         {/* Isi Artikel */}
-        <article
-          className="
-            prose
-            prose-lg
-            dark:prose-invert
-            max-w-none
-            prose-img:rounded-xl
-            prose-headings:text-foreground
-            prose-p:text-muted-foreground
-          "
-          dangerouslySetInnerHTML={{
-            __html: post.content.rendered,
-          }}
-        />
+        <article className="max-w-4xl mx-auto px-4 py-16">
+          <div
+            className="ck-content"
+            dangerouslySetInnerHTML={{
+              __html: post.content.rendered,
+            }}
+          />
+        </article>
       </div>
     </section>
   );

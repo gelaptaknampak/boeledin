@@ -178,3 +178,53 @@
 .ck.ck-editor {
   border-radius: 12px;
 }
+
+.ck-content figure.image {
+  margin: 1.5rem auto;
+}
+
+.ck-content figure.image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ck-content .image-style-align-left {
+  margin-right: auto;
+  margin-left: 0;
+  text-align: left;
+}
+
+.ck-content .image-style-align-center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.ck-content .image-style-align-right {
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
+}
+
+.ck-content .image-style-block {
+  text-align: center;
+}
+
+.ck-content .image-style-side {
+  float: right;
+  margin-left: 20px;
+}
+
+.ck-content ul {
+  list-style: disc;
+  margin-left: 1.5rem;
+}
+
+.ck-content ol {
+  list-style: decimal;
+  margin-left: 1.5rem;
+}
+
+.ck-content li {
+  margin-bottom: 0.35rem;
+}

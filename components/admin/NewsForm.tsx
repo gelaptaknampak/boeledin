@@ -21,6 +21,8 @@ import {
   Highlight,
   Link,
   List,
+  ListProperties,
+  TodoList,
   Alignment,
   Indent,
   IndentBlock,
@@ -433,6 +435,8 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
               Link,
 
               List,
+              ListProperties,
+              TodoList,
 
               Alignment,
 
@@ -623,6 +627,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
               "bulletedList",
               "numberedList",
+              "todoList",
 
               "|",
 

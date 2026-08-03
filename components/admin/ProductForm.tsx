@@ -194,9 +194,39 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/wordpress/products/${productId}`);
+      const res = await fetch(`/api/wordpress/products/${productId}?_embed`);
 
       const product = await res.json();
+
+      // console.log(product);
+      // console.log(product.acf);
+      // console.log(product.acf.feature_image);
+      // console.log(product.acf.download_brosur);
+
+      let imageUrl = "";
+      let pdfUrl = "";
+
+      if (product.acf.feature_image) {
+        const imageRes = await fetch(
+          `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.feature_image}`,
+        );
+
+        if (imageRes.ok) {
+          const image = await imageRes.json();
+          imageUrl = image.source_url;
+        }
+      }
+
+      if (product.acf.download_brosur) {
+        const pdfRes = await fetch(
+          `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.download_brosur}`,
+        );
+
+        if (pdfRes.ok) {
+          const pdf = await pdfRes.json();
+          pdfUrl = pdf.source_url;
+        }
+      }
 
       setForm({
         nama_produk: product.acf.nama_produk ?? "",
@@ -208,10 +238,10 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
         spesifikasi: product.acf.spesifikasi ?? "",
 
         feature_image: product.acf.feature_image?.id ?? null,
-        feature_image_url: product.acf.feature_image?.url ?? "",
+        feature_image_url: imageUrl,
 
         download_brosur: product.acf.download_brosur?.id ?? null,
-        download_brosur_url: product.acf.download_brosur?.url ?? "",
+        download_brosur_url: pdfUrl,
       });
     } catch (err) {
       console.error(err);
@@ -396,12 +426,21 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
         )}
       </div>
 
-      <button
-        disabled={loading}
-        className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold"
-      >
-        {mode === "create" ? "Simpan Produk" : "Update Produk"}
-      </button>
+      <div className="flex gap-4">
+        <button
+          disabled={loading}
+          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold"
+        >
+          {mode === "create" ? "Simpan Produk" : "Update Produk"}
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push("/admin/products")}
+          className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold"
+        >
+          Kembali
+        </button>
+      </div>
     </form>
   );
 }
