@@ -7,9 +7,6 @@ import toast from "react-hot-toast";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import UploadPlugin from "@/lib/ckeditor/UploadPlugin";
 import {
-    ImageUpload,
-} from "ckeditor5";
-import {
   ClassicEditor,
   Essentials,
   Paragraph,
@@ -17,18 +14,31 @@ import {
   Bold,
   Italic,
   Underline,
+  FontSize,
+  FontFamily,
+  FontColor,
+  FontBackgroundColor,
+  Highlight,
   Link,
   List,
+  Alignment,
+  Indent,
+  IndentBlock,
+  BlockQuote,
+  CodeBlock,
+  HorizontalLine,
   Table,
   TableToolbar,
   Image,
   ImageToolbar,
   ImageCaption,
   ImageResize,
-  BlockQuote,
-  CodeBlock,
+  ImageStyle,
+  ImageUpload,
+  ImageBlock,
+  ImageInline,
+  MediaEmbed,
   Autoformat,
-  Alignment,
 } from "ckeditor5";
 
 import "ckeditor5/ckeditor5.css";
@@ -405,6 +415,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
             plugins: [
               Essentials,
+
               Paragraph,
               Heading,
 
@@ -412,9 +423,27 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
               Italic,
               Underline,
 
+              FontSize,
+              FontFamily,
+              FontColor,
+              FontBackgroundColor,
+
+              Highlight,
+
               Link,
 
               List,
+
+              Alignment,
+
+              Indent,
+              IndentBlock,
+
+              BlockQuote,
+
+              CodeBlock,
+
+              HorizontalLine,
 
               Table,
               TableToolbar,
@@ -423,15 +452,129 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
               ImageToolbar,
               ImageCaption,
               ImageResize,
+              ImageStyle,
               ImageUpload,
+              ImageBlock,
+              ImageInline,
 
-              BlockQuote,
-
-              CodeBlock,
+              MediaEmbed,
 
               Autoformat,
-              Alignment,
             ],
+
+            heading: {
+              options: [
+                {
+                  model: "paragraph",
+                  title: "Paragraph",
+                  class: "ck-heading_paragraph",
+                },
+                {
+                  model: "heading1",
+                  view: "h1",
+                  title: "Heading 1",
+                  class: "ck-heading_heading1",
+                },
+                {
+                  model: "heading2",
+                  view: "h2",
+                  title: "Heading 2",
+                  class: "ck-heading_heading2",
+                },
+                {
+                  model: "heading3",
+                  view: "h3",
+                  title: "Heading 3",
+                  class: "ck-heading_heading3",
+                },
+              ],
+            },
+
+            fontSize: {
+              options: [12, 14, 16, 18, 20, 24, 28, 32, 40],
+              supportAllValues: true,
+            },
+
+            fontFamily: {
+              supportAllValues: true,
+            },
+
+            highlight: {
+              options: [
+                {
+                  model: "yellowMarker",
+                  class: "marker-yellow",
+                  title: "Yellow Marker",
+                  color: "#fdfd77",
+                  type: "marker",
+                },
+                {
+                  model: "greenMarker",
+                  class: "marker-green",
+                  title: "Green Marker",
+                  color: "#63f963",
+                  type: "marker",
+                },
+                {
+                  model: "pinkMarker",
+                  class: "marker-pink",
+                  title: "Pink Marker",
+                  color: "#fc7999",
+                  type: "marker",
+                },
+                {
+                  model: "redPen",
+                  class: "pen-red",
+                  title: "Red Pen",
+                  color: "#e71313",
+                  type: "pen",
+                },
+                {
+                  model: "greenPen",
+                  class: "pen-green",
+                  title: "Green Pen",
+                  color: "#128a12",
+                  type: "pen",
+                },
+              ],
+            },
+
+            image: {
+              toolbar: [
+                "imageStyle:inline",
+
+                "imageStyle:block",
+
+                "imageStyle:side",
+
+                "imageStyle:alignLeft",
+
+                "imageStyle:alignCenter",
+
+                "imageStyle:alignRight",
+
+                "|",
+
+                "toggleImageCaption",
+
+                "|",
+
+                "resizeImage",
+              ],
+            },
+
+            table: {
+              contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"],
+            },
+
+            mediaEmbed: {
+              previewsInData: true,
+            },
+
+            indentBlock: {
+              offset: 1,
+              unit: "em",
+            },
 
             extraPlugins: [UploadPlugin],
 
@@ -445,13 +588,32 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
               "|",
 
+              "fontFamily",
+              "fontSize",
+
+              "|",
+
+              "fontColor",
+              "fontBackgroundColor",
+
+              "|",
+
               "bold",
               "italic",
               "underline",
 
               "|",
 
+              "highlight",
+
+              "|",
+
               "alignment",
+
+              "|",
+
+              "outdent",
+              "indent",
 
               "|",
 
@@ -464,23 +626,25 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
               "|",
 
-              "blockQuote",
-
-              "|",
-
               "insertTable",
 
               "|",
 
               "uploadImage",
 
+              "mediaEmbed",
+
+              "|",
+
+              "horizontalLine",
+
+              "|",
+
+              "blockQuote",
+
               "|",
 
               "codeBlock",
-
-              "|",
-
-              "uploadImage",
             ],
           }}
         />

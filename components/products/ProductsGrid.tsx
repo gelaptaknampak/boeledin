@@ -1,160 +1,123 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 
 export default function ProductsGrid() {
   const { t } = useTranslation();
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [brandFilter, setBrandFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [brands, setBrands] = useState<any[]>([]);
+  const [productTypes, setProductTypes] = useState<any[]>([]);
 
-  const products = [
-    {
-      id: 1,
-      name: "Ultra-Slim 4K Commercial Display",
-      model: "FBI-43Q6",
-      brand: "fbi",
-      category: "signage",
-      image: "/product-digital signage.png",
-      specs: {
-        size: '43"',
-        resolution: "4K UHD",
-        brightness: "700 / 1000 / 1500 nits",
-        mount: "Wall Mount",
-      },
-      description:
-        "Desain bezel empat sisi ultra-tipis 6.9mm dengan arsitektur OD12.",
-    },
-    {
-      id: 2,
-      name: "Android SOC Digital Signage",
-      model: "SR Series (SRAA05)",
-      brand: "boeled",
-      category: "signage",
-      image: "/product-digital signage.png",
-      specs: {
-        brightness: "700 nits",
-        frame: "Aluminum",
-        os: "Android 13",
-        operation: "7×24",
-      },
-      description:
-        "Bezel super tipis, rangka aluminium ringan untuk operasi nonstop.",
-    },
-    {
-      id: 3,
-      name: "Fine-Pitch LED Display",
-      model: "BTQ Series (P1.25)",
-      brand: "boe",
-      category: "led",
-      image: "/product-LED.png",
-      specs: {
-        pitch: "P1.25",
-        brightness: "3000 nits",
-        refreshRate: "3840Hz",
-        technology: "COB",
-      },
-      description:
-        "Fine-pitch LED display dengan teknologi COB untuk command centers.",
-    },
-    {
-      id: 4,
-      name: "Interactive Touch Panel",
-      model: "FBI-65IFP",
-      brand: "fbi",
-      category: "ifp",
-      image: "/product-interactif flat panel.png",
-      specs: {
-        size: '65"',
-        resolution: "4K",
-        touchPoints: "40-point",
-        features: "Multi-touch",
-      },
-      description:
-        "Interactive flat panel dengan dukungan 40-point multi-touch untuk kolaborasi.",
-    },
-    {
-      id: 5,
-      name: "High-Brightness Outdoor Display",
-      model: "BSL-A Series (P2.6)",
-      brand: "boe",
-      category: "led",
-      image: "/product-LED.png",
-      specs: {
-        pitch: "P2.6",
-        brightness: "4000+ nits",
-        weatherproof: "IP65",
-        temp: "-40°C to 60°C",
-      },
-      description:
-        "LED display dengan brightness tinggi untuk penggunaan outdoor dengan IP65 rating.",
-    },
-    {
-      id: 6,
-      name: "Corporate Digital Signage",
-      model: "SA Series (SAAA03)",
-      brand: "boeled",
-      category: "signage",
-      image: "/product-digital signage.png",
-      specs: {
-        brightness: "500 nits",
-        resolution: "1080p/4K",
-        bezel: "9mm",
-        color: "Ultra HD",
-      },
-      description:
-        "Solusi signage untuk corporate dan retail dengan kualitas display superior.",
-    },
-    {
-      id: 7,
-      name: "Premium COB LED",
-      model: "BYH Pro (P0.9375)",
-      brand: "boe",
-      category: "led",
-      image: "/product-LED.png",
-      specs: {
-        pitch: "P0.9375",
-        brightness: "2000+ nits",
-        refreshRate: "7680Hz",
-        tech: "COB Pro",
-      },
-      description:
-        "Premium LED display dengan pixel pitch terkecil untuk detail maksimal.",
-    },
-    {
-      id: 8,
-      name: "Meeting Room Display",
-      model: "FBI-55IFP-V2",
-      brand: "fbi",
-      category: "ifp",
-      image: "/product-interactif flat panel.png",
-      specs: {
-        size: '55"',
-        resolution: "4K UHD",
-        touchPoints: "20-point",
-        ports: "USB-C, HDMI x2",
-      },
-      description:
-        "Interactive panel kompak untuk ruang rapat dengan connectivity lengkap.",
-    },
-  ];
+  useEffect(() => {
+    fetchProducts();
+    fetchBrands();
+    fetchProductTypes();
+  }, []);
+
+  async function fetchBrands() {
+    const res = await fetch("/api/wordpress/brands");
+    if (!res.ok) return;
+
+    setBrands(await res.json());
+  }
+
+  async function fetchProductTypes() {
+    const res = await fetch("/api/wordpress/product-types");
+    if (!res.ok) return;
+
+    setProductTypes(await res.json());
+  }
+
+  async function fetchProducts() {
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `https://wp.boeledin.com/wp-json/wp/v2/products?_embed&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        },
+      );
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      setProducts(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function getBrand(product: any) {
+    return (
+      product._embedded?.["wp:term"]
+        ?.flat()
+        ?.find((term: any) => term.taxonomy === "brand")?.slug ?? ""
+    );
+  }
+
+  function getBrandName(product: any) {
+    return (
+      product._embedded?.["wp:term"]
+        ?.flat()
+        ?.find((term: any) => term.taxonomy === "brand")?.name ?? "-"
+    );
+  }
+
+  function getCategory(product: any) {
+    return (
+      product._embedded?.["wp:term"]
+        ?.flat()
+        ?.find((term: any) => term.taxonomy === "jenis-produk")?.slug ?? ""
+    );
+  }
+
+  function getCategoryName(product: any) {
+    return (
+      product._embedded?.["wp:term"]
+        ?.flat()
+        ?.find((term: any) => term.taxonomy === "jenis-produk")?.name ?? "-"
+    );
+  }
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const brandMatch = brandFilter === "all" || product.brand === brandFilter;
+      const brand = getBrand(product);
+      const category = getCategory(product);
+
+      const brandMatch = brandFilter === "all" || brand === brandFilter;
+
       const categoryMatch =
-        categoryFilter === "all" || product.category === categoryFilter;
+        categoryFilter === "all" || category === categoryFilter;
+
       const searchMatch =
         searchQuery === "" ||
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.model.toLowerCase().includes(searchQuery.toLowerCase());
+        product.title.rendered
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        (product.acf?.model_produk ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
       return brandMatch && categoryMatch && searchMatch;
     });
-  }, [brandFilter, categoryFilter, searchQuery]);
+  }, [products, brandFilter, categoryFilter, searchQuery]);
+
+  if (loading) {
+    return <section className="py-20 text-center">Memuat produk...</section>;
+  }
 
   return (
     <section className="py-12 md:py-16 bg-background">
@@ -190,21 +153,22 @@ export default function ProductsGrid() {
                 </label>
                 <div className="space-y-2 flex flex-col">
                   {[
-                    { value: "all", label: t("products.allBrands") },
-                    { value: "boe", label: "BOE" },
-                    { value: "boeled", label: "BOELED" },
-                    { value: "fbi", label: "FBI" },
-                  ].map((option) => (
+                    {
+                      slug: "all",
+                      name: t("products.allBrands"),
+                    },
+                    ...brands,
+                  ].map((brand) => (
                     <button
-                      key={option.value}
-                      onClick={() => setBrandFilter(option.value)}
+                      key={brand.slug}
+                      onClick={() => setBrandFilter(brand.slug)}
                       className={`text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        brandFilter === option.value
+                        brandFilter === brand.slug
                           ? "bg-primary text-primary-foreground"
-                          : "bg-accent text-foreground hover:bg-accent/80"
+                          : "bg-accent hover:bg-accent/80"
                       }`}
                     >
-                      {option.label}
+                      {brand.name}
                     </button>
                   ))}
                 </div>
@@ -216,21 +180,22 @@ export default function ProductsGrid() {
                 </label>
                 <div className="space-y-2 flex flex-col">
                   {[
-                    { value: "all", label: t("products.allCategories") },
-                    { value: "signage", label: t("products.digitalSignage") },
-                    { value: "ifp", label: t("products.interactiveFlatPanel") },
-                    { value: "led", label: t("products.led") },
-                  ].map((option) => (
+                    {
+                      slug: "all",
+                      name: t("products.allCategories"),
+                    },
+                    ...productTypes,
+                  ].map((category) => (
                     <button
-                      key={option.value}
-                      onClick={() => setCategoryFilter(option.value)}
+                      key={category.slug}
+                      onClick={() => setCategoryFilter(category.slug)}
                       className={`text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        categoryFilter === option.value
+                        categoryFilter === category.slug
                           ? "bg-primary text-primary-foreground"
-                          : "bg-accent text-foreground hover:bg-accent/80"
+                          : "bg-accent hover:bg-accent/80"
                       }`}
                     >
-                      {option.label}
+                      {category.name}
                     </button>
                   ))}
                 </div>
@@ -280,52 +245,64 @@ export default function ProductsGrid() {
                   {/* Image */}
                   <div className="relative bg-accent h-48 overflow-hidden">
                     <Image
-                      src={product.image}
-                      alt={product.name}
+                      src={
+                        product._embedded?.["wp:featuredmedia"]?.[0]
+                          ?.source_url ?? "/placeholder.png"
+                      }
+                      alt={product.title.rendered}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                       sizes="(max-width:768px) 100vw, (max-width:1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-3 left-3 px-3 py-1 bg-black/50 text-white text-xs font-semibold rounded-full backdrop-blur-sm">
-                      {product.brand.toUpperCase()} ·{" "}
-                      {product.category === "ifp"
-                        ? "IFP"
-                        : product.category === "led"
-                          ? "LED"
-                          : "Signage"}
+                      {getBrandName(product)} · {getCategoryName(product)}
                     </div>
                   </div>
 
                   {/* Content */}
                   <div className="p-6">
                     <span className="text-xs font-semibold text-primary mb-2 block">
-                      {product.model}
+                      {product.acf?.model_produk}
                     </span>
                     <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-                      {product.name}
+                      {product.title.rendered}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      {product.description}
+                      {product.acf?.short_description}
                     </p>
 
                     {/* Specs */}
                     <div className="mb-6 space-y-1">
-                      {Object.entries(product.specs).map(([key, value]) => (
-                        <div key={key} className="flex justify-between text-xs">
-                          <span className="text-muted-foreground capitalize">
-                            {key}
-                          </span>
-                          <span className="font-semibold">
-                            {value as string}
-                          </span>
-                        </div>
-                      ))}
+                      <div
+                        className="prose prose-sm max-w-none text-sm mb-6 line-clamp-4"
+                        dangerouslySetInnerHTML={{
+                          __html: product.acf?.spesifikasi ?? "",
+                        }}
+                      />
                     </div>
 
                     {/* Action */}
-                    <button className="w-full px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold rounded-lg transition-colors">
-                      Detail Produk
-                    </button>
+                    <button
+                    onClick={async () => {
+                      if (!product.acf?.download_brosur) return;
+
+                      const res = await fetch(
+                        `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.download_brosur}`
+                      );
+
+                      if (!res.ok) {
+                        alert("Brosur tidak ditemukan");
+                        return;
+                      }
+
+                      const media = await res.json();
+
+                      window.open(media.source_url, "_blank");
+                    }}
+                    className="w-full px-4 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold rounded-lg transition-colors"
+                  >
+                    Detail Produk
+                  </button>
                   </div>
                 </div>
               ))}

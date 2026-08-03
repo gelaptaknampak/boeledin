@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     },
 
     body.brand,
-    body.jenis_produk,
+    Number(body["jenis-produk"]),
 
     token.value,
   );

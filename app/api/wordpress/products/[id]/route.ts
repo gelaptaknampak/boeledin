@@ -86,7 +86,7 @@ export async function PUT(
     },
 
     body.brand,
-    body.jenis_produk,
+    Number(body["jenis-produk"]),
 
     token.value,
   );

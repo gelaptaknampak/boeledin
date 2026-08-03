@@ -123,13 +123,18 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
         nama_produk: form.nama_produk,
         model_produk: form.model_produk,
         brand: form.brand,
-        "jenis-produk": form.jenis_produk,
+        "jenis-produk": [Number(form.jenis_produk)],
         short_description: form.short_description,
         description: form.description,
         spesifikasi: form.spesifikasi,
         feature_image: imageId,
         download_brosur: pdfId,
       };
+
+      // console.log(payload);
+      // console.log(typeof payload["jenis-produk"]);
+      // console.log(payload["jenis-produk"]);
+      // console.log(typeof payload["jenis-produk"][0]);
 
       const res = await fetch(url, {
         method: mode === "create" ? "POST" : "PUT",
