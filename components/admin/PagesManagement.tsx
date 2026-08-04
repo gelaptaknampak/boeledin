@@ -2,128 +2,181 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plus, Edit, Trash2, Search } from 'lucide-react'
-import toast from 'react-hot-toast'
+import {
+  Home,
+  ChevronDown,
+  ChevronRight,
+  ArrowRight,
+  LayoutTemplate,
+  Briefcase,
+  Package,
+  BarChart3,
+  Newspaper,
+  Megaphone,
+} from 'lucide-react'
+
+const homeSections = [
+  {
+    title: 'Hero',
+    description: 'Hero banner, tombol, statistik',
+    href: '/admin/pages/home/hero',
+    icon: LayoutTemplate,
+  },
+  {
+    title: 'Services',
+    description: 'Layanan utama',
+    href: '/admin/pages/home/services',
+    icon: Briefcase,
+  },
+  {
+    title: 'Product Showcase',
+    description: 'Heading Product Showcase',
+    href: '#',
+    icon: Package,
+  },
+  {
+    title: 'Case Study',
+    description: 'Konten Case Study',
+    href: '#',
+    icon: Briefcase,
+  },
+  {
+    title: 'Statistics',
+    description: 'Statistik perusahaan',
+    href: '#',
+    icon: BarChart3,
+  },
+  {
+    title: 'News',
+    description: 'Heading News',
+    href: '#',
+    icon: Newspaper,
+  },
+  {
+    title: 'CTA',
+    description: 'Call To Action',
+    href: '#',
+    icon: Megaphone,
+  },
+]
 
 export default function PagesManagement() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [pages, setPages] = useState([
-    { id: 1, title: 'Home', slug: 'home', status: 'publish', modified: '2024-02-15' },
-    { id: 2, title: 'Tentang Kami', slug: 'tentang-kami', status: 'publish', modified: '2024-02-14' },
-    { id: 3, title: 'Kebijakan Privasi', slug: 'privacy', status: 'publish', modified: '2024-01-20' },
-    { id: 4, title: 'Syarat & Ketentuan', slug: 'terms', status: 'draft', modified: '2024-01-15' },
-    { id: 5, title: 'Sitemap', slug: 'sitemap', status: 'publish', modified: '2024-02-10' },
-  ])
-
-  const filteredPages = pages.filter((page) =>
-    page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    page.slug.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const handleDelete = (id: number) => {
-    if (confirm('Yakin ingin menghapus halaman ini?')) {
-      setPages(pages.filter((p) => p.id !== id))
-      toast.success('Halaman berhasil dihapus')
-    }
-  }
+  const [homeOpen, setHomeOpen] = useState(false)
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Kelola Halaman</h1>
-          <p className="text-muted-foreground">Kelola semua halaman statis dari WordPress CMS</p>
-        </div>
-        <Link
-          href="/admin/pages/new"
-          className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Tambah Halaman
-        </Link>
-      </div>
+    <div className="space-y-8">
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Cari halaman..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-      </div>
+      <div>
+        <h1 className="text-3xl font-bold">
+          Kelola Halaman
+        </h1>
 
-      {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-accent border-b border-border">
-              <tr>
-                <th className="px-6 py-4 text-left font-semibold">Judul Halaman</th>
-                <th className="px-6 py-4 text-left font-semibold">Slug</th>
-                <th className="px-6 py-4 text-left font-semibold">Status</th>
-                <th className="px-6 py-4 text-left font-semibold">Diubah</th>
-                <th className="px-6 py-4 text-left font-semibold">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredPages.map((page) => (
-                <tr key={page.id} className="hover:bg-accent/50 transition-colors">
-                  <td className="px-6 py-4 font-medium">{page.title}</td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground font-mono">/{page.slug}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        page.status === 'publish'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}
-                    >
-                      {page.status === 'publish' ? 'Dipublikasikan' : 'Draft'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{page.modified}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/admin/pages/${page.id}/edit`}
-                        className="p-2 rounded-lg hover:bg-accent transition-colors"
-                        title="Edit"
-                      >
-                        <Edit className="w-4 h-4 text-primary" />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(page.id)}
-                        className="p-2 rounded-lg hover:bg-accent transition-colors"
-                        title="Hapus"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredPages.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Tidak ada halaman ditemukan</p>
-          </div>
-        )}
-      </div>
-
-      {/* Info Box */}
-      <div className="bg-accent border border-primary/30 rounded-lg p-6">
-        <h3 className="font-semibold mb-2">Informasi</h3>
-        <p className="text-sm text-muted-foreground">
-          Kelola halaman-halaman statis seperti Home, Tentang Kami, Privacy Policy, dan Syarat & Ketentuan dari dashboard ini.
+        <p className="mt-2 text-muted-foreground">
+          Pilih halaman kemudian pilih section yang ingin diedit.
         </p>
       </div>
+
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+
+        {/* HEADER */}
+        <button
+          onClick={() => setHomeOpen(!homeOpen)}
+          className="flex w-full items-center justify-between p-6 hover:bg-accent transition"
+        >
+          <div className="flex items-center gap-4">
+
+            <div className="rounded-lg bg-primary/10 p-3">
+              <Home className="h-7 w-7 text-primary" />
+            </div>
+
+            <div className="text-left">
+
+              <h2 className="text-xl font-semibold">
+                Home
+              </h2>
+
+              <p className="text-sm text-muted-foreground">
+                Landing page utama BOELEDIN
+              </p>
+
+            </div>
+
+          </div>
+
+          <div className="flex items-center gap-3">
+
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-200">
+              Published
+            </span>
+
+            {homeOpen ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+
+          </div>
+
+        </button>
+
+        {/* CONTENT */}
+
+        {homeOpen && (
+
+          <div className="border-t bg-background">
+
+            {homeSections.map((section) => {
+
+              const Icon = section.icon
+
+              return (
+
+                <div
+                  key={section.title}
+                  className="flex items-center justify-between border-b px-6 py-4 last:border-none"
+                >
+
+                  <div className="flex items-center gap-4">
+
+                    <div className="rounded-md bg-primary/10 p-2">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+
+                    <div>
+
+                      <h3 className="font-medium">
+                        {section.title}
+                      </h3>
+
+                      <p className="text-sm text-muted-foreground">
+                        {section.description}
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                  <Link
+                    href={section.href}
+                    className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-accent transition"
+                  >
+                    Kelola
+
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+
+                </div>
+
+              )
+
+            })}
+
+          </div>
+
+        )}
+
+      </div>
+
     </div>
   )
 }

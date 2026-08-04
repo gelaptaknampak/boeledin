@@ -1,40 +1,27 @@
 "use client";
 
-import { ArrowRight, Zap, Settings, Grid3x3, Lightbulb } from "lucide-react";
-import { useTranslation } from "@/hooks/useTranslation";
+import {
+  Zap,
+  Settings,
+  Grid3x3,
+  Lightbulb,
+} from "lucide-react";
+
 import { motion, type Variants } from "framer-motion";
 
-export default function ServicesSection() {
-  const { t } = useTranslation();
+type Props = {
+  data: any;
+};
 
-  const services = [
-    {
-      num: "01",
-      icon: Zap,
-      title: "Digital Signage",
-      desc: "Perangkat layar bermitra dengan merek ternama seperti BOE untuk fasilitas publik, termasuk implementasi Flight Information Display System (FIDS) di bandara.",
-    },
-    {
-      num: "02",
-      icon: Settings,
-      title: "Pengalaman Immersive",
-      desc: "Menciptakan instalasi visual atau LED interaktif untuk keperluan promosi dan branding perusahaan.",
-    },
-    {
-      num: "03",
-      icon: Grid3x3,
-      title: "Smart Command Center",
-      desc: "Membantu dunia usaha hingga instansi pemerintah membangun pusat kendali yang membutuhkan visualisasi data berskala besar.",
-    },
-    {
-      num: "04",
-      icon: Lightbulb,
-      title: "Integrasi IT & Software",
-      desc: "Menggabungkan perangkat keras layar dengan perangkat lunak pendukung agar informasi dapat disampaikan secara real-time.",
-    },
-  ];
+const iconMap = {
+  zap: Zap,
+  settings: Settings,
+  grid3x3: Grid3x3,
+  lightbulb: Lightbulb,
+};
 
-  const containerVariants = {
+export default function ServicesSection({ data }: Props) {
+  const containerVariants: Variants = {
     hidden: {},
     visible: {
       transition: {
@@ -53,14 +40,17 @@ export default function ServicesSection() {
       y: 0,
       transition: {
         duration: 0.7,
-        ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+        ease: [0.22, 1, 0.36, 1],
       },
     },
   };
 
   return (
-    <section className="py-20 md:py-28 bg-background">
+    <section className="bg-background py-20 md:py-28">
       <div className="container mx-auto px-4">
+
+        {/* Header */}
+
         <motion.div
           className="mb-16"
           variants={containerVariants}
@@ -70,62 +60,75 @@ export default function ServicesSection() {
         >
           <motion.div
             variants={itemVariants}
-            className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary"
+            className="inline-block rounded-full bg-accent px-4 py-2 text-sm font-semibold text-primary"
           >
-            Fokus Layanan Utama
+            {data?.eyebrow ?? ""}
           </motion.div>
 
           <motion.h2
             variants={itemVariants}
-            className="text-4xl md:text-5xl font-bold mb-6"
+            className="mt-4 mb-6 text-4xl font-bold md:text-5xl"
           >
-            Empat pilar solusi tampilan digital kami
+            {data?.title ?? ""}
           </motion.h2>
 
           <motion.p
             variants={itemVariants}
-            className="text-lg text-muted-foreground max-w-3xl"
+            className="max-w-3xl text-lg text-muted-foreground"
           >
-            Dari bandara hingga command center, kami merancang sistem yang
-            bekerja tanpa henti 7 hari seminggu, 24 jam sehari.
+            {data?.description ?? ""}
           </motion.p>
         </motion.div>
 
+        {/* Services */}
+
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+          className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {services.map((service) => {
-            const Icon = service.icon;
-            return (
-              <motion.div
-                key={service.num}
-                variants={itemVariants}
-                whileHover={{
-                  y: -8,
-                  transition: { duration: 0.25 },
-                }}
-                className="group"
-              >
-                <div className="mb-6 inline-block p-4 bg-accent/10 rounded-lg border border-accent/20 group-hover:border-primary/50 group-hover:bg-accent/20 transition-all">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
+          {(data?.services ?? []).map(
+            (service: any, index: number) => {
+              const Icon =
+                iconMap[
+                  service.icon as keyof typeof iconMap
+                ] ?? Zap;
 
-                <span className="text-5xl font-bold text-primary/10 block mb-2">
-                  {service.num}
-                </span>
+              return (
+                <motion.div
+                  key={service.number ?? index}
+                  variants={itemVariants}
+                  whileHover={{
+                    y: -8,
+                    transition: {
+                      duration: 0.25,
+                    },
+                  }}
+                  className="group"
+                >
+                  <div className="mb-6 inline-block rounded-lg border border-accent/20 bg-accent/10 p-4 transition-all group-hover:border-primary/50 group-hover:bg-accent/20">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
 
-                <h3 className="text-lg font-bold mb-4">{service.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">
-                  {service.desc}
-                </p>
-              </motion.div>
-            );
-          })}
+                  <span className="mb-2 block text-5xl font-bold text-primary/10">
+                    {service.number ?? ""}
+                  </span>
+
+                  <h3 className="mb-4 text-lg font-bold">
+                    {service.title ?? ""}
+                  </h3>
+
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {service.description ?? ""}
+                  </p>
+                </motion.div>
+              );
+            }
+          )}
         </motion.div>
+
       </div>
     </section>
   );

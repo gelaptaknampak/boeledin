@@ -160,22 +160,40 @@ export async function updateACFFields(
   postType: string,
   postId: number,
   fields: any,
+  token: string
 ) {
   try {
     const response = await axios.post(
-      `${ACF_API}/${postType}/${postId}`,
-      fields,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.WORDPRESS_JWT_TOKEN}`,
-        },
-      },
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating ACF fields:", error);
-    return null;
+  `${ACF_API}/${postType}/${postId}`,
+  fields,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  }
+);
+
+console.log(
+  "ACF UPDATE RESPONSE:",
+  JSON.stringify(response.data, null, 2)
+);
+
+return response.data;
+
+  } catch (error: any) {
+
+    console.log("========== ACF UPDATE ERROR ==========");
+
+    console.log("Status:", error.response?.status);
+
+    console.log("Data:", error.response?.data);
+
+    console.log("Headers:", error.response?.headers);
+
+    console.log("======================================");
+
+    throw error;
   }
 }
 
@@ -802,4 +820,49 @@ export async function deletePostTag(
   );
 
   return res.data;
+}
+
+export async function getPostBySlug(slug: string) {
+  try {
+    const response = await axios.get(
+      `${WORDPRESS_URL}/wp-json/wp/v2/posts`,
+      {
+        params: {
+          slug,
+          _embed: true,
+        },
+      }
+    );
+
+    return response.data[0] ?? null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+export async function updatePostACF(
+  id: number,
+  fields: any,
+  token: string
+) {
+  try {
+    const response = await axios.post(
+      `${WORDPRESS_URL}/wp-json/wp/v2/posts/${id}`,
+      {
+        acf: fields,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error(error.response?.data);
+    throw error;
+  }
 }
