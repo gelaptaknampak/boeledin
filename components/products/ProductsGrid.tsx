@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 import Link from "next/link";
+import ProductCarousel from "./ProductCarousel";
 
 export default function ProductsGrid() {
   const { t } = useTranslation();
@@ -43,17 +44,48 @@ export default function ProductsGrid() {
       setLoading(true);
 
       const res = await fetch(
-        `https://wp.boeledin.com/wp-json/wp/v2/products?_embed&_=${Date.now()}`,
+        "https://wp.boeledin.com/wp-json/wp/v2/products?_embed",
         {
           cache: "no-store",
         },
       );
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error("Failed fetch products");
 
       const data = await res.json();
 
-      setProducts(data);
+      const productsWithGallery = await Promise.all(
+        data.map(async (product: any) => {
+          const ids = (product.acf?.feature_image ?? "")
+            .split(/[\n,]+/)
+            .map((id: string) => id.trim())
+            .filter(Boolean);
+
+          const urls = await Promise.all(
+            ids.map(async (id: string) => {
+              try {
+                const res = await fetch(
+                  `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`,
+                );
+
+                if (!res.ok) return null;
+
+                const media = await res.json();
+                return media.source_url;
+              } catch {
+                return null;
+              }
+            }),
+          );
+
+          return {
+            ...product,
+            gallery: urls.filter(Boolean),
+          };
+        }),
+      );
+
+      setProducts(productsWithGallery);
     } catch (err) {
       console.error(err);
     } finally {
@@ -126,15 +158,14 @@ export default function ProductsGrid() {
         {/* Main Layout: Sidebar + Content */}
         <div className="space-y-8">
           <div className="mb-10 space-y-6">
-
             <div className="relative max-w-xl">
-  <Search className="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
 
-  <input
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    placeholder="Cari produk..."
-    className="
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari produk..."
+                className="
       w-full
       rounded-xl
       border
@@ -147,62 +178,53 @@ export default function ProductsGrid() {
       focus:ring-2
       focus:ring-primary
     "
-  />
-</div>
+              />
+            </div>
 
             {/* Brand */}
-<div className="space-y-3">
-
-    <h4 className="font-semibold">
-        Brand
-    </h4>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { slug: "all", name: "Semua" },
-                ...brands
-              ].map((brand) => (
-                <button
-                  key={brand.slug}
-                  onClick={() => setBrandFilter(brand.slug)}
-                  className={`rounded-full px-5 py-2 text-sm transition
-        ${brandFilter === brand.slug
-                      ? "bg-primary text-white"
-                      : "border border-border hover:border-primary"
-                    }`}
-                >
-                  {brand.name}
-                </button>
-              ))}
+            <div className="space-y-3">
+              <h4 className="font-semibold">Brand</h4>
+              <div className="flex flex-wrap gap-3">
+                {[{ slug: "all", name: "Semua" }, ...brands].map((brand) => (
+                  <button
+                    key={brand.slug}
+                    onClick={() => setBrandFilter(brand.slug)}
+                    className={`rounded-full px-5 py-2 text-sm transition
+        ${
+          brandFilter === brand.slug
+            ? "bg-primary text-white"
+            : "border border-border hover:border-primary"
+        }`}
+                  >
+                    {brand.name}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
             {/* Category */}
-<div className="space-y-3">
-
-    <h4 className="font-semibold">
-        Jenis Produk
-    </h4>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { slug: "all", name: "Semua" },
-                ...productTypes
-              ].map((cat) => (
-                <button
-                  key={cat.slug}
-                  onClick={() => setCategoryFilter(cat.slug)}
-                  className={`rounded-full px-5 py-2 text-sm transition
-        ${categoryFilter === cat.slug
-                      ? "bg-primary text-white"
-                      : "border border-border hover:border-primary"
-                    }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
+            <div className="space-y-3">
+              <h4 className="font-semibold">Jenis Produk</h4>
+              <div className="flex flex-wrap gap-3">
+                {[{ slug: "all", name: "Semua" }, ...productTypes].map(
+                  (cat) => (
+                    <button
+                      key={cat.slug}
+                      onClick={() => setCategoryFilter(cat.slug)}
+                      className={`rounded-full px-5 py-2 text-sm transition
+        ${
+          categoryFilter === cat.slug
+            ? "bg-primary text-white"
+            : "border border-border hover:border-primary"
+        }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ),
+                )}
+              </div>
             </div>
-
           </div>
-        </div>
 
           {/* Content Area */}
           <div className="lg:col-span-3">
@@ -222,14 +244,15 @@ export default function ProductsGrid() {
             </div>
 
             {/* Product Grid */}
-            <div className="grid grid-cols-1
+            <div
+              className="grid grid-cols-1
 sm:grid-cols-2
-xl:grid-cols-4 gap-8">
+xl:grid-cols-4 gap-8"
+            >
               {filteredProducts.map((product) => (
-
                 <div
-  key={product.id}
-  className="
+                  key={product.id}
+                  className="
     flex flex-col
     overflow-hidden
     rounded-xl
@@ -239,32 +262,25 @@ xl:grid-cols-4 gap-8">
     hover:border-primary
     hover:-translate-y-1
   "
->
-
+                >
                   <Link href={`/products/${product.slug}`}>
-
                     <div className="relative h-72 bg-white">
-
-                      <Image
-                        fill
-                        alt={product.title.rendered}
-                        src={
-                          product._embedded?.["wp:featuredmedia"]?.[0]?.source_url ??
-                          "/placeholder.png"
+                      <ProductCarousel
+                        images={
+                          product.gallery.length > 0
+                            ? product.gallery
+                            : ["/placeholder.png"]
                         }
-                        className="object-contain p-6 transition group-hover:scale-105"
+                        title={product.title.rendered}
                       />
 
                       <div className="absolute left-3 bottom-3 rounded bg-black/70 px-2 py-1 text-xs text-white">
                         {getCategoryName(product)}
                       </div>
-
                     </div>
-
                   </Link>
 
                   <div className="flex flex-1 flex-col p-5">
-
                     {/* Logo brand nanti */}
 
                     {/*
@@ -278,19 +294,17 @@ xl:grid-cols-4 gap-8">
         */}
 
                     <div>
-
                       <p className="text-xs uppercase tracking-widest text-primary font-bold">
-                          {getBrandName(product)}
+                        {getBrandName(product)}
                       </p>
 
                       <p className="text-sm text-muted-foreground">
-                          {product.acf?.model_produk}
+                        {product.acf?.model_produk}
                       </p>
-
                     </div>
 
                     <h3 className="mt-3 text-xl font-bold line-clamp-2">
-                        {product.title.rendered}
+                      {product.title.rendered}
                     </h3>
 
                     <div className="mt-3">
@@ -307,7 +321,7 @@ xl:grid-cols-4 gap-8">
                         </Link>
                       )}
                     </div>
-                  
+
                     <div className="mt-auto pt-6">
                       <Link
                         href={`/products/${product.slug}`}
@@ -329,11 +343,8 @@ xl:grid-cols-4 gap-8">
                         Detail Produk
                       </Link>
                     </div>
-
                   </div>
-
                 </div>
-
               ))}
             </div>
 
