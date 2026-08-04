@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { uploadProductImage } from "@/lib/wordpress";
 
 interface ProductFormProps {
   mode: "create" | "edit";
@@ -19,8 +18,8 @@ interface ProductFormData {
   description: string;
   spesifikasi: string;
 
-  feature_image: number | File | null;
-  feature_image_url: string;
+  feature_image: string; // isi: "123\n124\n125"
+  feature_image_urls: string[];
 
   download_brosur: number | File | null;
   download_brosur_url: string;
@@ -32,6 +31,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
   const [loading, setLoading] = useState(false);
   const [brands, setBrands] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [selectedImages,setSelectedImages] = useState<File[]>([]);
 
   async function fetchBrands() {
     const res = await fetch("/api/wordpress/brands");
@@ -60,8 +60,8 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     short_description: "",
     description: "",
     spesifikasi: "",
-    feature_image: null,
-    feature_image_url: "",
+    feature_image: "",
+    feature_image_urls: [],
 
     download_brosur: null,
     download_brosur_url: "",
@@ -103,12 +103,21 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
           ? "/api/wordpress/products"
           : `/api/wordpress/products/${productId}`;
 
-      let imageId = form.feature_image;
+      let gallery = form.feature_image;
 
-      if (form.feature_image instanceof File) {
-        const image = await uploadMedia(form.feature_image);
+      const ids: number[] = [];
 
-        imageId = image.id;
+      if (selectedImages.length > 0) {
+
+          for (const file of selectedImages) {
+              const media = await uploadMedia(file);
+              ids.push(media.id);
+          }
+
+          gallery =
+              form.feature_image
+                  ? `${form.feature_image}\n${ids.join("\n")}`
+                  : ids.join("\n");
       }
 
       let pdfId = form.download_brosur;
@@ -127,7 +136,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
         short_description: form.short_description,
         description: form.description,
         spesifikasi: form.spesifikasi,
-        feature_image: imageId,
+        feature_image: gallery,
         download_brosur: pdfId,
       };
 
@@ -191,66 +200,85 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
   }
 
   async function fetchProduct() {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await fetch(`/api/wordpress/products/${productId}?_embed`);
+    const res = await fetch(`/api/wordpress/products/${productId}?_embed`);
+    const product = await res.json();
 
-      const product = await res.json();
+    let pdfUrl = "";
 
-      // console.log(product);
-      // console.log(product.acf);
-      // console.log(product.acf.feature_image);
-      // console.log(product.acf.download_brosur);
+    // =========================
+    // Gallery
+    // =========================
 
-      let imageUrl = "";
-      let pdfUrl = "";
+    const ids = (product.acf.feature_image ?? "")
+      .split(/[\n,]+/)
+      .map((id: string) => id.trim())
+      .filter(Boolean);
 
-      if (product.acf.feature_image) {
-        const imageRes = await fetch(
-          `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.feature_image}`,
-        );
+    const urls: string[] = [];
 
-        if (imageRes.ok) {
-          const image = await imageRes.json();
-          imageUrl = image.source_url;
-        }
+    for (const id of ids) {
+      const imageRes = await fetch(
+        `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`
+      );
+
+      if (imageRes.ok) {
+        const image = await imageRes.json();
+        urls.push(image.source_url);
       }
-
-      if (product.acf.download_brosur) {
-        const pdfRes = await fetch(
-          `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.download_brosur}`,
-        );
-
-        if (pdfRes.ok) {
-          const pdf = await pdfRes.json();
-          pdfUrl = pdf.source_url;
-        }
-      }
-
-      setForm({
-        nama_produk: product.acf.nama_produk ?? "",
-        model_produk: product.acf.model_produk ?? "",
-        brand: product.brand?.[0] ?? 0,
-        jenis_produk: product["jenis-produk"]?.[0] ?? 0,
-        short_description: product.acf.short_description ?? "",
-        description: product.acf.description ?? "",
-        spesifikasi: product.acf.spesifikasi ?? "",
-
-        feature_image: product.acf.feature_image?.id ?? null,
-        feature_image_url: imageUrl,
-
-        download_brosur: product.acf.download_brosur?.id ?? null,
-        download_brosur_url: pdfUrl,
-      });
-    } catch (err) {
-      console.error(err);
-
-      toast.error("Gagal mengambil produk");
-    } finally {
-      setLoading(false);
     }
+
+    // =========================
+    // PDF
+    // =========================
+
+    if (product.acf.download_brosur) {
+      const pdfRes = await fetch(
+        `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.download_brosur}`
+      );
+
+      if (pdfRes.ok) {
+        const pdf = await pdfRes.json();
+        pdfUrl = pdf.source_url;
+      }
+    }
+
+    setForm({
+      nama_produk: product.acf.nama_produk ?? "",
+      model_produk: product.acf.model_produk ?? "",
+      brand: product.brand?.[0] ?? 0,
+      jenis_produk: product["jenis-produk"]?.[0] ?? 0,
+      short_description: product.acf.short_description ?? "",
+      description: product.acf.description ?? "",
+      spesifikasi: product.acf.spesifikasi ?? "",
+
+      // string "12\n15\n18"
+      feature_image: product.acf.feature_image ?? "",
+
+      // preview gallery
+      feature_image_urls: urls,
+
+      download_brosur: product.acf.download_brosur ?? null,
+      download_brosur_url: pdfUrl,
+    });
+  } catch (err) {
+    console.error(err);
+    toast.error("Gagal mengambil produk");
+  } finally {
+    setLoading(false);
   }
+}
+
+function removeImage(index: number) {
+  setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+
+  setForm((prev) => ({
+    ...prev,
+    feature_image_urls: prev.feature_image_urls.filter((_, i) => i !== index),
+  }));
+}
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl">
@@ -373,27 +401,63 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
         <label>Gambar Produk</label>
 
         <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
 
-            if (!file) return;
+              if (files.length === 0) return;
 
-            setForm({
-              ...form,
-              feature_image: file,
-              feature_image_url: URL.createObjectURL(file),
-            });
-          }}
+              setSelectedImages((prev) => [...prev, ...files]);
+
+              setForm((prev) => ({
+                ...prev,
+                feature_image_urls: [
+                  ...prev.feature_image_urls,
+                  ...files.map((file) => URL.createObjectURL(file)),
+                ],
+              }));
+
+              // supaya pilih file yang sama tetap memicu onChange
+              e.target.value = "";
+            }}
         />
-        {form.feature_image_url && (
-          <img
-            src={form.feature_image_url}
-            alt="Preview"
-            className="mt-3 w-48 rounded border"
-          />
-        )}
+        <div className="mt-4 grid grid-cols-4 gap-4">
+          {form.feature_image_urls.map((url, index) => (
+            <div
+              key={index}
+              className="relative group"
+            >
+              <img
+                src={url}
+                className="h-28 w-full rounded-lg object-cover border"
+              />
+
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="
+                  absolute
+                  top-2
+                  right-2
+                  hidden
+                  group-hover:flex
+                  h-7
+                  w-7
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-red-600
+                  text-white
+                  text-sm
+                "
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Download Brosur */}

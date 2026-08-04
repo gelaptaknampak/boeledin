@@ -7,6 +7,7 @@ import { signOut } from 'next-auth/react'
 import { Menu, X, LogOut, LayoutDashboard, FileText, ShoppingCart, Settings } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+
 interface AdminLayoutProps {
   children: ReactNode
 }
@@ -24,11 +25,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
   ]
 
-  const handleLogout = async () => {
-    if (confirm('Yakin ingin logout?')) {
-      await signOut({ redirect: false })
-      toast.success('Logout berhasil')
-      router.push('/admin/login')
+  async function handleLogout() {
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error();
+      }
+
+      toast.success("Berhasil logout");
+
+      router.replace("/admin/login");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal logout");
     }
   }
 
@@ -36,9 +50,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static top-0 left-0 h-full bg-card border-r border-border transition-transform duration-300 z-40 ${
-          sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:w-0'
-        }`}
+        className={`fixed lg:static top-0 left-0 h-full bg-card border-r border-border transition-transform duration-300 z-40 ${sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:w-0'
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -57,11 +70,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>

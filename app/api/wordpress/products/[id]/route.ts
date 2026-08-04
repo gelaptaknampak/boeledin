@@ -82,6 +82,7 @@ export async function PUT(
       description: body.description,
       spesifikasi: body.spesifikasi,
       feature_image: body.feature_image,
+      gallery_ids: body.gallery_ids,
       download_brosur: body.download_brosur,
     },
 

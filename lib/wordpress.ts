@@ -244,13 +244,31 @@ export async function createProduct(
   token: string,
 ) {
   try {
+
+    // ==========================
+    // TAMBAHKAN DI SINI
+    // ==========================
+    const galleryIds = fields.feature_image
+      ?.split(/[\n,]+/)
+      .map((id: string) => id.trim())
+      .filter(Boolean);
+
+    const featuredMedia =
+      galleryIds && galleryIds.length > 0
+        ? Number(galleryIds[0])
+        : 0;
+
+    // ==========================
+    // BARU AXIOS
+    // ==========================
+
     const response = await axios.post(
       `${WORDPRESS_URL}/wp-json/wp/v2/products`,
       {
         title,
         status: "publish",
 
-        featured_media: fields.feature_image,
+        featured_media: featuredMedia, // <-- ganti ini
 
         acf: fields,
 
@@ -282,12 +300,23 @@ export async function updateProduct(
   token: string,
 ) {
   try {
+
+  const galleryIds = fields.feature_image
+    ?.split(/[\n,]+/)
+    .map((id: string) => id.trim())
+    .filter(Boolean);
+
+  const featuredMedia =
+    galleryIds && galleryIds.length > 0
+      ? Number(galleryIds[0])
+      : 0;
+
     const response = await axios.post(
       `${WORDPRESS_URL}/wp-json/wp/v2/products/${id}`,
       {
         title,
 
-        featured_media: fields.feature_image,
+        featured_media: featuredMedia,
 
         acf: fields,
 
