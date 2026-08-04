@@ -1,5 +1,11 @@
-import NewsForm from "@/components/admin/NewsForm";
+"use client";
 
-export default function NewNewsPage() {
+import dynamic from "next/dynamic";
+
+const NewsForm = dynamic(() => import("@/components/admin/NewsForm"), {
+  ssr: false,
+});
+
+export default function Page() {
   return <NewsForm mode="create" />;
 }

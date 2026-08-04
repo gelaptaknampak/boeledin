@@ -1,4 +1,10 @@
-import NewsForm from "@/components/admin/NewsForm";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const NewsForm = dynamic(() => import("@/components/admin/NewsForm"), {
+  ssr: false,
+});
 
 interface Props {
   params: Promise<{
