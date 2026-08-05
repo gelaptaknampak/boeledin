@@ -141,6 +141,26 @@ export async function uploadMedia(file: File) {
   }
 }
 
+export async function uploadMediaPage(file: File, token: string) {
+  try {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await axios.post(`${WORDPRESS_API}/media`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Disposition": `attachment; filename="${file.name}"`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
 // ACF Fields
 export async function getACFFields(postType: string, postId: number) {
   try {
@@ -160,29 +180,24 @@ export async function updateACFFields(
   postType: string,
   postId: number,
   fields: any,
-  token: string
+  token: string,
 ) {
   try {
     const response = await axios.post(
-  `${ACF_API}/${postType}/${postId}`,
-  fields,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  }
-);
+      `${ACF_API}/${postType}/${postId}`,
+      fields,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
-console.log(
-  "ACF UPDATE RESPONSE:",
-  JSON.stringify(response.data, null, 2)
-);
+    console.log("ACF UPDATE RESPONSE:", JSON.stringify(response.data, null, 2));
 
-return response.data;
-
+    return response.data;
   } catch (error: any) {
-
     console.log("========== ACF UPDATE ERROR ==========");
 
     console.log("Status:", error.response?.status);
@@ -262,7 +277,6 @@ export async function createProduct(
   token: string,
 ) {
   try {
-
     // ==========================
     // TAMBAHKAN DI SINI
     // ==========================
@@ -272,9 +286,7 @@ export async function createProduct(
       .filter(Boolean);
 
     const featuredMedia =
-      galleryIds && galleryIds.length > 0
-        ? Number(galleryIds[0])
-        : 0;
+      galleryIds && galleryIds.length > 0 ? Number(galleryIds[0]) : 0;
 
     // ==========================
     // BARU AXIOS
@@ -318,16 +330,13 @@ export async function updateProduct(
   token: string,
 ) {
   try {
+    const galleryIds = fields.feature_image
+      ?.split(/[\n,]+/)
+      .map((id: string) => id.trim())
+      .filter(Boolean);
 
-  const galleryIds = fields.feature_image
-    ?.split(/[\n,]+/)
-    .map((id: string) => id.trim())
-    .filter(Boolean);
-
-  const featuredMedia =
-    galleryIds && galleryIds.length > 0
-      ? Number(galleryIds[0])
-      : 0;
+    const featuredMedia =
+      galleryIds && galleryIds.length > 0 ? Number(galleryIds[0]) : 0;
 
     const response = await axios.post(
       `${WORDPRESS_URL}/wp-json/wp/v2/products/${id}`,
@@ -691,10 +700,7 @@ export async function getPostCategories() {
 // POST CATEGORIES
 // ===============================
 
-export async function createPostCategory(
-  name: string,
-  token: string,
-) {
+export async function createPostCategory(name: string, token: string) {
   try {
     const response = await axios.post(
       `${WORDPRESS_URL}/wp-json/wp/v2/categories`,
@@ -742,10 +748,7 @@ export async function updatePostCategory(
   }
 }
 
-export async function deletePostCategory(
-  id: number,
-  token: string,
-) {
+export async function deletePostCategory(id: number, token: string) {
   try {
     const response = await axios.delete(
       `${WORDPRESS_URL}/wp-json/wp/v2/categories/${id}?force=true`,
@@ -764,17 +767,12 @@ export async function deletePostCategory(
 }
 
 export async function getPostTags() {
-  const res = await axios.get(
-    `${WORDPRESS_URL}/wp-json/wp/v2/tags`
-  );
+  const res = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/tags`);
 
   return res.data;
 }
 
-export async function createPostTag(
-  name: string,
-  token: string
-) {
+export async function createPostTag(name: string, token: string) {
   const res = await axios.post(
     `${WORDPRESS_URL}/wp-json/wp/v2/tags`,
     { name },
@@ -782,17 +780,13 @@ export async function createPostTag(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;
 }
 
-export async function updatePostTag(
-  id: number,
-  name: string,
-  token: string
-) {
+export async function updatePostTag(id: number, name: string, token: string) {
   const res = await axios.post(
     `${WORDPRESS_URL}/wp-json/wp/v2/tags/${id}`,
     { name },
@@ -800,39 +794,30 @@ export async function updatePostTag(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;
 }
 
-export async function deletePostTag(
-  id: number,
-  token: string
-) {
-  const res = await axios.delete(
-    `${WORDPRESS_URL}/wp-json/wp/v2/tags/${id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export async function deletePostTag(id: number, token: string) {
+  const res = await axios.delete(`${WORDPRESS_URL}/wp-json/wp/v2/tags/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return res.data;
 }
 
 export async function getPostBySlug(slug: string) {
   try {
-    const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts`,
-      {
-        params: {
-          slug,
-          _embed: true,
-        },
-      }
-    );
+    const response = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/posts`, {
+      params: {
+        slug,
+        _embed: true,
+      },
+    });
 
     return response.data[0] ?? null;
   } catch (error) {
@@ -841,28 +826,29 @@ export async function getPostBySlug(slug: string) {
   }
 }
 
-export async function updatePostACF(
-  id: number,
-  fields: any,
-  token: string
-) {
+export async function updatePostACF(id: number, fields: any, token: string) {
   try {
+    console.log("UPDATE ACF PAYLOAD:", fields);
+
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts/${id}`,
+      `${ACF_API}/posts/${id}`,
       {
-        acf: fields,
+        fields,
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
+
+    console.log("UPDATE ACF SUCCESS:", response.data);
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data);
+    console.error("UPDATE ACF ERROR:", error.response?.data);
+
     throw error;
   }
 }

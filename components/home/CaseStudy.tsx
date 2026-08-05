@@ -1,10 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslation } from "@/hooks/useTranslation";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
-export default function CaseStudy() {
-  const { t } = useTranslation();
+type Props = {
+  data: any;
+};
+
+export default function CaseStudy({ data }: Props) {
+  const [image, setImage] = useState("");
+
+  useEffect(() => {
+    async function loadImage() {
+      if (!data?.casestudy_image) return;
+
+      const res = await fetch(
+        `/api/wordpress/media/page/${data.casestudy_image}`,
+      );
+
+      const result = await res.json();
+
+      if (result?.source_url) {
+        setImage(result.source_url);
+      }
+    }
+
+    loadImage();
+  }, [data]);
 
   return (
     <section className="py-20 md:py-28">
@@ -13,33 +36,44 @@ export default function CaseStudy() {
           {/* Content */}
           <div>
             <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
-              Studi Kasus
+              {data?.casestudy_eyebrow ?? ""}
             </div>
+
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Flight Information Display System Bandara SMB II
+              {data?.casestudy_title ?? ""}
             </h2>
+
             <p className="text-muted-foreground text-lg mb-8">
-              Salah satu implementasi kami yang menonjol adalah pemasangan
-              Flight Information Display System (FIDS) di Bandara Internasional
-              Sultan Mahmud Badaruddin II sistem yang menyampaikan informasi
-              penerbangan secara real-time, 24 jam nonstop, dengan standar
-              keandalan bandara internasional.
+              {data?.casestudy_description ?? ""}
             </p>
             <Link
-              href="/contact"
+              href={data?.casestudy_link?.url ?? "/contact"}
               className="inline-flex px-6 py-3 border border-border rounded-lg hover:bg-accent transition-colors font-semibold text-sm"
             >
-              Diskusikan Proyek Serupa
+              {data?.casestudy_button ?? "Diskusikan Proyek Serupa"}
             </Link>
           </div>
 
           {/* Visual */}
-          <div className="relative h-80 bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg border border-border flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 opacity-20 bg-[linear-gradient(45deg,#1e293b_25%,transparent_25%,transparent_75%,#1e293b_75%,#1e293b),linear-gradient(45deg,#1e293b_25%,transparent_25%,transparent_75%,#1e293b_75%,#1e293b)] bg-[length:40px_40px]" />
-            <div className="relative text-center">
-              <div className="text-sm text-gray-400">Feature Media</div>
-              <div className="text-6xl font-bold text-slate-700 mt-2">SR98</div>
-            </div>
+          <div className="relative h-80 rounded-lg border border-border overflow-hidden">
+            {image ? (
+              <Image
+                src={image}
+                alt={data?.casestudy_title ?? ""}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
+                <div className="text-center">
+                  <div className="text-sm text-gray-400">Feature Media</div>
+
+                  <div className="text-6xl font-bold text-slate-700 mt-2">
+                    SR98
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

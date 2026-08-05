@@ -5,7 +5,11 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
-export default function ProductsShowcase() {
+type Props = {
+  data: any;
+};
+
+export default function ProductsShowcase({ data }: Props) {
   const { t } = useTranslation();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,15 +128,14 @@ export default function ProductsShowcase() {
         {/* Section Header */}
         <div className="mb-16">
           <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
-            Katalog Unggulan
+            {data?.product_eyebrow ?? ""}
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Produk yang kami rekomendasikan
+            {data?.product_title ?? ""}
           </h2>
+
           <p className="text-lg text-muted-foreground max-w-3xl">
-            Model paling banyak diminati dari lini Digital Signage, Interactive
-            Flat Panel, dan LED Display kami diambil langsung dari spec sheet
-            resmi produk.
+            {data?.product_description ?? ""}
           </p>
         </div>
 

@@ -10,7 +10,6 @@ function setValue(obj: any, path: string, value: any) {
 
   keys.forEach((key, index) => {
     const last = index === keys.length - 1;
-
     const next = keys[index + 1];
 
     if (last) {
@@ -26,13 +25,13 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function ServicesPage() {
-  const config = homeSectionConfig.services;
+export default async function ProductShowcasePage() {
+  const config = homeSectionConfig.productShowcase;
 
   const post = await getPostById(config.id);
 
   if (!post) {
-    throw new Error("Services section tidak ditemukan");
+    throw new Error("Product Showcase tidak ditemukan");
   }
 
   const acf = post.acf ?? {};

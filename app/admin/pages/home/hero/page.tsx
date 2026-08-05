@@ -1,57 +1,65 @@
-import { getPostBySlug } from "@/lib/wordpress";
-import HeroForm from "./HeroForm";
+import { getPostById } from "@/lib/wordpress";
 
-export default async function HeroPage() {
-  const post = await getPostBySlug("home-hero");
+import SectionForm from "@/components/admin/sections/SectionForm";
+import { homeSectionConfig } from "@/components/admin/sections/sectionConfig";
+
+function getValue(obj: any, path: string) {
+  return path.split(".").reduce((acc, key) => {
+    if (acc == null) return "";
+
+    if (/^\d+$/.test(key)) {
+      return acc[Number(key)];
+    }
+
+    return acc[key];
+  }, obj);
+}
+
+function setValue(obj: any, path: string, value: any) {
+  const keys = path.split(".");
+
+  let current = obj;
+
+  keys.forEach((key, index) => {
+    const last = index === keys.length - 1;
+
+    const next = keys[index + 1];
+
+    if (last) {
+      current[key] = value;
+      return;
+    }
+
+    if (!(key in current)) {
+      current[key] = /^\d+$/.test(next) ? [] : {};
+    }
+
+    current = current[key];
+  });
+}
+
+export default async function Page() {
+  const config = homeSectionConfig.hero;
+
+  const post = await getPostById(config.id);
 
   if (!post) {
-    throw new Error("Post Home Hero tidak ditemukan");
+    throw new Error("Hero section tidak ditemukan");
   }
 
-  const hero = {
-    eyebrow: post.acf?.hero_eyebrow ?? "",
-    title: post.acf?.hero_title ?? "",
-    description: post.acf?.hero_description ?? "",
+  const acf = post.acf ?? {};
 
-    primaryButton: {
-      text: post.acf?.primary_button_text ?? "",
-      url: post.acf?.primary_button_link ?? "",
-    },
+  const data: any = {};
 
-    secondaryButton: {
-      text: post.acf?.hero_secondary_button_text ?? "",
-      url: post.acf?.hero_secondary_button_link ?? "",
-    },
+  config.fields.forEach((field) => {
+    let value = acf[field.acf];
 
-    stats: [
-      {
-        number: post.acf?.stat_1_number ?? "",
-        label: post.acf?.stat_1_label ?? "",
-      },
-      {
-        number: post.acf?.stat_2_number ?? "",
-        label: post.acf?.stat_2_label ?? "",
-      },
-      {
-        number: post.acf?.stat_3_number ?? "",
-        label: post.acf?.stat_3_label ?? "",
-      },
-    ],
-  };
+    if (field.type === "link" && value && typeof value === "object") {
+      value = value.url;
+    }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">
-          Home • Hero Section
-        </h1>
+    setValue(data, field.name, value ?? "");
+  });
 
-        <p className="text-muted-foreground mt-2">
-          Edit konten Hero Section yang tampil pada halaman Home.
-        </p>
-      </div>
-
-      <HeroForm data={hero} />
-    </div>
-  );
+  return <SectionForm data={data} config={config} />;
 }

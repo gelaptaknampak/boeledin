@@ -10,7 +10,6 @@ function setValue(obj: any, path: string, value: any) {
 
   keys.forEach((key, index) => {
     const last = index === keys.length - 1;
-
     const next = keys[index + 1];
 
     if (last) {
@@ -26,13 +25,13 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function ServicesPage() {
-  const config = homeSectionConfig.services;
+export default async function StatPage() {
+  const config = homeSectionConfig.statSection;
 
   const post = await getPostById(config.id);
 
   if (!post) {
-    throw new Error("Services section tidak ditemukan");
+    throw new Error("Statistics section tidak ditemukan");
   }
 
   const acf = post.acf ?? {};
@@ -42,9 +41,30 @@ export default async function ServicesPage() {
   config.fields.forEach((field) => {
     let value = acf[field.acf];
 
+    // Link ACF
     // if (field.type === "link" && value && typeof value === "object") {
     //   value = value.url;
     // }
+
+    // // Image ACF (kalau suatu saat dipakai)
+    // if (field.type === "image" && value && typeof value === "object") {
+    //   value = value.url ?? value.id ?? "";
+    // }
+
+    // Brand List JSON
+    if (field.type === "brand-list") {
+      try {
+        if (typeof value === "string") {
+          value = value ? JSON.parse(value) : [];
+        }
+
+        if (!Array.isArray(value)) {
+          value = [];
+        }
+      } catch {
+        value = [];
+      }
+    }
 
     setValue(data, field.name, value ?? "");
   });

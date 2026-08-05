@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 
-export default function NewsSection() {
-  const { t } = useTranslation();
+type Props = {
+  data: any;
+};
 
+export default function NewsSection({ data }: Props) {
   const news = [
     {
       id: 1,
@@ -40,10 +41,11 @@ export default function NewsSection() {
         {/* Section Header */}
         <div className="mb-16">
           <div className="inline-block mb-4 px-4 py-2 bg-accent rounded-full text-sm font-semibold text-primary">
-            Wawasan & Berita
+            {data?.news_eyebrow ?? ""}
           </div>
+
           <h2 className="text-4xl md:text-5xl font-bold">
-            Terbaru dari BOELEDIN
+            {data?.news_title ?? ""}
           </h2>
         </div>
 
