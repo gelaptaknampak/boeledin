@@ -5,13 +5,34 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { Zap, Settings, Grid3X3, Lightbulb } from "lucide-react";
+import {
+  Zap,
+  Settings,
+  Grid3X3,
+  Lightbulb,
+  Shield,
+  Sparkles,
+  Users,
+  Monitor,
+  Cpu,
+  Globe,
+  Building2,
+  Handshake,
+} from "lucide-react";
 
 const icons = {
   Zap,
   Settings,
   Grid3X3,
   Lightbulb,
+  Shield,
+  Sparkles,
+  Users,
+  Monitor,
+  Cpu,
+  Globe,
+  Building2,
+  Handshake,
 };
 
 type Props = {
@@ -128,7 +149,7 @@ export default function SectionForm({ data, config }: Props) {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/admin/pages/home/section", {
+      const res = await fetch("/api/admin/pages/section", {
         method: "POST",
 
         headers: {

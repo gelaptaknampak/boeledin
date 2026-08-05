@@ -1,0 +1,68 @@
+{
+  "key": "group_about_story",
+  "title": "About Story",
+  "fields": [
+    {
+      "key": "field_about_story_title",
+      "label": "Section Title",
+      "name": "about_story_title",
+      "type": "text"
+    },
+    {
+      "key": "field_about_story_p1",
+      "label": "Paragraph 1",
+      "name": "about_story_paragraph_1",
+      "type": "textarea"
+    },
+    {
+      "key": "field_about_story_p2",
+      "label": "Paragraph 2",
+      "name": "about_story_paragraph_2",
+      "type": "textarea"
+    },
+    {
+      "key": "field_about_story_p3",
+      "label": "Paragraph 3",
+      "name": "about_story_paragraph_3",
+      "type": "textarea"
+    },
+    {
+      "key": "field_about_story_vision_title",
+      "label": "Vision Badge",
+      "name": "about_story_vision_title",
+      "type": "text"
+    },
+    {
+      "key": "field_about_story_vision",
+      "label": "Vision",
+      "name": "about_story_vision",
+      "type": "textarea"
+    },
+    {
+      "key": "field_about_story_mission_title",
+      "label": "Mission Badge",
+      "name": "about_story_mission_title",
+      "type": "text"
+    },
+    {
+      "key": "field_about_story_mission",
+      "label": "Mission",
+      "name": "about_story_mission",
+      "type": "textarea"
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post",
+        "operator": "==",
+        "value": "214"
+      }
+    ]
+  ],
+  "position": "normal",
+  "style": "default",
+  "active": true,
+  "show_in_rest": 1,
+  "acf_field_group_edit_in_rest": 1
+}

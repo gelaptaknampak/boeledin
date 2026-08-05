@@ -13,6 +13,11 @@ import {
   BarChart3,
   Newspaper,
   Megaphone,
+  Landmark,
+  ChartColumn,
+  Gem,
+  Route,
+  Handshake,
 } from "lucide-react";
 
 const homeSections = [
@@ -60,8 +65,48 @@ const homeSections = [
   },
 ];
 
+const aboutSections = [
+  {
+    title: "Hero",
+    description: "Hero About Us",
+    href: "/admin/pages/about/AboutHero",
+    icon: LayoutTemplate,
+  },
+  {
+    title: "Story",
+    description: "Cerita perusahaan",
+    href: "/admin/pages/about/AboutStory",
+    icon: Landmark,
+  },
+  {
+    title: "Statistics",
+    description: "Statistik perusahaan",
+    href: "/admin/pages/about/AboutStats",
+    icon: ChartColumn,
+  },
+  {
+    title: "Values",
+    description: "Core Values",
+    href: "/admin/pages/about/AboutValues",
+    icon: Gem,
+  },
+  {
+    title: "Journey",
+    description: "Timeline perusahaan",
+    href: "/admin/pages/about/AboutJourney",
+    icon: Route,
+  },
+  {
+    title: "CTA",
+    description: "Call To Action",
+    href: "/admin/pages/about/AboutCTA",
+    icon: Handshake,
+  },
+];
+
 export default function PagesManagement() {
   const [homeOpen, setHomeOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <div className="space-y-8">
@@ -144,6 +189,76 @@ export default function PagesManagement() {
             })}
           </div>
         )}
+
+        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+  <button
+    onClick={() => setAboutOpen(!aboutOpen)}
+    className="flex w-full items-center justify-between p-6 hover:bg-accent transition"
+  >
+    <div className="flex items-center gap-4">
+      <div className="rounded-lg bg-primary/10 p-3">
+        <Briefcase className="h-7 w-7 text-primary" />
+      </div>
+
+      <div className="text-left">
+        <h2 className="text-xl font-semibold">About</h2>
+
+        <p className="text-sm text-muted-foreground">
+          Halaman Tentang Kami
+        </p>
+      </div>
+    </div>
+
+    <div className="flex items-center gap-3">
+      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-200">
+        Published
+      </span>
+
+      {aboutOpen ? (
+        <ChevronDown className="h-5 w-5" />
+      ) : (
+        <ChevronRight className="h-5 w-5" />
+      )}
+    </div>
+  </button>
+
+  {aboutOpen && (
+    <div className="border-t bg-background">
+      {aboutSections.map((section) => {
+        const Icon = section.icon;
+
+        return (
+          <div
+            key={section.title}
+            className="flex items-center justify-between border-b px-6 py-4 last:border-none"
+          >
+            <div className="flex items-center gap-4">
+              <div className="rounded-md bg-primary/10 p-2">
+                <Icon className="h-5 w-5 text-primary" />
+              </div>
+
+              <div>
+                <h3 className="font-medium">{section.title}</h3>
+
+                <p className="text-sm text-muted-foreground">
+                  {section.description}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href={section.href}
+              className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm hover:bg-accent transition"
+            >
+              Kelola
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
       </div>
     </div>
   );

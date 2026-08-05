@@ -23,9 +23,9 @@ async function getHomeSection(slug: string) {
 
   if (!post) return null;
 
-  const acf = await getACFFields("posts", post.id);
+  console.log("POST DATA:", post);
 
-  return acf?.acf ?? null;
+  return post.acf ?? null;
 }
 
 export default async function Home() {
@@ -46,6 +46,9 @@ export default async function Home() {
     getHomeSection("news-section"),
     getHomeSection("cta-section"),
   ]);
+
+  console.log("FULL SERVICES DATA:", servicesData);
+
 
   return (
     <>

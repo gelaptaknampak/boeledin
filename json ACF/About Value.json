@@ -1,0 +1,111 @@
+{
+  "key": "group_about_values",
+  "title": "About Values",
+  "fields": [
+    {
+      "key": "field_about_values_eyebrow",
+      "label": "Eyebrow",
+      "name": "about_values_eyebrow",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_values_title",
+      "label": "Section Title",
+      "name": "about_values_title",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_about_value_1_icon",
+      "label": "Value 1 Icon",
+      "name": "about_value_1_icon",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_value_1_title",
+      "label": "Value 1 Title",
+      "name": "about_value_1_title",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_value_1_description",
+      "label": "Value 1 Description",
+      "name": "about_value_1_description",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_about_value_2_icon",
+      "label": "Value 2 Icon",
+      "name": "about_value_2_icon",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_value_2_title",
+      "label": "Value 2 Title",
+      "name": "about_value_2_title",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_value_2_description",
+      "label": "Value 2 Description",
+      "name": "about_value_2_description",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_about_value_3_icon",
+      "label": "Value 3 Icon",
+      "name": "about_value_3_icon",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_value_3_title",
+      "label": "Value 3 Title",
+      "name": "about_value_3_title",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_value_3_description",
+      "label": "Value 3 Description",
+      "name": "about_value_3_description",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post",
+        "operator": "==",
+        "value": "218"
+      }
+    ]
+  ],
+  "position": "normal",
+  "style": "default",
+  "active": true,
+  "show_in_rest": 1,
+  "acf_field_group_edit_in_rest": 1
+}

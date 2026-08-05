@@ -1,0 +1,53 @@
+{
+  "key": "group_about_cta",
+  "title": "About CTA",
+  "show_in_rest": 1,
+  "fields": [
+    {
+      "key": "field_about_cta_title",
+      "label": "Title",
+      "name": "about_cta_title",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_cta_description",
+      "label": "Description",
+      "name": "about_cta_description",
+      "type": "textarea",
+      "rows": 3,
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_cta_button_text",
+      "label": "Button Text",
+      "name": "about_cta_button_text",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_cta_button_link",
+      "label": "Button Link",
+      "name": "about_cta_button_link",
+      "type": "link",
+      "return_format": "array",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post",
+        "operator": "==",
+        "value": "222"
+      }
+    ]
+  ],
+  "position": "normal",
+  "style": "default",
+  "active": true
+}

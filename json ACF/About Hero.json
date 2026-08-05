@@ -1,0 +1,52 @@
+{
+  "key": "group_about_hero",
+  "title": "About Hero",
+  "fields": [
+    {
+      "key": "field_about_hero_eyebrow",
+      "label": "Eyebrow",
+      "name": "about_hero_eyebrow",
+      "type": "text"
+    },
+    {
+      "key": "field_about_hero_title",
+      "label": "Title",
+      "name": "about_hero_title",
+      "type": "text"
+    },
+    {
+      "key": "field_about_hero_description",
+      "label": "Description",
+      "name": "about_hero_description",
+      "type": "textarea",
+      "rows": 4
+    },
+    {
+      "key": "field_about_hero_image",
+      "label": "Hero Image",
+      "name": "about_hero_image",
+      "type": "image",
+      "return_format": "id",
+      "preview_size": "medium",
+      "library": "all"
+    },
+    {
+      "key": "field_about_hero_image_caption",
+      "label": "Image Caption",
+      "name": "about_hero_image_caption",
+      "type": "text"
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post",
+        "operator": "==",
+        "value": "212"
+      }
+    ]
+  ],
+  "position": "normal",
+  "style": "default",
+  "active": true
+}

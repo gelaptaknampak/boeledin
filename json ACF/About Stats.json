@@ -1,0 +1,87 @@
+{
+  "key": "group_about_stats",
+  "title": "About Stats",
+  "fields": [
+    {
+      "key": "field_about_stat_number_1",
+      "label": "Stat Number 1",
+      "name": "about_stat_number_1",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_stat_label_1",
+      "label": "Stat Label 1",
+      "name": "about_stat_label_1",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_about_stat_number_2",
+      "label": "Stat Number 2",
+      "name": "about_stat_number_2",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_stat_label_2",
+      "label": "Stat Label 2",
+      "name": "about_stat_label_2",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_about_stat_number_3",
+      "label": "Stat Number 3",
+      "name": "about_stat_number_3",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_stat_label_3",
+      "label": "Stat Label 3",
+      "name": "about_stat_label_3",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_about_stat_number_4",
+      "label": "Stat Number 4",
+      "name": "about_stat_number_4",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_about_stat_label_4",
+      "label": "Stat Label 4",
+      "name": "about_stat_label_4",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post",
+        "operator": "==",
+        "value": "216"
+      }
+    ]
+  ],
+  "position": "normal",
+  "style": "default",
+  "active": true,
+  "show_in_rest": 1,
+  "acf_field_group_edit_in_rest": 1
+}

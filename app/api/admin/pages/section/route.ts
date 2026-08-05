@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { updatePostACF } from "@/lib/wordpress";
-import { homeSectionConfig } from "@/components/admin/sections/sectionConfig";
+import {
+  homeSectionConfig,
+  aboutSectionConfig,
+} from "@/components/admin/sections/sectionConfig";
 
 function getValue(obj: any, path: string) {
   return path.split(".").reduce((current, key) => {
@@ -30,13 +33,17 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 401,
-        },
+        }
       );
     }
 
-    const config = Object.values(homeSectionConfig).find(
-      (section) => section.id === id,
-    );
+    // gabungkan semua config
+    const allSections = [
+      ...Object.values(homeSectionConfig),
+      ...Object.values(aboutSectionConfig),
+    ];
+
+    const config = allSections.find((section) => section.id === id);
 
     if (!config) {
       return NextResponse.json(
@@ -46,7 +53,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 404,
-        },
+        }
       );
     }
 
@@ -55,12 +62,18 @@ export async function POST(req: NextRequest) {
     for (const field of config.fields) {
       let value = getValue(data, field.name);
 
+      // ACF Link
       if (field.type === "link") {
         value = {
           url: value ?? "",
           title: "",
           target: "_self",
         };
+      }
+
+      // ACF Image (Return Format = ID)
+      if (field.type === "image") {
+        value = value || null;
       }
 
       acfData[field.acf] = value ?? "";
@@ -83,11 +96,13 @@ export async function POST(req: NextRequest) {
       {
         success: false,
         message:
-          error?.response?.data?.message ?? error?.message ?? "Gagal menyimpan",
+          error?.response?.data?.message ??
+          error?.message ??
+          "Gagal menyimpan",
       },
       {
         status: error?.response?.status ?? 500,
-      },
+      }
     );
   }
 }

@@ -27,7 +27,7 @@ export default function CtaSection({ data }: CtaSectionProps) {
 
           <Link
             href={data?.cta_button_link || "/contact"}
-            className="inline-block px-8 py-3 bg-slate-900 text-white font-semibold rounded hover:bg-slate-700 transition-colors whitespace-nowrap"
+            className="inline-block px-8 py-3 bg-slate-800 border-white border-1 text-white font-semibold rounded hover:bg-slate-900 transition-colors whitespace-nowrap"
           >
             {data?.cta_button_text || "Hubungi Kami"}
           </Link>
