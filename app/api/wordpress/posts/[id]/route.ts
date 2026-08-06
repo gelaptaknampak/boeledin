@@ -70,7 +70,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         excerpt: body.excerpt,
         status: body.status,
         featured_media: body.featured_media,
-        categories: body.categories,
+        kategori: body.kategori,
         tags: body.tags,
       },
       token.value,

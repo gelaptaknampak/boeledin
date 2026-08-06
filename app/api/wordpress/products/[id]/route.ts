@@ -83,7 +83,12 @@ export async function PUT(
       spesifikasi: body.spesifikasi,
       feature_image: body.feature_image,
       gallery_ids: body.gallery_ids,
-      download_brosur: body.download_brosur,
+      download_brosur:
+        body.download_brosur === ""
+          ? null
+          : body.download_brosur
+            ? Number(body.download_brosur)
+            : null,
     },
 
     body.brand,

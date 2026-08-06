@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         excerpt: body.excerpt,
         status: body.status,
         featured_media: body.featured_media,
-        categories: body.categories,
+        kategori: body.kategori,
         tags: body.tags,
       },
       token.value,

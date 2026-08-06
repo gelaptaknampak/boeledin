@@ -46,15 +46,17 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(media);
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("STATUS:", error.response?.status);
+    console.error("DATA:", error.response?.data);
+    console.error("MESSAGE:", error.message);
 
     return NextResponse.json(
       {
-        message: "Internal Server Error",
+        message: error.response?.data ?? "Internal Server Error",
       },
       {
-        status: 500,
+        status: error.response?.status ?? 500,
       },
     );
   }

@@ -277,9 +277,6 @@ export async function createProduct(
   token: string,
 ) {
   try {
-    // ==========================
-    // TAMBAHKAN DI SINI
-    // ==========================
     const galleryIds = fields.feature_image
       ?.split(/[\n,]+/)
       .map((id: string) => id.trim())
@@ -288,36 +285,38 @@ export async function createProduct(
     const featuredMedia =
       galleryIds && galleryIds.length > 0 ? Number(galleryIds[0]) : 0;
 
-    // ==========================
-    // BARU AXIOS
-    // ==========================
+    const payload = {
+      title,
+      status: "publish",
+      featured_media: featuredMedia,
 
-    const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/products`,
-      {
-        title,
-        status: "publish",
+      // ACF
+      acf: fields,
 
-        featured_media: featuredMedia, // <-- ganti ini
+      // Taxonomy
+      brand: [Number(brand)],
+      "jenis-produk": [Number(jenisProduk)],
+    };
 
-        acf: fields,
+    console.log("CREATE PAYLOAD");
+    console.log(JSON.stringify(payload, null, 2));
 
-        brand: [brand],
-
-        "jenis-produk": [Number(jenisProduk)],
+    const response = await axios.post(`${WORDPRESS_API}/products`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
+    });
+
+    console.log("CREATE RESPONSE");
+    console.log(JSON.stringify(response.data, null, 2));
 
     return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (error: any) {
+    console.error("CREATE PRODUCT ERROR");
+    console.error(error.response?.data || error);
+
+    return null;
   }
 }
 
@@ -338,19 +337,25 @@ export async function updateProduct(
     const featuredMedia =
       galleryIds && galleryIds.length > 0 ? Number(galleryIds[0]) : 0;
 
+    const payload = {
+      title,
+
+      featured_media: featuredMedia,
+
+      // ACF
+      acf: fields,
+
+      // Taxonomy
+      brand: [Number(brand)],
+      "jenis-produk": [Number(jenisProduk)],
+    };
+
+    console.log("UPDATE PAYLOAD");
+    console.log(JSON.stringify(payload, null, 2));
+
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/products/${id}`,
-      {
-        title,
-
-        featured_media: featuredMedia,
-
-        acf: fields,
-
-        brand: [brand],
-
-        "jenis-produk": [Number(jenisProduk)],
-      },
+      `${WORDPRESS_API}/products/${id}`,
+      payload,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -359,9 +364,14 @@ export async function updateProduct(
       },
     );
 
+    console.log("UPDATE RESPONSE");
+    console.log(JSON.stringify(response.data, null, 2));
+
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data);
+    console.error("UPDATE PRODUCT ERROR");
+    console.error(error.response?.data || error);
+
     return null;
   }
 }
@@ -398,8 +408,13 @@ export async function uploadProductImage(file: File, token: string) {
     });
 
     return response.data;
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("========== WORDPRESS ==========");
+    console.error("STATUS:", error.response?.status);
+    console.error("DATA:", error.response?.data);
+    console.error("HEADERS:", error.response?.headers);
+    console.error("MESSAGE:", error.message);
+    console.error("===============================");
 
     return null;
   }
@@ -526,7 +541,7 @@ export async function updateProductType(
   token: string,
 ) {
   try {
-    const response = await axios.post(
+    const response = await axios.put(
       `${WORDPRESS_API}/jenis-produk/${id}`,
       {
         name,
@@ -537,6 +552,9 @@ export async function updateProductType(
         },
       },
     );
+
+    console.log(response.data.meta);
+    console.log(response.data.acf);
 
     return response.data;
   } catch (error: any) {
@@ -570,7 +588,7 @@ export async function deleteProductType(id: number, token: string) {
 export async function getPosts() {
   try {
     const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts?_embed&per_page=100`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/berita?_embed&per_page=100`,
       {
         headers: {
           "Cache-Control": "no-cache",
@@ -588,7 +606,7 @@ export async function getPosts() {
 export async function getPost(id: number) {
   try {
     const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts/${id}?_embed`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}?_embed`,
     );
 
     return response.data;
@@ -601,7 +619,7 @@ export async function getPost(id: number) {
 export async function createPost(title: string, fields: any, token: string) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/berita`,
       {
         title,
         content: fields.content,
@@ -637,7 +655,7 @@ export async function updatePost(
 ) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts/${id}`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}`,
       {
         title,
         content: fields.content,
@@ -668,7 +686,7 @@ export async function updatePost(
 export async function deletePost(id: number, token: string) {
   try {
     const response = await axios.delete(
-      `${WORDPRESS_URL}/wp-json/wp/v2/posts/${id}?force=true`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}?force=true`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -686,7 +704,7 @@ export async function deletePost(id: number, token: string) {
 export async function getPostCategories() {
   try {
     const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/categories?per_page=100`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/kategori?per_page=100`,
     );
 
     return response.data;
@@ -703,7 +721,7 @@ export async function getPostCategories() {
 export async function createPostCategory(name: string, token: string) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/categories`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/kategori`,
       {
         name,
       },
@@ -729,7 +747,7 @@ export async function updatePostCategory(
 ) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/categories/${id}`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/kategori/${id}`,
       {
         name,
       },
@@ -751,7 +769,7 @@ export async function updatePostCategory(
 export async function deletePostCategory(id: number, token: string) {
   try {
     const response = await axios.delete(
-      `${WORDPRESS_URL}/wp-json/wp/v2/categories/${id}?force=true`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/kategori/${id}?force=true`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

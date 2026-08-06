@@ -67,7 +67,7 @@ interface NewsFormData {
 
   status: "publish" | "draft";
 
-  categories: number[];
+  kategori: number[];
 
   tags: number[];
 
@@ -92,7 +92,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
     status: "publish",
 
-    categories: [],
+    kategori: [],
 
     tags: [],
 
@@ -158,7 +158,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
         status: post.status,
 
-        categories: post.categories ?? [],
+        kategori: post.kategori ?? [],
 
         tags: post.tags ?? [],
 
@@ -297,7 +297,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
         featured_media: featuredMedia,
 
-        categories: form.categories,
+        kategori: form.kategori,
 
         tags: form.tags,
       };
@@ -663,14 +663,14 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
         <label className="block mb-2 font-semibold">Kategori</label>
 
         <select
-          value={form.categories[0] ?? ""}
+          value={form.kategori[0] ?? ""}
           onChange={(e) =>
             setForm((prev) => ({
               ...prev,
-              categories: [Number(e.target.value)],
+              kategori: [Number(e.target.value)],
             }))
           }
-          className="w-full rounded-lg border px-4 py-3"
+          className="w-full rounded-lg border px-4 py-3 bg-white text-black"
         >
           <option value={0}>Pilih kategori</option>
 

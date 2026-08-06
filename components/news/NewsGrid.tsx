@@ -17,10 +17,10 @@ export default function NewsGrid() {
   async function fetchNews() {
     try {
       const res = await fetch(
-        "https://wp.boeledin.com/wp-json/wp/v2/posts?_embed&per_page=100",
+        "https://wp.boeledin.com/wp-json/wp/v2/berita?_embed&per_page=100",
         {
           cache: "no-store",
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Gagal mengambil berita");
@@ -77,11 +77,7 @@ export default function NewsGrid() {
   }
 
   if (loading) {
-    return (
-      <section className="py-20 text-center">
-        Memuat berita...
-      </section>
-    );
+    return <section className="py-20 text-center">Memuat berita...</section>;
   }
 
   return (
@@ -113,7 +109,7 @@ export default function NewsGrid() {
                 <div className="mb-3">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(
-                      getCategory(post)
+                      getCategory(post),
                     )}`}
                   >
                     {getCategory(post)}

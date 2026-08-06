@@ -9,7 +9,7 @@ interface Props {
 
 async function getPost(slug: string) {
   const res = await fetch(
-    `https://wp.boeledin.com/wp-json/wp/v2/posts?slug=${slug}&_embed`,
+    `https://wp.boeledin.com/wp-json/wp/v2/berita?slug=${slug}&_embed`,
     {
       cache: "no-store",
     },
