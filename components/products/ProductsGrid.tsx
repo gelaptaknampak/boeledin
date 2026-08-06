@@ -156,217 +156,198 @@ export default function ProductsGrid() {
     <section className="py-12 md:py-16 bg-background">
       <div className="container mx-auto px-4">
         {/* Main Layout: Sidebar + Content */}
-        <div className="space-y-8">
-          <div className="mb-10 space-y-6">
-            <div className="relative max-w-xl">
-              <Search className="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
+        {/* Main Layout */}
+<div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+  {/* ================================= */}
+  {/* Sidebar */}
+  {/* ================================= */}
 
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari produk..."
-                className="
-      w-full
-      rounded-xl
-      border
-      border-border
-      bg-card
-      pl-12
-      pr-4
-      py-3
-      focus:outline-none
-      focus:ring-2
-      focus:ring-primary
-    "
+  <aside className="lg:col-span-1 space-y-8">
+    {/* Search */}
+    <div>
+      <h3 className="mb-3 text-lg font-semibold">
+        Cari Produk
+      </h3>
+
+      <div className="relative">
+        <Search className="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
+
+        <input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari produk..."
+          className="
+            w-full
+            rounded-xl
+            border
+            border-border
+            bg-card
+            py-3
+            pl-12
+            pr-4
+            focus:outline-none
+            focus:ring-2
+            focus:ring-primary
+          "
+        />
+      </div>
+    </div>
+
+    {/* Brand */}
+    <div>
+      <h3 className="mb-3 text-lg font-semibold">
+        Brand
+      </h3>
+
+      <div className="flex flex-col gap-3">
+        {[{ slug: "all", name: "Semua" }, ...brands].map((brand) => (
+          <button
+            key={brand.slug}
+            onClick={() => setBrandFilter(brand.slug)}
+            className={`rounded-xl border px-4 py-3 text-left transition
+              ${
+                brandFilter === brand.slug
+                  ? "bg-primary text-white border-primary"
+                  : "border-border hover:border-primary"
+              }`}
+          >
+            {brand.name}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* Jenis Produk */}
+    <div>
+      <h3 className="mb-3 text-lg font-semibold">
+        Jenis Produk
+      </h3>
+
+      <div className="flex flex-col gap-3">
+        {[{ slug: "all", name: "Semua" }, ...productTypes].map((cat) => (
+          <button
+            key={cat.slug}
+            onClick={() => setCategoryFilter(cat.slug)}
+            className={`rounded-xl border px-4 py-3 text-left transition
+              ${
+                categoryFilter === cat.slug
+                  ? "bg-primary text-white border-primary"
+                  : "border-border hover:border-primary"
+              }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  </aside>
+
+  {/* ================================= */}
+  {/* Product List */}
+  {/* ================================= */}
+
+  <div className="lg:col-span-3">
+    <div className="mb-6">
+      <p className="text-sm text-muted-foreground">
+        {t("products.showing")}{" "}
+        <strong>{filteredProducts.length}</strong>{" "}
+        {t("products.of")}{" "}
+        <strong>{products.length}</strong>{" "}
+        {t("products.products")}
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      {filteredProducts.map((product) => (
+        <div
+          key={product.id}
+          className="
+            flex
+            flex-col
+            overflow-hidden
+            rounded-xl
+            border
+            border-border
+            bg-card
+            transition
+            hover:border-primary
+            hover:-translate-y-1
+          "
+        >
+          <Link href={`/products/${product.slug}`}>
+            <div className="relative h-72 bg-white">
+              <ProductCarousel
+                images={
+                  product.gallery.length > 0
+                    ? product.gallery
+                    : ["/placeholder.png"]
+                }
+                title={product.title.rendered}
               />
-            </div>
 
-            {/* Brand */}
-            <div className="space-y-3">
-              <h4 className="font-semibold">Brand</h4>
-              <div className="flex flex-wrap gap-3">
-                {[{ slug: "all", name: "Semua" }, ...brands].map((brand) => (
-                  <button
-                    key={brand.slug}
-                    onClick={() => setBrandFilter(brand.slug)}
-                    className={`rounded-full px-5 py-2 text-sm transition
-        ${
-          brandFilter === brand.slug
-            ? "bg-primary text-white"
-            : "border border-border hover:border-primary"
-        }`}
-                  >
-                    {brand.name}
-                  </button>
-                ))}
+              <div className="absolute left-3 bottom-3 rounded bg-black/70 px-2 py-1 text-xs text-white">
+                {getCategoryName(product)}
               </div>
             </div>
+          </Link>
 
-            {/* Category */}
-            <div className="space-y-3">
-              <h4 className="font-semibold">Jenis Produk</h4>
-              <div className="flex flex-wrap gap-3">
-                {[{ slug: "all", name: "Semua" }, ...productTypes].map(
-                  (cat) => (
-                    <button
-                      key={cat.slug}
-                      onClick={() => setCategoryFilter(cat.slug)}
-                      className={`rounded-full px-5 py-2 text-sm transition
-        ${
-          categoryFilter === cat.slug
-            ? "bg-primary text-white"
-            : "border border-border hover:border-primary"
-        }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-          </div>
+          <div className="flex flex-1 flex-col p-5">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                {getBrandName(product)}
+              </p>
 
-          {/* Content Area */}
-          <div className="lg:col-span-3">
-            {/* Results Count */}
-            <div className="mb-6">
               <p className="text-sm text-muted-foreground">
-                {t("products.showing")}{" "}
-                <span className="font-semibold text-foreground">
-                  <strong> {filteredProducts.length}</strong>
-                </span>{" "}
-                {t("products.of")}{" "}
-                <span className="font-semibold text-foreground">
-                  <strong> {products.length}</strong>
-                </span>{" "}
-                {t("products.products")}
+                {product.acf?.model_produk}
               </p>
             </div>
 
-            {/* Product Grid */}
-            <div
-              className="grid grid-cols-1
-sm:grid-cols-2
-xl:grid-cols-4 gap-8"
-            >
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="
-    flex flex-col
-    overflow-hidden
-    rounded-xl
-    border border-border
-    bg-card
-    transition
-    hover:border-primary
-    hover:-translate-y-1
-  "
+            <h3 className="mt-3 text-xl font-bold line-clamp-2">
+              {product.acf?.nama_produk}
+            </h3>
+
+            <div className="mt-3">
+              <p className="line-clamp-2 text-sm text-muted-foreground">
+                {product.acf?.short_description}
+              </p>
+
+              {(product.acf?.short_description?.length ?? 0) > 90 && (
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="mt-1 inline-block text-sm font-medium text-primary hover:underline"
                 >
-                  <Link href={`/products/${product.slug}`}>
-                    <div className="relative h-72 bg-white">
-                      <ProductCarousel
-                        images={
-                          product.gallery.length > 0
-                            ? product.gallery
-                            : ["/placeholder.png"]
-                        }
-                        title={product.title.rendered}
-                      />
-
-                      <div className="absolute left-3 bottom-3 rounded bg-black/70 px-2 py-1 text-xs text-white">
-                        {getCategoryName(product)}
-                      </div>
-                    </div>
-                  </Link>
-
-                  <div className="flex flex-1 flex-col p-5">
-                    {/* Logo brand nanti */}
-
-                    {/*
-        <div className="relative h-10 w-10">
-            <Image
-                src={getBrandLogo(product)}
-                fill
-                alt={getBrandName(product)}
-            />
-        </div>
-        */}
-
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-primary font-bold">
-                        {getBrandName(product)}
-                      </p>
-
-                      <p className="text-sm text-muted-foreground">
-                        {product.acf?.model_produk}
-                      </p>
-                    </div>
-
-                    <h3 className="mt-3 text-xl font-bold line-clamp-2">
-                      {product.title.rendered}
-                    </h3>
-
-                    <div className="mt-3">
-                      <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {product.acf?.short_description}
-                      </p>
-
-                      {(product.acf?.short_description?.length ?? 0) > 90 && (
-                        <Link
-                          href={`/products/${product.slug}`}
-                          className="mt-1 inline-block text-sm font-medium text-primary hover:underline"
-                        >
-                          Read more...
-                        </Link>
-                      )}
-                    </div>
-
-                    <div className="mt-auto pt-6">
-                      <Link
-                        href={`/products/${product.slug}`}
-                        className="
-                          block
-                          w-full
-                          rounded-xl
-                          border
-                          border-primary
-                          py-3
-                          text-center
-                          font-semibold
-                          text-primary
-                          transition
-                          hover:bg-primary
-                          hover:text-white
-                        "
-                      >
-                        Detail Produk
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  Read more...
+                </Link>
+              )}
             </div>
 
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12 col-span-full">
-                <p className="text-muted-foreground mb-4">
-                  {t("products.noResults")}
-                </p>
-                <button
-                  onClick={() => {
-                    setBrandFilter("all");
-                    setCategoryFilter("all");
-                    setSearchQuery("");
-                  }}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  {t("products.resetFilter")}
-                </button>
-              </div>
-            )}
+            <div className="mt-auto pt-6">
+              <Link
+                href={`/products/${product.slug}`}
+                className="
+                  block
+                  w-full
+                  rounded-xl
+                  border
+                  border-primary
+                  py-3
+                  text-center
+                  font-semibold
+                  text-primary
+                  transition
+                  hover:bg-primary
+                  hover:text-white
+                "
+              >
+                Detail Produk
+              </Link>
+            </div>
           </div>
         </div>
+      ))}
+    </div>
+  </div>
+</div>
       </div>
     </section>
   );
