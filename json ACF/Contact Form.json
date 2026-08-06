@@ -1,0 +1,88 @@
+{
+  "key": "group_contact_form",
+  "title": "Contact Form",
+  "fields": [
+    {
+      "key": "field_form_title",
+      "label": "Judul Form",
+      "name": "form_title",
+      "type": "text",
+      "default_value": "Form Inquiry",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_form_description",
+      "label": "Deskripsi",
+      "name": "form_description",
+      "type": "textarea",
+      "rows": 3,
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_interest_options",
+      "label": "Pilihan Produk",
+      "name": "interest_options",
+      "type": "repeater",
+      "button_label": "Tambah Produk",
+      "show_in_rest": 1,
+      "sub_fields": [
+        {
+          "key": "field_interest_value",
+          "label": "Value",
+          "name": "value",
+          "type": "text",
+          "show_in_rest": 1
+        },
+        {
+          "key": "field_interest_label",
+          "label": "Label",
+          "name": "label",
+          "type": "text",
+          "show_in_rest": 1
+        }
+      ]
+    },
+    {
+      "key": "field_submit_text",
+      "label": "Teks Tombol",
+      "name": "submit_text",
+      "type": "text",
+      "default_value": "Kirim Pesan",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_success_message",
+      "label": "Pesan Berhasil",
+      "name": "success_message",
+      "type": "text",
+      "default_value": "Terima kasih! Pesan Anda telah kami terima.",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_error_message",
+      "label": "Pesan Gagal",
+      "name": "error_message",
+      "type": "text",
+      "default_value": "Gagal mengirim pesan. Silakan coba lagi.",
+      "show_in_rest": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "contact-form"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "show_in_rest": 1,
+  "description": ""
+}

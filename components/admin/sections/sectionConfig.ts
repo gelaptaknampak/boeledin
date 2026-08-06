@@ -838,3 +838,317 @@ export const aboutSectionConfig = {
     ],
   },
 } as const;
+
+export const contactSectionConfig = {
+  hero: {
+    id: 397,
+
+    title: "Contact Hero",
+
+    fields: [
+      {
+        name: "badge",
+        label: "Badge",
+        type: "text",
+        acf: "hero_badge",
+      },
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "hero_title",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        acf: "hero_description",
+      },
+    ],
+  },
+
+  form: {
+    id: 395,
+
+    title: "Contact Form",
+
+    fields: [
+      {
+        name: "title",
+        label: "Form Title",
+        type: "text",
+        acf: "form_title",
+      },
+      {
+        name: "description",
+        label: "Form Description",
+        type: "textarea",
+        acf: "form_description",
+      },
+
+      // Option Select
+      {
+        name: "interest1Value",
+        label: "Interest 1 Value",
+        type: "text",
+        acf: "interest_1_value",
+      },
+      {
+        name: "interest1Label",
+        label: "Interest 1 Label",
+        type: "text",
+        acf: "interest_1_label",
+      },
+
+      {
+        name: "interest2Value",
+        label: "Interest 2 Value",
+        type: "text",
+        acf: "interest_2_value",
+      },
+      {
+        name: "interest2Label",
+        label: "Interest 2 Label",
+        type: "text",
+        acf: "interest_2_label",
+      },
+
+      {
+        name: "interest3Value",
+        label: "Interest 3 Value",
+        type: "text",
+        acf: "interest_3_value",
+      },
+      {
+        name: "interest3Label",
+        label: "Interest 3 Label",
+        type: "text",
+        acf: "interest_3_label",
+      },
+
+      {
+        name: "interest4Value",
+        label: "Interest 4 Value",
+        type: "text",
+        acf: "interest_4_value",
+      },
+      {
+        name: "interest4Label",
+        label: "Interest 4 Label",
+        type: "text",
+        acf: "interest_4_label",
+      },
+
+      {
+        name: "interest5Value",
+        label: "Interest 5 Value",
+        type: "text",
+        acf: "interest_5_value",
+      },
+      {
+        name: "interest5Label",
+        label: "Interest 5 Label",
+        type: "text",
+        acf: "interest_5_label",
+      },
+
+      {
+        name: "submitText",
+        label: "Submit Button",
+        type: "text",
+        acf: "submit_text",
+      },
+
+      {
+        name: "successMessage",
+        label: "Success Message",
+        type: "text",
+        acf: "success_message",
+      },
+
+      {
+        name: "errorMessage",
+        label: "Error Message",
+        type: "text",
+        acf: "error_message",
+      },
+    ],
+  },
+
+  info: {
+    id: 412,
+
+    title: "Contact Info",
+
+    fields: [
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "contact_info_title",
+      },
+      {
+        name: "company",
+        label: "Company",
+        type: "text",
+        acf: "company_name",
+      },
+      {
+        name: "address",
+        label: "Address",
+        type: "textarea",
+        acf: "address",
+      },
+
+      // Email
+      {
+        name: "email1",
+        label: "Email 1",
+        type: "text",
+        acf: "email_1",
+      },
+      {
+        name: "email2",
+        label: "Email 2",
+        type: "text",
+        acf: "email_2",
+      },
+
+      // Phone
+      {
+        name: "phone1",
+        label: "Phone 1",
+        type: "text",
+        acf: "phone_1",
+      },
+      {
+        name: "phone2",
+        label: "Phone 2",
+        type: "text",
+        acf: "phone_2",
+      },
+
+      // Business Hours
+      {
+        name: "businessDay1",
+        label: "Business Day 1",
+        type: "text",
+        acf: "business_day_1",
+      },
+      {
+        name: "businessTime1",
+        label: "Business Time 1",
+        type: "text",
+        acf: "business_time_1",
+      },
+
+      {
+        name: "businessDay2",
+        label: "Business Day 2",
+        type: "text",
+        acf: "business_day_2",
+      },
+      {
+        name: "businessTime2",
+        label: "Business Time 2",
+        type: "text",
+        acf: "business_time_2",
+      },
+    ],
+  },
+} as const;
+
+export const footerSectionConfig = {
+  footer: {
+    id: 212,
+    title: "Footer Section",
+
+    fields: [
+       {
+        name: "image_logo",
+        acf: "image_logo",
+        label: "Footer Logo",
+        type: "image",
+      },
+      {
+        name: "footer_description",
+        acf: "footer_description",
+        label: "Footer Description",
+        type: "textarea",
+      },
+
+      {
+        name: "copyright_text",
+        acf: "copyright_text",
+        label: "Copyright Text",
+        type: "text",
+      },
+
+
+      {
+        name: "navigation_title",
+        acf: "navigation_title",
+        label: "Navigation Title",
+        type: "text",
+      },
+
+
+      {
+        name: "navigation_items",
+        acf: "navigation_items",
+        label: "Navigation Items",
+        type: "textarea",
+        hidden: true,
+      },
+
+
+      {
+        name: "service_title",
+        acf: "service_title",
+        label: "Service Title",
+        type: "text",
+      },
+
+
+      {
+        name: "service_items",
+        acf: "service_items",
+        label: "Service Items",
+        type: "textarea",
+        hidden: true,
+      },
+
+
+      {
+        name: "contact_title",
+        acf: "contact_title",
+        label: "Contact Title",
+        type: "text",
+      },
+
+
+      {
+        name: "address",
+        acf: "address",
+        label: "Address",
+        type: "textarea",
+      },
+
+
+      {
+        name: "phone",
+        acf: "phone",
+        label: "Phone",
+        type: "text",
+      },
+
+
+      {
+        name: "email",
+        acf: "email",
+        label: "Email",
+        type: "text",
+      },
+    ],
+  },
+} as const;

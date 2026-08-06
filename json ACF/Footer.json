@@ -1,0 +1,210 @@
+{
+  "key": "group_footer_section",
+  "title": "Footer Section",
+  "fields": [
+    {
+      "key": "field_footer_description",
+      "label": "Footer Description",
+      "name": "footer_description",
+      "type": "textarea",
+      "instructions": "Deskripsi singkat perusahaan pada footer.",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.",
+      "placeholder": "",
+      "maxlength": "",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_copyright_text",
+      "label": "Copyright Text",
+      "name": "copyright_text",
+      "type": "text",
+      "instructions": "Teks copyright footer.",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "BOELEDIN. All rights reserved.",
+      "placeholder": "",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_navigation_title",
+      "label": "Navigation Title",
+      "name": "navigation_title",
+      "type": "text",
+      "default_value": "Navigasi",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_navigation_items",
+      "label": "Navigation Items",
+      "name": "navigation_items",
+      "type": "repeater",
+      "layout": "table",
+      "button_label": "Tambah Menu",
+      "show_in_rest": 1,
+      "edit_in_rest": 1,
+      "sub_fields": [
+        {
+          "key": "field_navigation_label",
+          "label": "Label",
+          "name": "label",
+          "type": "text",
+          "show_in_rest": 1,
+          "edit_in_rest": 1
+        },
+        {
+          "key": "field_navigation_link",
+          "label": "Link",
+          "name": "link",
+          "type": "text",
+          "show_in_rest": 1,
+          "edit_in_rest": 1
+        }
+      ]
+    },
+
+
+    {
+      "key": "field_service_title",
+      "label": "Service Title",
+      "name": "service_title",
+      "type": "text",
+      "default_value": "Layanan",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_service_items",
+      "label": "Service Items",
+      "name": "service_items",
+      "type": "repeater",
+      "layout": "table",
+      "button_label": "Tambah Layanan",
+      "show_in_rest": 1,
+      "edit_in_rest": 1,
+      "sub_fields": [
+        {
+          "key": "field_service_label",
+          "label": "Label",
+          "name": "label",
+          "type": "text",
+          "show_in_rest": 1,
+          "edit_in_rest": 1
+        },
+        {
+          "key": "field_service_link",
+          "label": "Link",
+          "name": "link",
+          "type": "text",
+          "show_in_rest": 1,
+          "edit_in_rest": 1
+        }
+      ]
+    },
+
+
+    {
+      "key": "field_contact_title",
+      "label": "Contact Title",
+      "name": "contact_title",
+      "type": "text",
+      "default_value": "Contact Us",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_address",
+      "label": "Address",
+      "name": "address",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_phone",
+      "label": "Phone",
+      "name": "phone",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_email",
+      "label": "Email",
+      "name": "email",
+      "type": "email",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+
+    {
+      "key": "field_social_media",
+      "label": "Social Media",
+      "name": "social_media",
+      "type": "repeater",
+      "layout": "table",
+      "button_label": "Tambah Social Media",
+      "show_in_rest": 1,
+      "edit_in_rest": 1,
+      "sub_fields": [
+        {
+          "key": "field_social_name",
+          "label": "Name",
+          "name": "name",
+          "type": "text",
+          "show_in_rest": 1,
+          "edit_in_rest": 1
+        },
+        {
+          "key": "field_social_url",
+          "label": "URL",
+          "name": "url",
+          "type": "url",
+          "show_in_rest": 1,
+          "edit_in_rest": 1
+        }
+      ]
+    }
+  ],
+
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "footer"
+      }
+    ]
+  ],
+
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "active": true,
+  "description": "ACF fields untuk footer website BOELEDIN.",
+  "show_in_rest": 1,
+  "edit_in_rest": 1
+}

@@ -16,6 +16,8 @@ export async function PUT(
 
   const body = await req.json();
 
+  console.log("BODY:", body);
+
   const brand = await updateBrand(
     Number(id),
     body.name,

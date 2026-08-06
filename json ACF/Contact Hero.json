@@ -1,0 +1,53 @@
+{
+  "key": "group_contact_hero",
+  "title": "Contact Hero",
+  "fields": [
+    {
+      "key": "field_contact_hero_badge",
+      "label": "Badge",
+      "name": "hero_badge",
+      "type": "text",
+      "instructions": "Contoh: Hubungi Kami",
+      "required": 0,
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_contact_hero_title",
+      "label": "Title",
+      "name": "hero_title",
+      "type": "textarea",
+      "required": 1,
+      "rows": 2,
+      "new_lines": "br",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_contact_hero_description",
+      "label": "Description",
+      "name": "hero_description",
+      "type": "textarea",
+      "required": 1,
+      "rows": 4,
+      "new_lines": "br",
+      "show_in_rest": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "contacthero"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "acf_after_title",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "",
+  "show_in_rest": 1
+}

@@ -5,7 +5,10 @@ import { updatePostACF } from "@/lib/wordpress";
 import {
   homeSectionConfig,
   aboutSectionConfig,
+  contactSectionConfig,
+  footerSectionConfig,
 } from "@/components/admin/sections/sectionConfig";
+import Footer from "@/components/Footer";
 
 function getValue(obj: any, path: string) {
   return path.split(".").reduce((current, key) => {
@@ -41,6 +44,8 @@ export async function POST(req: NextRequest) {
     const allSections = [
       ...Object.values(homeSectionConfig),
       ...Object.values(aboutSectionConfig),
+      ...Object.values(contactSectionConfig),
+      ...Object.values(footerSectionConfig),
     ];
 
     const config = allSections.find((section) => section.id === id);

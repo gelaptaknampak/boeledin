@@ -1,0 +1,120 @@
+{
+  "key": "group_contact_info",
+  "title": "Contact Info",
+  "fields": [
+    {
+      "key": "field_contact_info_title",
+      "label": "Title",
+      "name": "contact_info_title",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_company_name",
+      "label": "Company",
+      "name": "company_name",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_address",
+      "label": "Address",
+      "name": "address",
+      "type": "textarea",
+      "rows": 4,
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_email_1",
+      "label": "Email 1",
+      "name": "email_1",
+      "type": "email",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_email_2",
+      "label": "Email 2",
+      "name": "email_2",
+      "type": "email",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_phone_1",
+      "label": "Phone 1",
+      "name": "phone_1",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_phone_2",
+      "label": "Phone 2",
+      "name": "phone_2",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_business_day_1",
+      "label": "Business Day 1",
+      "name": "business_day_1",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_business_time_1",
+      "label": "Business Time 1",
+      "name": "business_time_1",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_business_day_2",
+      "label": "Business Day 2",
+      "name": "business_day_2",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_business_time_2",
+      "label": "Business Time 2",
+      "name": "business_time_2",
+      "type": "text",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_latitude",
+      "label": "Latitude",
+      "name": "latitude",
+      "type": "text",
+      "default_value": "-6.111602791048489",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_longitude",
+      "label": "Longitude",
+      "name": "longitude",
+      "type": "text",
+      "default_value": "106.74596102766824",
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_google_maps_url",
+      "label": "Google Maps URL",
+      "name": "google_maps_url",
+      "type": "url",
+      "show_in_rest": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "contact-info"
+      }
+    ]
+  ],
+  "position": "normal",
+  "style": "default",
+  "active": true,
+  "show_in_rest": 1
+}

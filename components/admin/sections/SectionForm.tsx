@@ -449,13 +449,17 @@ export default function SectionForm({ data, config }: Props) {
         <h2 className="text-xl font-semibold">{config.title}</h2>
 
         <div className="mt-6 space-y-5">
-          {config.fields.map((field: any) => (
-            <div key={field.name}>
-              <label className="mb-2 block font-medium">{field.label}</label>
+          {config.fields
+  .filter((field: any) => !field.hidden)
+  .map((field: any) => (
+    <div key={field.name}>
+      <label className="mb-2 block font-medium">
+        {field.label}
+      </label>
 
-              {renderField(field)}
-            </div>
-          ))}
+      {renderField(field)}
+    </div>
+  ))}
         </div>
       </div>
 

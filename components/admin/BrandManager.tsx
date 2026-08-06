@@ -122,6 +122,9 @@ export default function BrandManager() {
 
       if (editingLogo) {
         const media = await uploadMedia(editingLogo);
+
+        console.log("MEDIA:", media);
+
         logoId = media.id;
       }
 

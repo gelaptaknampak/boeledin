@@ -488,6 +488,12 @@ export async function updateBrand(
   brand_logo: number | null,
   token: string,
 ) {
+
+  console.log({
+    id,
+    name,
+    brand_logo,
+  });
   try {
     const response = await axios.post(
       `${WORDPRESS_API}/brand/${id}`,
@@ -501,6 +507,8 @@ export async function updateBrand(
         },
       },
     );
+
+    console.log(response.data);
 
     return response.data;
   } catch (error: any) {
