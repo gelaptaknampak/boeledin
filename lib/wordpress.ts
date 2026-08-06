@@ -428,19 +428,45 @@ export async function getBrands(params?: any) {
       params,
     });
 
-    return response.data;
+    const brands = await Promise.all(
+      response.data.map(async (brand: any) => {
+        let logo = "";
+
+        if (brand.acf?.brand_logo) {
+          try {
+            const media = await wpClient.get(`/media/${brand.acf.brand_logo}`);
+
+            logo = media.data.source_url;
+          } catch (err) {
+            console.error(`Gagal mengambil logo brand ${brand.name}:`, err);
+          }
+        }
+
+        return {
+          ...brand,
+          logo,
+        };
+      }),
+    );
+
+    return brands;
   } catch (error) {
     console.error("Error fetching brands:", error);
     return [];
   }
 }
 
-export async function createBrand(name: string, token: string) {
+export async function createBrand(
+  name: string,
+  brand_logo: number | null,
+  token: string,
+) {
   try {
     const response = await axios.post(
       `${WORDPRESS_API}/brand`,
       {
         name,
+        brand_logo,
       },
       {
         headers: {
@@ -452,17 +478,22 @@ export async function createBrand(name: string, token: string) {
     return response.data;
   } catch (error: any) {
     console.error(error.response?.data || error);
-
     return null;
   }
 }
 
-export async function updateBrand(id: number, name: string, token: string) {
+export async function updateBrand(
+  id: number,
+  name: string,
+  brand_logo: number | null,
+  token: string,
+) {
   try {
     const response = await axios.post(
       `${WORDPRESS_API}/brand/${id}`,
       {
         name,
+        brand_logo, // kirim langsung ke v2
       },
       {
         headers: {
@@ -474,7 +505,6 @@ export async function updateBrand(id: number, name: string, token: string) {
     return response.data;
   } catch (error: any) {
     console.error(error.response?.data || error);
-
     return null;
   }
 }

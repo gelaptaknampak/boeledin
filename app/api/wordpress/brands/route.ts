@@ -27,7 +27,11 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const brand = await createBrand(body.name, token);
+    const brand = await createBrand(
+      body.name,
+      body.brand_logo,
+      token,
+    );
 
     if (!brand) {
       return NextResponse.json(

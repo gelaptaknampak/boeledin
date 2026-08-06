@@ -16,7 +16,12 @@ export async function PUT(
 
   const body = await req.json();
 
-  const brand = await updateBrand(Number(id), body.name, token);
+  const brand = await updateBrand(
+    Number(id),
+    body.name,
+    body.brand_logo,
+    token,
+  );
 
   return NextResponse.json(brand);
 }

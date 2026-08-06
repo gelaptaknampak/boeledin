@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Edit, Trash2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -9,6 +10,11 @@ interface Brand {
   name: string;
   slug: string;
   count: number;
+
+  acf?: {
+    brand_logo?: number;
+    brand_logo_url?: string;
+  };
 }
 
 export default function BrandManager() {
@@ -16,10 +22,13 @@ export default function BrandManager() {
   const [loading, setLoading] = useState(true);
 
   const [newBrand, setNewBrand] = useState("");
+  const [newLogo, setNewLogo] = useState<File | null>(null);
+  const [newLogoPreview, setNewLogoPreview] = useState("");
 
   const [editingId, setEditingId] = useState<number | null>(null);
-
   const [editingName, setEditingName] = useState("");
+  const [editingLogo, setEditingLogo] = useState<File | null>(null);
+  const [editingLogoPreview, setEditingLogoPreview] = useState("");
 
   const [saving, setSaving] = useState(false);
 
@@ -35,9 +44,7 @@ export default function BrandManager() {
         cache: "no-store",
       });
 
-      if (!res.ok) {
-        throw new Error();
-      }
+      if (!res.ok) throw new Error();
 
       const data = await res.json();
 
@@ -50,11 +57,33 @@ export default function BrandManager() {
     }
   }
 
+  async function uploadMedia(file: File) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const res = await fetch("/api/wordpress/media", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Upload gagal");
+
+    return await res.json();
+  }
+
   async function handleAddBrand() {
     if (!newBrand.trim()) return;
 
     try {
       setSaving(true);
+
+      let logoId = null;
+
+      if (newLogo) {
+        const media = await uploadMedia(newLogo);
+        logoId = media.id;
+      }
 
       const res = await fetch("/api/wordpress/brands", {
         method: "POST",
@@ -63,6 +92,7 @@ export default function BrandManager() {
         },
         body: JSON.stringify({
           name: newBrand,
+          brand_logo: logoId,
         }),
       });
 
@@ -71,6 +101,8 @@ export default function BrandManager() {
       toast.success("Brand berhasil ditambahkan");
 
       setNewBrand("");
+      setNewLogo(null);
+      setNewLogoPreview("");
 
       fetchBrands();
     } catch {
@@ -86,6 +118,13 @@ export default function BrandManager() {
     try {
       setSaving(true);
 
+      let logoId = undefined;
+
+      if (editingLogo) {
+        const media = await uploadMedia(editingLogo);
+        logoId = media.id;
+      }
+
       const res = await fetch(`/api/wordpress/brands/${id}`, {
         method: "PUT",
         headers: {
@@ -93,6 +132,7 @@ export default function BrandManager() {
         },
         body: JSON.stringify({
           name: editingName,
+          brand_logo: logoId,
         }),
       });
 
@@ -101,10 +141,12 @@ export default function BrandManager() {
       toast.success("Brand berhasil diupdate");
 
       setEditingId(null);
+      setEditingLogo(null);
+      setEditingLogoPreview("");
 
       fetchBrands();
     } catch {
-      toast.error("Gagal mengupdate brand");
+      toast.error("Gagal update brand");
     } finally {
       setSaving(false);
     }
@@ -129,91 +171,154 @@ export default function BrandManager() {
   }
 
   return (
-    <div className="bg-card border border-border rounded-xl p-6">
-      {/* Header */}
-
-      <div className="flex items-center justify-between mb-6">
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-xl font-bold">Brand</h2>
-
-          <p className="text-sm text-muted-foreground">
-            Kelola daftar brand produk
+          <p className="text-muted-foreground text-sm">
+            Kelola brand beserta logo
           </p>
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            value={newBrand}
-            onChange={(e) => setNewBrand(e.target.value)}
-            placeholder="Nama brand..."
-            className="border rounded-lg px-3 py-2"
-          />
-
-          <button
-            disabled={saving}
-            onClick={handleAddBrand}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground"
-          >
-            <Plus className="w-4 h-4" />
-            Tambah
-          </button>
         </div>
       </div>
 
-      {/* Loading */}
+      {/* ADD BRAND */}
 
-      {loading && (
-        <div className="py-10 text-center text-muted-foreground">
-          Memuat data...
-        </div>
-      )}
+      <div className="mb-8 rounded-xl border p-5 space-y-4">
+        <input
+          value={newBrand}
+          onChange={(e) => setNewBrand(e.target.value)}
+          placeholder="Nama Brand"
+          className="w-full rounded-lg border px-4 py-2"
+        />
 
-      {/* Empty */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
 
-      {!loading && brands.length === 0 && (
-        <div className="py-10 text-center text-muted-foreground">
-          Belum ada brand.
-        </div>
-      )}
+            if (!file) return;
 
-      {/* List */}
+            setNewLogo(file);
+            setNewLogoPreview(URL.createObjectURL(file));
+          }}
+        />
 
-      {!loading && brands.length > 0 && (
-        <div className="divide-y divide-border">
+        {newLogoPreview && (
+          <Image
+            src={newLogoPreview}
+            alt=""
+            width={120}
+            height={60}
+            className="h-16 w-auto object-contain border rounded-lg p-2"
+          />
+        )}
+
+        <button
+          disabled={saving}
+          onClick={handleAddBrand}
+          className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-primary-foreground"
+        >
+          <Plus className="h-4 w-4" />
+          Tambah Brand
+        </button>
+      </div>
+
+      {loading && <div className="text-center py-10">Memuat...</div>}
+
+      {!loading && (
+        <div className="divide-y">
           {brands.map((brand) => (
             <div
               key={brand.id}
-              className="flex items-center justify-between py-4"
+              className="flex items-start justify-between gap-6 py-5"
             >
-              <div>
-                {editingId === brand.id ? (
-                  <input
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    className="border rounded-lg px-3 py-2 w-72"
-                  />
-                ) : (
-                  <h3 className="font-medium">{brand.name}</h3>
-                )}
+              <div className="flex flex-1 gap-4 items-start min-w-0">
+                <div className="h-16 w-24 rounded-lg border flex items-center justify-center bg-white">
+                  {editingId === brand.id ? (
+                    editingLogoPreview ? (
+                      <Image
+                        src={editingLogoPreview}
+                        alt=""
+                        width={80}
+                        height={40}
+                        className="object-contain"
+                      />
+                    ) : (
+                      brand.acf?.brand_logo_url && (
+                        <Image
+                          src={brand.acf.brand_logo_url}
+                          alt=""
+                          width={80}
+                          height={40}
+                          className="object-contain"
+                        />
+                      )
+                    )
+                  ) : (
+                    brand.acf?.brand_logo_url && (
+                      <Image
+                        src={brand.acf.brand_logo_url}
+                        alt={brand.name}
+                        width={80}
+                        height={40}
+                        className="object-contain"
+                      />
+                    )
+                  )}
+                </div>
 
-                <p className="text-sm text-muted-foreground">
-                  Digunakan oleh {brand.count} produk
-                </p>
+                <div>
+                  {editingId === brand.id ? (
+                    <div className="space-y-3 w-full max-w-md">
+                      <input
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        className="w-full rounded-lg border px-3 py-2"
+                      />
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+
+                          if (!file) return;
+
+                          setEditingLogo(file);
+                          setEditingLogoPreview(URL.createObjectURL(file));
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h3 className="font-semibold">{brand.name}</h3>
+
+                      <p className="text-sm text-muted-foreground">
+                        Digunakan oleh {brand.count} produk
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex gap-2">
                 {editingId === brand.id ? (
                   <>
                     <button
-                      disabled={saving}
                       onClick={() => handleUpdateBrand(brand.id)}
-                      className="px-3 py-1 rounded bg-green-600 text-white"
+                      className="rounded bg-green-600 px-4 py-2 text-white"
                     >
                       Simpan
                     </button>
 
                     <button
-                      onClick={() => setEditingId(null)}
-                      className="px-3 py-1 rounded border"
+                      onClick={() => {
+                        setEditingId(null);
+                        setEditingLogo(null);
+                        setEditingLogoPreview("");
+                      }}
+                      className="rounded border px-4 py-2"
                     >
                       Batal
                     </button>
@@ -225,16 +330,16 @@ export default function BrandManager() {
                         setEditingId(brand.id);
                         setEditingName(brand.name);
                       }}
-                      className="p-2 rounded-lg hover:bg-accent"
+                      className="rounded-lg p-2 hover:bg-accent"
                     >
-                      <Edit className="w-4 h-4 text-primary" />
+                      <Edit className="h-4 w-4 text-primary" />
                     </button>
 
                     <button
                       onClick={() => handleDeleteBrand(brand.id)}
-                      className="p-2 rounded-lg hover:bg-accent"
+                      className="rounded-lg p-2 hover:bg-accent"
                     >
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-red-500" />
                     </button>
                   </>
                 )}
