@@ -41,7 +41,12 @@ export default async function ContactFormPage() {
   config.fields.forEach((field) => {
     let value = acf[field.acf];
 
-    // // repeater
+    // Checkbox / ACF True False
+    if (field.type === "true_false") {
+      value = value === true || value === 1 || value === "1";
+    }
+
+    // // Repeater (jika nanti dipakai)
     // if (field.type === "repeater") {
     //   value = value ?? [];
     // }

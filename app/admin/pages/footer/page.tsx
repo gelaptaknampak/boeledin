@@ -3,7 +3,6 @@ import { getPostById } from "@/lib/wordpress";
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { footerSectionConfig } from "@/components/admin/sections/sectionConfig";
 
-
 function setValue(obj: any, path: string, value: any) {
   const keys = path.split(".");
 
@@ -26,38 +25,39 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-
 export default async function FooterFormPage() {
   const config = footerSectionConfig.footer;
 
   const post = await getPostById(config.id);
 
-
   if (!post) {
     throw new Error("Footer tidak ditemukan");
   }
-
 
   const acf = post.acf ?? {};
 
   const data: any = {};
 
-
   config.fields.forEach((field) => {
     let value = acf[field.acf];
 
-    setValue(
-      data,
-      field.name,
-      value ?? ""
-    );
+    // Parse semua field bertipe *-list (brand-list, social-media-list, dll)
+    if (typeof field.type === "string" && field.type.endsWith("-list")) {
+      try {
+        if (typeof value === "string") {
+          value = value ? JSON.parse(value) : [];
+        }
+
+        if (!Array.isArray(value)) {
+          value = [];
+        }
+      } catch {
+        value = [];
+      }
+    }
+
+    setValue(data, field.name, value ?? "");
   });
 
-
-  return (
-    <SectionForm
-      data={data}
-      config={config}
-    />
-  );
+  return <SectionForm data={data} config={config} />;
 }

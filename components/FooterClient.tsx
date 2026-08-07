@@ -6,10 +6,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 
+type SocialMediaItem = {
+  logo: number;
+  link: string;
+};
+
 type FooterProps = {
-  data?: { 
-    
+  data?: {
     image_logo?: number;
+    image_logo_width?: number;
+    image_logo_height?: number;
 
     footer_description?: string;
     copyright_text?: string;
@@ -21,29 +27,72 @@ type FooterProps = {
     address?: string;
     phone?: string;
     email?: string;
+
+    social_media_list?: SocialMediaItem[];
   };
 };
 
 export default function FooterClient({ data }: FooterProps) {
   const [logo, setLogo] = useState("/logo-white.png");
 
-useEffect(() => {
-  async function loadLogo() {
-    if (!data?.image_logo) return;
+  const [socialMedia, setSocialMedia] = useState<
+    {
+      logo: string;
+      link: string;
+    }[]
+  >([]);
 
-    const res = await fetch(
-      `/api/wordpress/media/page/${data.image_logo}`
-    );
+  useEffect(() => {
+    async function loadAssets() {
+      // Logo Footer
+      if (data?.image_logo) {
+        try {
+          const res = await fetch(
+            `/api/wordpress/media/page/${data.image_logo}`,
+          );
 
-    const media = await res.json();
+          const media = await res.json();
 
-    if (media?.source_url) {
-      setLogo(media.source_url);
+          if (media?.source_url) {
+            setLogo(media.source_url);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Social Media
+      if (data?.social_media_list?.length) {
+        try {
+          const socials = await Promise.all(
+            data.social_media_list.map(async (item) => {
+              if (!item.logo) {
+                return {
+                  logo: "",
+                  link: item.link,
+                };
+              }
+
+              const res = await fetch(`/api/wordpress/media/page/${item.logo}`);
+
+              const media = await res.json();
+
+              return {
+                logo: media?.source_url ?? "",
+                link: item.link,
+              };
+            }),
+          );
+
+          setSocialMedia(socials);
+        } catch (err) {
+          console.error(err);
+        }
+      }
     }
-  }
 
-  loadLogo();
-}, [data?.image_logo]);
+    loadAssets();
+  }, [data]);
 
   const currentYear = new Date().getFullYear();
 
@@ -51,37 +100,25 @@ useEffect(() => {
     data?.footer_description ??
     "Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.";
 
-  const copyright =
-    data?.copyright_text ??
-    "BOELEDIN. All rights reserved.";
+  const copyright = data?.copyright_text ?? "BOELEDIN. All rights reserved.";
 
-  const navigationTitle =
-    data?.navigation_title ??
-    "Navigasi";
+  const navigationTitle = data?.navigation_title ?? "Navigasi";
 
-  const serviceTitle =
-    data?.service_title ??
-    "Layanan";
+  const serviceTitle = data?.service_title ?? "Layanan";
 
-  const contactTitle =
-    data?.contact_title ??
-    "Contact Us";
+  const contactTitle = data?.contact_title ?? "Contact Us";
 
   const address =
     data?.address ??
     "Rukan Exclusive, Jl. Bukit Golf Mediterania, Pantai Indah Kapuk No.1A Blok G, RT.7/RW.2, Kamal Muara, Penjaringan, Jakarta Utara, DKI Jakarta 14470";
 
-  const phone =
-    data?.phone ??
-    "+62 813-1906-0606";
+  const phone = data?.phone ?? "+62 813-1906-0606";
 
-  const email =
-    data?.email ??
-    "info@boeledin.com";
+  const email = data?.email ?? "info@boeledin.com";
 
-//   const logo =
-//     data?.image_logo?.url ??
-//     "/logo-white.png";
+  //   const logo =
+  //     data?.image_logo?.url ??
+  //     "/logo-white.png";
 
   const navigationItems = [
     {
@@ -125,6 +162,9 @@ useEffect(() => {
     },
   ];
 
+  const logoWidth = data?.image_logo_width ?? 220;
+  const logoHeight = data?.image_logo_height ?? 70;
+
   return (
     <footer className="bg-card border-t border-border mt-auto">
       <div className="container mx-auto px-4 py-12">
@@ -133,10 +173,10 @@ useEffect(() => {
           <div>
             <Image
               src={logo}
-              alt="BOELEDIN"
-              width={70}
-              height={70}
-              className="mb-3 h-7 w-auto"
+              alt="BOELED"
+              width={logoWidth}
+              height={logoHeight}
+              className="h-auto max-w-full object-contain"
               unoptimized
             />
 
@@ -145,40 +185,30 @@ useEffect(() => {
             </p>
 
             <div className="flex gap-3">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-accent p-2 hover:bg-primary hover:text-primary-foreground"
-              >
-                <span className="font-bold">f</span>
-              </a>
-
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-accent p-2 hover:bg-primary hover:text-primary-foreground"
-              >
-                <span className="font-bold">𝕏</span>
-              </a>
-
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-accent p-2 hover:bg-primary hover:text-primary-foreground"
-              >
-                📷
-              </a>
+              {socialMedia.map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-accent p-2 transition hover:bg-primary"
+                >
+                  <Image
+                    src={item.logo}
+                    alt={`Social Media ${index + 1}`}
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 object-contain"
+                    unoptimized
+                  />
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Navigation */}
           <div>
-            <h4 className="mb-4 font-semibold">
-              {navigationTitle}
-            </h4>
+            <h4 className="mb-4 font-semibold">{navigationTitle}</h4>
 
             <ul className="space-y-2">
               {navigationItems.map((item) => (
@@ -196,9 +226,7 @@ useEffect(() => {
 
           {/* Services */}
           <div>
-            <h4 className="mb-4 font-semibold">
-              {serviceTitle}
-            </h4>
+            <h4 className="mb-4 font-semibold">{serviceTitle}</h4>
 
             <ul className="space-y-2">
               {serviceItems.map((item) => (
@@ -216,9 +244,7 @@ useEffect(() => {
 
           {/* Contact */}
           <div>
-            <h4 className="mb-4 font-semibold">
-              {contactTitle}
-            </h4>
+            <h4 className="mb-4 font-semibold">{contactTitle}</h4>
 
             <ul className="space-y-3">
               <li className="flex gap-2 text-sm text-muted-foreground">

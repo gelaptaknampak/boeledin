@@ -886,7 +886,88 @@ export const contactSectionConfig = {
         acf: "form_description",
       },
 
-      // Option Select
+      // Full Name
+      {
+        name: "fullNameLabel",
+        label: "Full Name Label",
+        type: "text",
+        acf: "full_name_label",
+      },
+      {
+        name: "fullNamePlaceholder",
+        label: "Full Name Placeholder",
+        type: "text",
+        acf: "full_name_placeholder",
+      },
+      {
+        name: "fullNameRequired",
+        label: "Full Name Required",
+        type: "true_false",
+        acf: "full_name_required",
+      },
+
+      // Company
+      {
+        name: "companyLabel",
+        label: "Company Label",
+        type: "text",
+        acf: "company_label",
+      },
+      {
+        name: "companyPlaceholder",
+        label: "Company Placeholder",
+        type: "text",
+        acf: "company_placeholder",
+      },
+
+      // Email
+      {
+        name: "emailLabel",
+        label: "Email Label",
+        type: "text",
+        acf: "email_label",
+      },
+      {
+        name: "emailPlaceholder",
+        label: "Email Placeholder",
+        type: "text",
+        acf: "email_placeholder",
+      },
+      {
+        name: "emailRequired",
+        label: "Email Required",
+        type: "true_false",
+        acf: "email_required",
+      },
+
+      // Phone
+      {
+        name: "phoneLabel",
+        label: "Phone Label",
+        type: "text",
+        acf: "phone_label",
+      },
+      {
+        name: "phonePlaceholder",
+        label: "Phone Placeholder",
+        type: "text",
+        acf: "phone_placeholder",
+      },
+
+      // Interest
+      {
+        name: "interestLabel",
+        label: "Interest Label",
+        type: "text",
+        acf: "interest_label",
+      },
+      {
+        name: "interestPlaceholder",
+        label: "Interest Placeholder",
+        type: "text",
+        acf: "interest_placeholder",
+      },
+
       {
         name: "interest1Value",
         label: "Interest 1 Value",
@@ -952,24 +1033,45 @@ export const contactSectionConfig = {
         acf: "interest_5_label",
       },
 
+      // Message
+      {
+        name: "messageLabel",
+        label: "Message Label",
+        type: "text",
+        acf: "message_label",
+      },
+      {
+        name: "messagePlaceholder",
+        label: "Message Placeholder",
+        type: "textarea",
+        acf: "message_placeholder",
+      },
+      {
+        name: "messageRequired",
+        label: "Message Required",
+        type: "true_false",
+        acf: "message_required",
+      },
+
+      // Button
       {
         name: "submitText",
-        label: "Submit Button",
+        label: "Submit Button Text",
         type: "text",
         acf: "submit_text",
       },
 
+      // Response
       {
         name: "successMessage",
         label: "Success Message",
-        type: "text",
+        type: "textarea",
         acf: "success_message",
       },
-
       {
         name: "errorMessage",
         label: "Error Message",
-        type: "text",
+        type: "textarea",
         acf: "error_message",
       },
     ],
@@ -1064,7 +1166,7 @@ export const footerSectionConfig = {
     title: "Footer Section",
 
     fields: [
-       {
+      {
         name: "image_logo",
         acf: "image_logo",
         label: "Footer Logo",
@@ -1084,14 +1186,12 @@ export const footerSectionConfig = {
         type: "text",
       },
 
-
       {
         name: "navigation_title",
         acf: "navigation_title",
         label: "Navigation Title",
         type: "text",
       },
-
 
       {
         name: "navigation_items",
@@ -1101,14 +1201,12 @@ export const footerSectionConfig = {
         hidden: true,
       },
 
-
       {
         name: "service_title",
         acf: "service_title",
         label: "Service Title",
         type: "text",
       },
-
 
       {
         name: "service_items",
@@ -1118,14 +1216,12 @@ export const footerSectionConfig = {
         hidden: true,
       },
 
-
       {
         name: "contact_title",
         acf: "contact_title",
         label: "Contact Title",
         type: "text",
       },
-
 
       {
         name: "address",
@@ -1134,7 +1230,6 @@ export const footerSectionConfig = {
         type: "textarea",
       },
 
-
       {
         name: "phone",
         acf: "phone",
@@ -1142,12 +1237,29 @@ export const footerSectionConfig = {
         type: "text",
       },
 
-
       {
         name: "email",
         acf: "email",
         label: "Email",
         type: "text",
+      },
+      {
+        name: "image_logo_width",
+        acf: "image_logo_width",
+        label: "Footer Logo Width",
+        type: "number",
+      },
+      {
+        name: "image_logo_height",
+        acf: "image_logo_height",
+        label: "Footer Logo Height",
+        type: "number",
+      },
+      {
+        name: "social_media_list",
+        acf: "social_media_list",
+        label: "Social Media List",
+        type: "social-media-list",
       },
     ],
   },

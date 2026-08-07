@@ -1,210 +1,272 @@
 {
-  "key": "group_footer_section",
-  "title": "Footer Section",
+  "key": "group_contact_form",
+  "title": "Contact Form",
   "fields": [
     {
-      "key": "field_footer_description",
-      "label": "Footer Description",
-      "name": "footer_description",
-      "type": "textarea",
-      "instructions": "Deskripsi singkat perusahaan pada footer.",
-      "required": 0,
-      "conditional_logic": 0,
-      "wrapper": {
-        "width": "",
-        "class": "",
-        "id": ""
-      },
-      "default_value": "Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.",
-      "placeholder": "",
-      "maxlength": "",
-      "show_in_rest": 1,
-      "edit_in_rest": 1
-    },
-    {
-      "key": "field_copyright_text",
-      "label": "Copyright Text",
-      "name": "copyright_text",
+      "key": "field_form_title",
+      "label": "Form Title",
+      "name": "form_title",
       "type": "text",
-      "instructions": "Teks copyright footer.",
-      "required": 0,
-      "conditional_logic": 0,
-      "wrapper": {
-        "width": "",
-        "class": "",
-        "id": ""
-      },
-      "default_value": "BOELEDIN. All rights reserved.",
-      "placeholder": "",
       "show_in_rest": 1,
       "edit_in_rest": 1
     },
-
     {
-      "key": "field_navigation_title",
-      "label": "Navigation Title",
-      "name": "navigation_title",
-      "type": "text",
-      "default_value": "Navigasi",
-      "show_in_rest": 1,
-      "edit_in_rest": 1
-    },
-
-    {
-      "key": "field_navigation_items",
-      "label": "Navigation Items",
-      "name": "navigation_items",
-      "type": "repeater",
-      "layout": "table",
-      "button_label": "Tambah Menu",
-      "show_in_rest": 1,
-      "edit_in_rest": 1,
-      "sub_fields": [
-        {
-          "key": "field_navigation_label",
-          "label": "Label",
-          "name": "label",
-          "type": "text",
-          "show_in_rest": 1,
-          "edit_in_rest": 1
-        },
-        {
-          "key": "field_navigation_link",
-          "label": "Link",
-          "name": "link",
-          "type": "text",
-          "show_in_rest": 1,
-          "edit_in_rest": 1
-        }
-      ]
-    },
-
-
-    {
-      "key": "field_service_title",
-      "label": "Service Title",
-      "name": "service_title",
-      "type": "text",
-      "default_value": "Layanan",
-      "show_in_rest": 1,
-      "edit_in_rest": 1
-    },
-
-    {
-      "key": "field_service_items",
-      "label": "Service Items",
-      "name": "service_items",
-      "type": "repeater",
-      "layout": "table",
-      "button_label": "Tambah Layanan",
-      "show_in_rest": 1,
-      "edit_in_rest": 1,
-      "sub_fields": [
-        {
-          "key": "field_service_label",
-          "label": "Label",
-          "name": "label",
-          "type": "text",
-          "show_in_rest": 1,
-          "edit_in_rest": 1
-        },
-        {
-          "key": "field_service_link",
-          "label": "Link",
-          "name": "link",
-          "type": "text",
-          "show_in_rest": 1,
-          "edit_in_rest": 1
-        }
-      ]
-    },
-
-
-    {
-      "key": "field_contact_title",
-      "label": "Contact Title",
-      "name": "contact_title",
-      "type": "text",
-      "default_value": "Contact Us",
-      "show_in_rest": 1,
-      "edit_in_rest": 1
-    },
-
-    {
-      "key": "field_address",
-      "label": "Address",
-      "name": "address",
+      "key": "field_form_description",
+      "label": "Form Description",
+      "name": "form_description",
       "type": "textarea",
       "show_in_rest": 1,
       "edit_in_rest": 1
     },
 
     {
-      "key": "field_phone",
-      "label": "Phone",
-      "name": "phone",
+      "key": "field_full_name_label",
+      "label": "Full Name Label",
+      "name": "full_name_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_full_name_placeholder",
+      "label": "Full Name Placeholder",
+      "name": "full_name_placeholder",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_full_name_required",
+      "label": "Full Name Required",
+      "name": "full_name_required",
+      "type": "true_false",
+      "ui": 1,
+      "default_value": 1,
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_company_label",
+      "label": "Company Label",
+      "name": "company_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_company_placeholder",
+      "label": "Company Placeholder",
+      "name": "company_placeholder",
       "type": "text",
       "show_in_rest": 1,
       "edit_in_rest": 1
     },
 
     {
-      "key": "field_email",
-      "label": "Email",
-      "name": "email",
-      "type": "email",
+      "key": "field_email_label",
+      "label": "Email Label",
+      "name": "email_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_email_placeholder",
+      "label": "Email Placeholder",
+      "name": "email_placeholder",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_email_required",
+      "label": "Email Required",
+      "name": "email_required",
+      "type": "true_false",
+      "ui": 1,
+      "default_value": 1,
       "show_in_rest": 1,
       "edit_in_rest": 1
     },
 
+    {
+      "key": "field_phone_label",
+      "label": "Phone Label",
+      "name": "phone_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_phone_placeholder",
+      "label": "Phone Placeholder",
+      "name": "phone_placeholder",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
 
     {
-      "key": "field_social_media",
-      "label": "Social Media",
-      "name": "social_media",
-      "type": "repeater",
-      "layout": "table",
-      "button_label": "Tambah Social Media",
+      "key": "field_interest_label",
+      "label": "Interest Label",
+      "name": "interest_label",
+      "type": "text",
       "show_in_rest": 1,
-      "edit_in_rest": 1,
-      "sub_fields": [
-        {
-          "key": "field_social_name",
-          "label": "Name",
-          "name": "name",
-          "type": "text",
-          "show_in_rest": 1,
-          "edit_in_rest": 1
-        },
-        {
-          "key": "field_social_url",
-          "label": "URL",
-          "name": "url",
-          "type": "url",
-          "show_in_rest": 1,
-          "edit_in_rest": 1
-        }
-      ]
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_interest_placeholder",
+      "label": "Interest Placeholder",
+      "name": "interest_placeholder",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_interest_1_label",
+      "label": "Interest 1 Label",
+      "name": "interest_1_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_interest_1_value",
+      "label": "Interest 1 Value",
+      "name": "interest_1_value",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_interest_2_label",
+      "label": "Interest 2 Label",
+      "name": "interest_2_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_interest_2_value",
+      "label": "Interest 2 Value",
+      "name": "interest_2_value",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_interest_3_label",
+      "label": "Interest 3 Label",
+      "name": "interest_3_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_interest_3_value",
+      "label": "Interest 3 Value",
+      "name": "interest_3_value",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_interest_4_label",
+      "label": "Interest 4 Label",
+      "name": "interest_4_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_interest_4_value",
+      "label": "Interest 4 Value",
+      "name": "interest_4_value",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_interest_5_label",
+      "label": "Interest 5 Label",
+      "name": "interest_5_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_interest_5_value",
+      "label": "Interest 5 Value",
+      "name": "interest_5_value",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_message_label",
+      "label": "Message Label",
+      "name": "message_label",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_message_placeholder",
+      "label": "Message Placeholder",
+      "name": "message_placeholder",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_message_required",
+      "label": "Message Required",
+      "name": "message_required",
+      "type": "true_false",
+      "ui": 1,
+      "default_value": 1,
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_submit_text",
+      "label": "Submit Button Text",
+      "name": "submit_text",
+      "type": "text",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+
+    {
+      "key": "field_success_message",
+      "label": "Success Message",
+      "name": "success_message",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
+    },
+    {
+      "key": "field_error_message",
+      "label": "Error Message",
+      "name": "error_message",
+      "type": "textarea",
+      "show_in_rest": 1,
+      "edit_in_rest": 1
     }
   ],
-
-  "location": [
-    [
-      {
-        "param": "post_type",
-        "operator": "==",
-        "value": "footer"
-      }
-    ]
-  ],
-
+  "location": [],
   "menu_order": 0,
   "position": "normal",
   "style": "default",
   "label_placement": "top",
   "instruction_placement": "label",
-  "active": true,
-  "description": "ACF fields untuk footer website BOELEDIN.",
-  "show_in_rest": 1,
-  "edit_in_rest": 1
+  "active": true
 }

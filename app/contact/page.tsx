@@ -14,6 +14,16 @@ export const metadata = {
     "Hubungi PT Future Boeled Indonesia untuk konsultasi digital signage, interactive flat panel, dan LED display.",
 };
 
+function mapSectionData(config: any, acf: any) {
+  const data: any = {};
+
+  config.fields.forEach((field: any) => {
+    data[field.acf] = acf?.[field.acf] ?? "";
+  });
+
+  return data;
+}
+
 export default async function ContactPage() {
   const [hero, form, info] = await Promise.all([
     getPostById(contactSectionConfig.hero.id),
@@ -21,19 +31,25 @@ export default async function ContactPage() {
     getPostById(contactSectionConfig.info.id),
   ]);
 
+  const heroData = mapSectionData(contactSectionConfig.hero, hero?.acf ?? {});
+
+  const formData = mapSectionData(contactSectionConfig.form, form?.acf ?? {});
+
+  const infoData = mapSectionData(contactSectionConfig.info, info?.acf ?? {});
+
   return (
     <>
       <Navigation />
 
       <main>
-        <ContactHero acf={hero?.acf ?? {}} />
+        <ContactHero acf={heroData} />
 
         <section className="py-12 md:py-20">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-              <ContactForm acf={form?.acf ?? {}} />
+              <ContactForm acf={formData} />
 
-              <ContactInfo acf={info?.acf ?? {}} />
+              <ContactInfo acf={infoData} />
             </div>
           </div>
         </section>

@@ -224,7 +224,6 @@ export default function StatsSection({ data }: Props) {
                     h-16
                     sm:h-20
                     rounded-lg
-                    bg-white
                     flex
                     items-center
                     justify-center

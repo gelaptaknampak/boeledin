@@ -92,12 +92,21 @@ export default function SectionForm({ data, config }: Props) {
       const images: Record<string, string> = {};
 
       for (const field of config.fields) {
-        if (field.type !== "image" && field.type !== "brand-list") {
+        if (
+          field.type !== "image" &&
+          field.type !== "brand-list" &&
+          field.type !== "social-media-list"
+        ) {
           continue;
         }
 
         if (field.type === "brand-list") {
           const brands = getValue(data, field.name) ?? [];
+
+          console.log("BRANDS");
+          console.log(brands);
+          console.log(typeof brands);
+          console.log(Array.isArray(brands));
 
           for (let i = 0; i < brands.length; i++) {
             const logoId = brands[i].logo;
@@ -107,6 +116,34 @@ export default function SectionForm({ data, config }: Props) {
             try {
               const res = await fetch(`/api/wordpress/media/page/${logoId}`);
 
+              const result = await res.json();
+
+              if (result?.source_url) {
+                images[`${field.name}.${i}.logo`] = result.source_url;
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }
+
+          continue;
+        }
+
+        if (field.type === "social-media-list") {
+          const socials = getValue(data, field.name) ?? [];
+
+          console.log("SOCIALS");
+          console.log(socials);
+          console.log(typeof socials);
+          console.log(Array.isArray(socials));
+
+          for (let i = 0; i < socials.length; i++) {
+            const logoId = socials[i].logo;
+
+            if (!logoId) continue;
+
+            try {
+              const res = await fetch(`/api/wordpress/media/page/${logoId}`);
               const result = await res.json();
 
               if (result?.source_url) {
@@ -184,7 +221,9 @@ export default function SectionForm({ data, config }: Props) {
     const rawValue = getValue(form, field.name);
 
     const value =
-      field.type === "brand-list" ? (rawValue ?? []) : (rawValue ?? "");
+      field.type === "brand-list" || field.type === "social-media-list"
+        ? (rawValue ?? [])
+        : (rawValue ?? "");
 
     const update = (newValue: any) =>
       setForm(setValue(form, field.name, newValue));
@@ -332,6 +371,12 @@ export default function SectionForm({ data, config }: Props) {
 
                         update(brands);
 
+                        setPreview((prev) => ({
+                          ...prev,
+                          [`${field.name}.${index}.logo`]:
+                            result.media.source_url,
+                        }));
+
                         toast.success("Logo berhasil diupload");
                       } catch (err) {
                         console.error(err);
@@ -341,9 +386,9 @@ export default function SectionForm({ data, config }: Props) {
                     }}
                   />
 
-                  {preview[`brands.${index}.logo`] && (
+                  {preview[`${field.name}.${index}.logo`] && (
                     <Image
-                      src={preview[`brands.${index}.logo`]}
+                      src={preview[`${field.name}.${index}.logo`]}
                       alt={brand.name}
                       width={150}
                       height={80}
@@ -431,6 +476,139 @@ export default function SectionForm({ data, config }: Props) {
           </div>
         );
 
+      case "social-media-list":
+        return (
+          <div className="space-y-4">
+            {(value ?? []).map((social: any, index: number) => (
+              <div key={index} className="space-y-4 rounded-lg border p-4">
+                {/* Logo */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Logo Social Media
+                  </label>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+
+                      if (!file) return;
+
+                      try {
+                        const formData = new FormData();
+                        formData.append("file", file);
+
+                        const res = await fetch("/api/wordpress/media/page", {
+                          method: "POST",
+                          body: formData,
+                        });
+
+                        const result = await res.json();
+
+                        if (!res.ok || !result.success) {
+                          toast.error(result.message ?? "Upload gagal");
+                          return;
+                        }
+
+                        const socials = [...value];
+
+                        socials[index].logo = result.media.id;
+
+                        update(socials);
+
+                        setPreview((prev) => ({
+                          ...prev,
+                          [`${field.name}.${index}.logo`]:
+                            result.media.source_url,
+                        }));
+
+                        toast.success("Logo berhasil diupload");
+                      } catch {
+                        toast.error("Upload gagal");
+                      }
+                    }}
+                  />
+
+                  {preview[`${field.name}.${index}.logo`] && (
+                    <Image
+                      src={preview[`${field.name}.${index}.logo`]}
+                      alt=""
+                      width={50}
+                      height={50}
+                      className="mt-3 h-12 w-12 object-contain"
+                      unoptimized
+                    />
+                  )}
+                </div>
+
+                {/* Link */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Link Social Media
+                  </label>
+
+                  <textarea
+                    rows={2}
+                    className="w-full resize-none rounded-lg border px-4 py-3"
+                    value={social.link ?? ""}
+                    placeholder="[https://instagram.com/](https://instagram.com/)..."
+                    onChange={(e) => {
+                      const socials = [...value];
+
+                      socials[index].link = e.target.value;
+
+                      update(socials);
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="rounded-lg bg-red-500 px-4 py-2 text-white"
+                  onClick={() => {
+                    update(value.filter((_: any, i: number) => i !== index));
+                  }}
+                >
+                  Hapus Social Media
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              className="rounded-lg border px-5 py-2"
+              onClick={() => {
+                update([
+                  ...(value ?? []),
+                  {
+                    logo: "",
+                    link: "",
+                  },
+                ]);
+              }}
+            >
+              + Tambah Social Media
+            </button>
+          </div>
+        );
+
+        case "true_false":
+  return (
+    <label className="flex items-center gap-3">
+      <input
+        type="checkbox"
+        checked={Boolean(value)}
+        onChange={(e) => update(e.target.checked)}
+        className="h-5 w-5 rounded border"
+      />
+
+      <span>
+        Required
+      </span>
+    </label>
+  );
+
       default:
         return (
           <input
@@ -450,16 +628,14 @@ export default function SectionForm({ data, config }: Props) {
 
         <div className="mt-6 space-y-5">
           {config.fields
-  .filter((field: any) => !field.hidden)
-  .map((field: any) => (
-    <div key={field.name}>
-      <label className="mb-2 block font-medium">
-        {field.label}
-      </label>
+            .filter((field: any) => !field.hidden)
+            .map((field: any) => (
+              <div key={field.name}>
+                <label className="mb-2 block font-medium">{field.label}</label>
 
-      {renderField(field)}
-    </div>
-  ))}
+                {renderField(field)}
+              </div>
+            ))}
         </div>
       </div>
 
