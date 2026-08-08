@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FileText, ShoppingCart, Newspaper, TrendingUp } from "lucide-react";
 
@@ -12,30 +13,43 @@ interface DashboardStats {
 }
 
 export default function DashboardOverview() {
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
+
   const [stats, setStats] = useState<DashboardStats>({
     totalPages: 0,
     totalProducts: 0,
     totalNews: 0,
     recentItems: [],
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [lang]);
 
   async function fetchDashboard() {
     try {
-      const res = await fetch("/api/wordpress/dashboard");
+      setError(null);
+      const res = await fetch(`/api/wordpress/dashboard?lang=${lang}`);
 
       if (!res.ok) {
-        throw new Error("Gagal mengambil dashboard");
+        const errorBody = await res.text();
+        throw new Error(`Gagal mengambil dashboard: ${errorBody}`);
       }
 
       const data = await res.json();
 
       setStats(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setStats({
+        totalPages: 0,
+        totalProducts: 0,
+        totalNews: 0,
+        recentItems: [],
+      });
+      setError(err.message || "Gagal mengambil dashboard");
     }
   }
 

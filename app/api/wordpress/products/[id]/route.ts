@@ -1,108 +1,333 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
 import {
   getCustomPostById,
   updateProduct,
   deleteProduct,
 } from "@/lib/wordpress";
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
+const WORDPRESS_URL = "https://wp.boeledin.com";
 
-  const product = await getCustomPostById("products", Number(id));
-
-  if (!product) {
-    return NextResponse.json(
-      { message: "Produk tidak ditemukan" },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json(product);
+interface RouteContext {
+  params: Promise<{
+    id: string;
+  }>;
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
+/**
+ * Mengambil translation ID berdasarkan bahasa yang diminta.
+ *
+ * Contoh:
+ * Product EN:
+ * 525
+ *
+ * translations:
+ * {
+ *   en: 525,
+ *   id: 530
+ * }
+ *
+ * request:
+ * /products/525?lang=id
+ *
+ * hasil:
+ * 530
+ */
+async function getTranslationId(
+  productId: number,
+  lang: string,
+): Promise<number> {
+  const response = await fetch(
+    `${WORDPRESS_URL}/wp-json/boeledin/v1/products/${productId}?lang=${lang}`,
+    {
+      cache: "no-store",
+    },
+  );
 
-  const token = (await cookies()).get("wp_token")?.value;
-
-  if (!token) {
-    return NextResponse.json(
-      {
-        message: "Unauthorized",
-      },
-      {
-        status: 401,
-      },
+  if (!response.ok) {
+    throw new Error(
+      `Gagal mengambil translation product ${productId}`,
     );
   }
-  const result = await deleteProduct(Number(id), token);
 
-  if (!result) {
+  const data = await response.json();
+
+  return Number(data.id);
+}
+
+/**
+ * GET PRODUCT
+ */
+export async function GET(
+  req: Request,
+  { params }: RouteContext,
+) {
+  try {
+    const { id } = await params;
+
+    const requestedId = Number(id);
+
+    if (!requestedId) {
+      return NextResponse.json(
+        {
+          message: "ID produk tidak valid",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+
+    const lang = searchParams.get("lang") || "id";
+
+    /**
+     * Ambil product sesuai language.
+     *
+     * Custom multilingual API akan menentukan
+     * post ID translation yang benar.
+     */
+    const translatedId = await getTranslationId(
+      requestedId,
+      lang,
+    );
+
+    const product = await getCustomPostById(
+      "products",
+      translatedId,
+      {
+        lang,
+      },
+      lang as any,
+    );
+
+    if (!product) {
+      return NextResponse.json(
+        {
+          message: "Produk tidak ditemukan",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
+
+    return NextResponse.json({
+      ...product,
+
+      /**
+       * ID yang sedang digunakan oleh form.
+       */
+      id: translatedId,
+
+      /**
+       * ID awal yang dikirim dari URL.
+       */
+      requested_id: requestedId,
+
+      /**
+       * Bahasa product yang sedang diedit.
+       */
+      language: lang,
+    });
+  } catch (error) {
+    console.error("GET PRODUCT ERROR:", error);
+
     return NextResponse.json(
       {
-        message: "Gagal menghapus produk",
+        message: "Gagal mengambil produk",
+        error: String(error),
       },
       {
         status: 500,
       },
     );
   }
-  return NextResponse.json(result);
 }
 
-export async function PUT(
+/**
+ * DELETE PRODUCT
+ */
+export async function DELETE(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: RouteContext,
 ) {
-  const token = (await cookies()).get("wp_token");
+  try {
+    const token = (await cookies()).get("wp_token")?.value;
 
-  if (!token) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+    if (!token) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
 
-  const { id } = await params;
+    const { id } = await params;
 
-  const body = await req.json();
+    const productId = Number(id);
 
-  const product = await updateProduct(
-    Number(id),
-    body.nama_produk,
+    if (!productId) {
+      return NextResponse.json(
+        {
+          message: "ID produk tidak valid",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
 
-    {
-      nama_produk: body.nama_produk,
-      model_produk: body.model_produk,
-      short_description: body.short_description,
-      description: body.description,
-      spesifikasi: body.spesifikasi,
-      feature_image: body.feature_image,
-      gallery_ids: body.gallery_ids,
-      download_brosur:
-        body.download_brosur === ""
-          ? null
-          : body.download_brosur
-            ? Number(body.download_brosur)
-            : null,
-    },
+    const result = await deleteProduct(
+      productId,
+      token,
+    );
 
-    body.brand,
-    Number(body["jenis-produk"]),
+    if (!result) {
+      return NextResponse.json(
+        {
+          message: "Gagal menghapus produk",
+        },
+        {
+          status: 500,
+        },
+      );
+    }
 
-    token.value,
-  );
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("DELETE PRODUCT ERROR:", error);
 
-  if (!product) {
     return NextResponse.json(
-      { message: "Gagal update produk" },
-      { status: 500 },
+      {
+        message: "Gagal menghapus produk",
+        error: String(error),
+      },
+      {
+        status: 500,
+      },
     );
   }
+}
 
-  return NextResponse.json(product);
+/**
+ * UPDATE PRODUCT
+ */
+export async function PUT(
+  req: Request,
+  { params }: RouteContext,
+) {
+  try {
+    const token = (await cookies()).get("wp_token")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
+    const { id } = await params;
+
+    const requestedId = Number(id);
+
+    if (!requestedId) {
+      return NextResponse.json(
+        {
+          message: "ID produk tidak valid",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    const body = await req.json();
+
+    const { searchParams } = new URL(req.url);
+
+    const lang =
+      searchParams.get("lang") ||
+      body.lang ||
+      "id";
+
+    /**
+     * Cari ID translation terlebih dahulu.
+     *
+     * Contoh:
+     *
+     * URL:
+     * /products/525?lang=id
+     *
+     * 525 = EN
+     * 530 = ID
+     *
+     * Maka update dilakukan ke 530.
+     */
+    const productId = await getTranslationId(
+      requestedId,
+      lang,
+    );
+
+    const product = await updateProduct(
+      productId,
+      body.nama_produk,
+      {
+        nama_produk: body.nama_produk,
+        model_produk: body.model_produk,
+
+        short_description: body.short_description,
+        description: body.description,
+        spesifikasi: body.spesifikasi,
+
+        feature_image: body.feature_image,
+        gallery_ids: body.gallery_ids,
+
+        download_brosur:
+          body.download_brosur === ""
+            ? null
+            : body.download_brosur
+              ? Number(body.download_brosur)
+              : null,
+      },
+      body.brand,
+      Number(body["jenis-produk"]),
+      token,
+      lang as any,
+    );
+
+    if (!product) {
+      return NextResponse.json(
+        {
+          message: "Gagal update produk",
+        },
+        {
+          status: 500,
+        },
+      );
+    }
+
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error("UPDATE PRODUCT ERROR:", error);
+
+    return NextResponse.json(
+      {
+        message: "Gagal update produk",
+        error: String(error),
+      },
+      {
+        status: 500,
+      },
+    );
+  }
 }

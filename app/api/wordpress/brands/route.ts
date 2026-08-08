@@ -2,9 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getBrands, createBrand } from "@/lib/wordpress";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const brands = await getBrands();
+    const lang = new URL(req.url).searchParams.get("lang") || "id";
+    const brands = await getBrands(undefined, lang as any);
 
     return NextResponse.json(brands);
   } catch (error) {
@@ -27,10 +28,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    const lang = new URL(req.url).searchParams.get("lang") || body.lang || "id";
     const brand = await createBrand(
       body.name,
       body.brand_logo,
       token,
+      lang as any,
     );
 
     if (!brand) {

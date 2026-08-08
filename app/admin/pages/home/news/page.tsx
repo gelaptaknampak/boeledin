@@ -25,10 +25,17 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function NewsPage() {
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = homeSectionConfig.news;
+  const lang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("News section tidak ditemukan");

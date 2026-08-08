@@ -2,9 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getProductTypes, createProductType } from "@/lib/wordpress";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const types = await getProductTypes();
+    const lang = new URL(req.url).searchParams.get("lang") || "id";
+    const types = await getProductTypes(undefined, lang as any);
 
     return NextResponse.json(types);
   } catch (error) {
@@ -26,7 +27,8 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  const type = await createProductType(body.name, token);
+  const lang = new URL(req.url).searchParams.get("lang") || body.lang || "id";
+  const type = await createProductType(body.name, token, lang as any);
 
   return NextResponse.json(type);
 }

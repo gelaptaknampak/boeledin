@@ -3,7 +3,8 @@ import { getPosts } from '@/lib/wordpress'
 
 export async function GET(request: NextRequest) {
   try {
-    const news = await getPosts({ per_page: 10 })
+    const lang = request.nextUrl.searchParams.get('lang') || 'id'
+    const news = await getPosts(lang as any)
     return Response.json(news)
   } catch (error) {
     console.error('Error fetching news:', error)

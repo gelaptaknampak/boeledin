@@ -18,11 +18,14 @@ export async function PUT(
 
   console.log("BODY:", body);
 
+  const lang = new URL(req.url).searchParams.get("lang") || body.lang || "id";
+
   const brand = await updateBrand(
     Number(id),
     body.name,
     body.brand_logo,
     token,
+    lang as any,
   );
 
   return NextResponse.json(brand);

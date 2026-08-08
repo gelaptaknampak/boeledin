@@ -1,4 +1,5 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { aboutSectionConfig } from "@/components/admin/sections/sectionConfig";
@@ -25,10 +26,18 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function AboutCTAPage() {
+export default async function AboutCTA({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = aboutSectionConfig.cta;
+  const rawLang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang;
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("About CTA section tidak ditemukan");

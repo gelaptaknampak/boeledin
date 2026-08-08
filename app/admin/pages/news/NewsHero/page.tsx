@@ -1,7 +1,19 @@
 import { getPostById } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
-import { homeSectionConfig } from "@/components/admin/sections/sectionConfig";
+import { newsSectionConfig } from "@/components/admin/sections/sectionConfig";
+
+function getValue(obj: any, path: string) {
+  return path.split(".").reduce((acc, key) => {
+    if (acc == null) return "";
+
+    if (/^\d+$/.test(key)) {
+      return acc[Number(key)];
+    }
+
+    return acc[key];
+  }, obj);
+}
 
 function setValue(obj: any, path: string, value: any) {
   const keys = path.split(".");
@@ -10,7 +22,6 @@ function setValue(obj: any, path: string, value: any) {
 
   keys.forEach((key, index) => {
     const last = index === keys.length - 1;
-
     const next = keys[index + 1];
 
     if (last) {
@@ -26,12 +37,12 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function ServicesPage({
+export default async function NewsHeroPage({
   searchParams,
 }: {
   searchParams: { lang?: string | string[] };
 }) {
-  const config = homeSectionConfig.services;
+  const config = newsSectionConfig.hero;
   const lang = Array.isArray(searchParams.lang)
     ? searchParams.lang[0]
     : searchParams.lang || "id";
@@ -39,7 +50,7 @@ export default async function ServicesPage({
   const post = await getPostById(config.id, lang);
 
   if (!post) {
-    throw new Error("Services section tidak ditemukan");
+    throw new Error("News Hero section tidak ditemukan");
   }
 
   const acf = post.acf ?? {};

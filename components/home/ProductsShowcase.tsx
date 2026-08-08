@@ -10,7 +10,7 @@ type Props = {
 };
 
 export default function ProductsShowcase({ data }: Props) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,17 +24,17 @@ export default function ProductsShowcase({ data }: Props) {
     fetchProducts();
     fetchBrands();
     fetchProductTypes();
-  }, []);
+  }, [language]);
 
   async function fetchBrands() {
-    const res = await fetch("/api/wordpress/brands");
+    const res = await fetch(`/api/wordpress/brands?lang=${language}`);
     if (!res.ok) return;
 
     setBrands(await res.json());
   }
 
   async function fetchProductTypes() {
-    const res = await fetch("/api/wordpress/product-types");
+    const res = await fetch(`/api/wordpress/product-types?lang=${language}`);
     if (!res.ok) return;
 
     setProductTypes(await res.json());
@@ -45,7 +45,7 @@ export default function ProductsShowcase({ data }: Props) {
       setLoading(true);
 
       const res = await fetch(
-        "https://wp.boeledin.com/wp-json/wp/v2/products?_embed&per_page=3&orderby=date&order=desc",
+        `https://wp.boeledin.com/wp-json/wp/v2/products?_embed&per_page=3&orderby=date&order=desc&lang=${language}`,
         {
           cache: "no-store",
         },
@@ -123,43 +123,43 @@ export default function ProductsShowcase({ data }: Props) {
   }
 
   return (
-  <section className="py-14 sm:py-20 md:py-28 bg-accent/5">
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-14 sm:py-20 md:py-28 bg-accent/5">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="mb-10 sm:mb-14 md:mb-16 max-w-4xl">
+          <div className="inline-flex mb-4 px-3 sm:px-4 py-2 bg-accent rounded-full text-xs sm:text-sm font-semibold text-primary">
+            {data?.product_eyebrow ?? ""}
+          </div>
 
-      {/* Section Header */}
-      <div className="mb-10 sm:mb-14 md:mb-16 max-w-4xl">
-
-        <div className="inline-flex mb-4 px-3 sm:px-4 py-2 bg-accent rounded-full text-xs sm:text-sm font-semibold text-primary">
-          {data?.product_eyebrow ?? ""}
-        </div>
-
-        <h2 className="
+          <h2
+            className="
           text-3xl 
           sm:text-4xl 
           md:text-5xl 
           font-bold 
           leading-tight 
           mb-4 sm:mb-6
-        ">
-          {data?.product_title ?? ""}
-        </h2>
+        "
+          >
+            {data?.product_title ?? ""}
+          </h2>
 
-        <p className="
+          <p
+            className="
           text-sm 
           sm:text-base 
           md:text-lg 
           text-muted-foreground 
           max-w-3xl
-        ">
-          {data?.product_description ?? ""}
-        </p>
+        "
+          >
+            {data?.product_description ?? ""}
+          </p>
+        </div>
 
-      </div>
-
-
-      {/* Product Grid */}
-      <div
-        className="
+        {/* Product Grid */}
+        <div
+          className="
           grid 
           grid-cols-1 
           sm:grid-cols-2 
@@ -168,13 +168,11 @@ export default function ProductsShowcase({ data }: Props) {
           sm:gap-6 
           lg:gap-8
         "
-      >
-
-        {filteredProducts.map((product) => (
-
-          <div
-            key={product.id}
-            className="
+        >
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="
               group 
               bg-card 
               rounded-xl 
@@ -187,53 +185,48 @@ export default function ProductsShowcase({ data }: Props) {
               transition-all
               duration-300
             "
-          >
-
-
-            {/* Product Image */}
-            <div
-              className="
+            >
+              {/* Product Image */}
+              <div
+                className="
                 relative 
                 aspect-[4/3]
                 sm:aspect-[5/4]
                 overflow-hidden
               "
-            >
-
-              <Image
-                src={
-                  product._embedded?.["wp:featuredmedia"]?.[0]?.source_url ??
-                  "/placeholder.png"
-                }
-                alt={product.title.rendered}
-                fill
-                className="
+              >
+                <Image
+                  src={
+                    product._embedded?.["wp:featuredmedia"]?.[0]?.source_url ??
+                    "/placeholder.png"
+                  }
+                  alt={product.title.rendered}
+                  fill
+                  className="
                   object-cover
                   transition-transform 
                   duration-500 
                   group-hover:scale-105
                 "
-                sizes="
+                  sizes="
                   (max-width:640px) 100vw,
                   (max-width:1024px) 50vw,
                   33vw
                 "
-              />
+                />
 
-
-              <div
-                className="
+                <div
+                  className="
                   absolute 
                   inset-0 
                   bg-black/10 
                   group-hover:bg-black/25
                   transition
                 "
-              />
+                />
 
-
-              <span
-                className="
+                <span
+                  className="
                   absolute
                   top-3
                   left-3
@@ -250,17 +243,14 @@ export default function ProductsShowcase({ data }: Props) {
                   font-semibold
                   truncate
                 "
-              >
-                {getBrandName(product)} · {getCategoryName(product)}
-              </span>
+                >
+                  {getBrandName(product)} · {getCategoryName(product)}
+                </span>
+              </div>
 
-            </div>
-
-
-
-            {/* Body */}
-            <div
-              className="
+              {/* Body */}
+              <div
+                className="
                 p-4
                 sm:p-5
                 lg:p-6
@@ -268,11 +258,10 @@ export default function ProductsShowcase({ data }: Props) {
                 flex-col
                 flex-1
               "
-            >
-
-              {/* Model */}
-              <span
-                className="
+              >
+                {/* Model */}
+                <span
+                  className="
                   text-[11px]
                   sm:text-xs
                   text-primary
@@ -280,14 +269,13 @@ export default function ProductsShowcase({ data }: Props) {
                   uppercase
                   tracking-wider
                 "
-              >
-                {product.acf?.model_produk}
-              </span>
+                >
+                  {product.acf?.model_produk}
+                </span>
 
-
-              {/* Title */}
-              <h3
-                className="
+                {/* Title */}
+                <h3
+                  className="
                   text-base
                   sm:text-lg
                   font-bold
@@ -295,15 +283,13 @@ export default function ProductsShowcase({ data }: Props) {
                   mb-3
                   line-clamp-2
                 "
-              >
-                {product.title.rendered}
-              </h3>
+                >
+                  {product.title.rendered}
+                </h3>
 
-
-
-              {/* Description */}
-              <p
-                className="
+                {/* Description */}
+                <p
+                  className="
                   text-xs
                   sm:text-sm
                   text-muted-foreground
@@ -311,15 +297,13 @@ export default function ProductsShowcase({ data }: Props) {
                   line-clamp-3
                   min-h-[60px]
                 "
-              >
-                {product.acf?.short_description}
-              </p>
+                >
+                  {product.acf?.short_description}
+                </p>
 
-
-
-              {/* Specs */}
-              <div
-                className="
+                {/* Specs */}
+                <div
+                  className="
                   prose
                   prose-sm
                   max-w-none
@@ -334,37 +318,30 @@ export default function ProductsShowcase({ data }: Props) {
                   prose-li:break-words
                   prose-li:before:hidden
                 "
-                dangerouslySetInnerHTML={{
-                  __html: product.acf?.spesifikasi ?? "",
-                }}
-              />
+                  dangerouslySetInnerHTML={{
+                    __html: product.acf?.spesifikasi ?? "",
+                  }}
+                />
 
+                {/* Button */}
+                <button
+                  onClick={async () => {
+                    if (!product.acf?.download_brosur) return;
 
+                    const res = await fetch(
+                      `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.download_brosur}`,
+                    );
 
-              {/* Button */}
-              <button
-                onClick={async () => {
+                    if (!res.ok) {
+                      alert("Brosur tidak ditemukan");
+                      return;
+                    }
 
-                  if (!product.acf?.download_brosur) return;
+                    const media = await res.json();
 
-
-                  const res = await fetch(
-                    `https://wp.boeledin.com/wp-json/wp/v2/media/${product.acf.download_brosur}`
-                  );
-
-
-                  if (!res.ok) {
-                    alert("Brosur tidak ditemukan");
-                    return;
-                  }
-
-
-                  const media = await res.json();
-
-                  window.open(media.source_url,"_blank");
-
-                }}
-                className="
+                    window.open(media.source_url, "_blank");
+                  }}
+                  className="
                   mt-auto
                   w-full
                   px-4
@@ -380,20 +357,14 @@ export default function ProductsShowcase({ data }: Props) {
                   rounded-lg
                   transition-colors
                 "
-              >
-                Detail Produk
-              </button>
-
-
+                >
+                  Detail Produk
+                </button>
+              </div>
             </div>
-
-          </div>
-
-        ))}
-
+          ))}
+        </div>
       </div>
-
-    </div>
-  </section>
-);
+    </section>
+  );
 }

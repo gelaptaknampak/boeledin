@@ -15,7 +15,13 @@ export async function PUT(
   const { id } = await params;
   const body = await req.json();
 
-  const tag = await updatePostTag(Number(id), body.name, token.value);
+  const lang = new URL(req.url).searchParams.get("lang") || body.lang || "id";
+  const tag = await updatePostTag(
+    Number(id),
+    body.name,
+    token.value,
+    lang as any,
+  );
 
   return NextResponse.json(tag);
 }

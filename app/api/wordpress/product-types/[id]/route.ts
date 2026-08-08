@@ -16,7 +16,13 @@ export async function PUT(
 
   const body = await req.json();
 
-  const type = await updateProductType(Number(id), body.name, token);
+  const lang = new URL(req.url).searchParams.get("lang") || body.lang || "id";
+  const type = await updateProductType(
+    Number(id),
+    body.name,
+    token,
+    lang as any,
+  );
 
   return NextResponse.json(type);
 }

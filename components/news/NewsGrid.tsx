@@ -5,19 +5,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function NewsGrid() {
+  const { language } = useTranslation();
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchNews();
-  }, []);
+  }, [language]);
 
   async function fetchNews() {
     try {
       const res = await fetch(
-        "https://wp.boeledin.com/wp-json/wp/v2/berita?_embed&per_page=100",
+        `https://wp.boeledin.com/wp-json/wp/v2/berita?_embed&per_page=100&lang=${language}`,
         {
           cache: "no-store",
         },

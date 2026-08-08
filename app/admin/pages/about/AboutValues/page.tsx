@@ -25,10 +25,17 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function AboutValuesPage() {
+export default async function AboutValuesPage({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = aboutSectionConfig.values;
+  const lang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("About Values section tidak ditemukan");

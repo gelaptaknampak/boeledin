@@ -6,6 +6,8 @@ import {
   homeSectionConfig,
   aboutSectionConfig,
   contactSectionConfig,
+  productsSectionConfig,
+  newsSectionConfig,
   footerSectionConfig,
 } from "@/components/admin/sections/sectionConfig";
 import Footer from "@/components/Footer";
@@ -24,7 +26,7 @@ function getValue(obj: any, path: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, data } = await req.json();
+    const { id, data, lang } = await req.json();
 
     const token = (await cookies()).get("wp_token")?.value;
 
@@ -45,6 +47,8 @@ export async function POST(req: NextRequest) {
       ...Object.values(homeSectionConfig),
       ...Object.values(aboutSectionConfig),
       ...Object.values(contactSectionConfig),
+      ...Object.values(productsSectionConfig),
+      ...Object.values(newsSectionConfig),
       ...Object.values(footerSectionConfig),
     ];
 
@@ -87,7 +91,7 @@ export async function POST(req: NextRequest) {
     console.log("UPDATE ACF:");
     console.log(acfData);
 
-    const result = await updatePostACF(id, acfData, token);
+    const result = await updatePostACF(id, acfData, token, lang || "id");
 
     return NextResponse.json({
       success: true,

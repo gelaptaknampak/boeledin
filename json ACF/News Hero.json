@@ -1,0 +1,63 @@
+{
+  "key": "group_news_hero",
+  "title": "News Hero",
+  "fields": [
+    {
+      "key": "field_news_hero_eyebrow",
+      "label": "Eyebrow",
+      "name": "eyebrow",
+      "type": "text",
+      "instructions": "Teks kecil yang tampil di atas judul.",
+      "required": 0,
+      "default_value": "Wawasan & Berita",
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_news_hero_title",
+      "label": "Title",
+      "name": "title",
+      "type": "text",
+      "instructions": "Judul utama pada News Hero.",
+      "required": 0,
+      "default_value": "Wawasan Teknologi Display",
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_news_hero_description",
+      "label": "Description",
+      "name": "description",
+      "type": "textarea",
+      "instructions": "Deskripsi yang tampil di bawah judul.",
+      "required": 0,
+      "rows": 4,
+      "new_lines": "br",
+      "default_value": "Artikel dan panduan seputar LED display, interactive flat panel, digital signage, dan perkembangan teknologi tampilan terkini.",
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "show_in_rest": 1
+    }
+  ],
+  "location": [],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "Content configuration for News Hero section.",
+  "show_in_rest": 1
+}

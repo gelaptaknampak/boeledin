@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Edit, Trash2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -12,6 +13,9 @@ interface ProductType {
 }
 
 export default function CategoryManager() {
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
+
   const [category, setCategory] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,15 +29,18 @@ export default function CategoryManager() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [lang]);
 
   async function fetchCategories() {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/wordpress/product-types?_=${Date.now()}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `/api/wordpress/product-types?lang=${lang}&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        },
+      );
 
       if (!res.ok) {
         throw new Error();
@@ -56,7 +63,7 @@ export default function CategoryManager() {
     try {
       setSaving(true);
 
-      const res = await fetch("/api/wordpress/product-types", {
+      const res = await fetch(`/api/wordpress/product-types?lang=${lang}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,15 +93,18 @@ export default function CategoryManager() {
     try {
       setSaving(true);
 
-      const res = await fetch(`/api/wordpress/product-types/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `/api/wordpress/product-types/${id}?lang=${lang}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: editingName,
+          }),
         },
-        body: JSON.stringify({
-          name: editingName,
-        }),
-      });
+      );
 
       if (!res.ok) throw new Error();
 
@@ -115,7 +125,7 @@ export default function CategoryManager() {
     if (!confirm("Yakin ingin menghapus jenis produk ini?")) return;
 
     try {
-      const res = await fetch(`/api/wordpress/product-types/${id}`, {
+      const res = await fetch(`/api/wordpress/product-types/${id}?lang=${lang}`, {
         method: "DELETE",
       });
 

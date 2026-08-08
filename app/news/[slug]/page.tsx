@@ -5,11 +5,14 @@ interface Props {
   params: Promise<{
     slug: string;
   }>;
+  searchParams?: {
+    lang?: string;
+  };
 }
 
-async function getPost(slug: string) {
+async function getPost(slug: string, lang: string) {
   const res = await fetch(
-    `https://wp.boeledin.com/wp-json/wp/v2/berita?slug=${slug}&_embed`,
+    `https://wp.boeledin.com/wp-json/wp/v2/berita?slug=${slug}&_embed&lang=${lang}`,
     {
       cache: "no-store",
     },
@@ -22,10 +25,11 @@ async function getPost(slug: string) {
   return data[0] ?? null;
 }
 
-export default async function NewsDetail({ params }: Props) {
+export default async function NewsDetail({ params, searchParams }: Props) {
   const { slug } = await params;
+  const lang = searchParams?.lang || "id";
 
-  const post = await getPost(slug);
+  const post = await getPost(slug, lang);
 
   if (!post) {
     notFound();

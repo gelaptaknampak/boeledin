@@ -25,10 +25,17 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function FooterFormPage() {
+export default async function FooterFormPage({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = footerSectionConfig.footer;
+  const lang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("Footer tidak ditemukan");

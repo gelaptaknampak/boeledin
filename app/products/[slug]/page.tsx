@@ -7,13 +7,17 @@ interface Props {
   params: Promise<{
     slug: string;
   }>;
+  searchParams?: {
+    lang?: string;
+  };
 }
 
-export default async function ProductDetail({ params }: Props) {
+export default async function ProductDetail({ params, searchParams }: Props) {
   const { slug } = await params;
+  const lang = searchParams?.lang || "id";
 
   const res = await fetch(
-    `https://wp.boeledin.com/wp-json/wp/v2/products?slug=${slug}&_embed`,
+    `https://wp.boeledin.com/wp-json/wp/v2/products?slug=${slug}&_embed&lang=${lang}`,
     {
       cache: "no-store",
     }

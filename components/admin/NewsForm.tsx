@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -41,6 +41,7 @@ import {
   ImageInline,
   MediaEmbed,
   Autoformat,
+  HtmlEmbed,
 } from "ckeditor5";
 
 import "ckeditor5/ckeditor5.css";
@@ -78,6 +79,17 @@ interface NewsFormData {
 
 export default function NewsForm({ mode, postId }: NewsFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
+  const returnUrl = `/admin/news?lang=${lang}`;
+
+  // Template HTML untuk video Google Drive
+  const googleDriveVideoTemplate = `<iframe
+    src="isi dengan link gdrive open akses"
+    width="100%"
+    height="400"
+    allowfullscreen>
+  </iframe>`;
 
   const [loading, setLoading] = useState(false);
 
@@ -103,7 +115,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
   async function fetchCategories() {
     try {
-      const res = await fetch("/api/wordpress/post-categories");
+      const res = await fetch(`/api/wordpress/post-categories?lang=${lang}`);
 
       if (!res.ok) throw new Error();
 
@@ -119,7 +131,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
   async function fetchTags() {
     try {
-      const res = await fetch("/api/wordpress/post-tags");
+      const res = await fetch(`/api/wordpress/post-tags?lang=${lang}`);
 
       if (!res.ok) throw new Error();
 
@@ -139,9 +151,12 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/wordpress/posts/${postId}?_embed`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `/api/wordpress/posts/${postId}?_embed&lang=${lang}`,
+        {
+          cache: "no-store",
+        },
+      );
 
       if (!res.ok) throw new Error();
 
@@ -183,13 +198,13 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
     fetchCategories();
 
     fetchTags();
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
-    if (mode === "edit") {
+    if (mode === "edit" && postId) {
       fetchPost();
     }
-  }, [mode, postId]);
+  }, [mode, postId, lang]);
 
   function handleInputChange(
     e: React.ChangeEvent<
@@ -309,7 +324,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
 
       const method = mode === "create" ? "POST" : "PUT";
 
-      const res = await fetch(url, {
+      const res = await fetch(`${url}?lang=${lang}`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -339,7 +354,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
           : "Berita berhasil diperbarui.",
       );
 
-      router.push("/admin/news");
+      router.push(returnUrl);
 
       router.refresh();
     } catch (err) {
@@ -406,6 +421,23 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
         <CKEditor
           editor={ClassicEditor}
           data={form.content}
+          onReady={(editor) => {
+            const htmlEmbedCommand = editor.commands.get("htmlEmbed");
+
+            if (htmlEmbedCommand) {
+              htmlEmbedCommand.on(
+                "execute",
+                (event, args) => {
+                  // Jika HTML Embed baru dibuat,
+                  // masukkan template Google Drive secara otomatis.
+                  if (!args[0]) {
+                    args[0] = googleDriveVideoTemplate;
+                  }
+                },
+                { priority: "high" },
+              );
+            }
+          }}
           onChange={(_, editor) => {
             setForm((prev) => ({
               ...prev,
@@ -464,6 +496,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
               MediaEmbed,
 
               Autoformat,
+              HtmlEmbed,
             ],
 
             heading: {
@@ -650,6 +683,10 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
               "|",
 
               "codeBlock",
+
+              "|",
+
+              "htmlEmbed",
             ],
           }}
         />
@@ -755,7 +792,7 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
       <div className="flex justify-end gap-3 pt-6">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => router.push(returnUrl)}
           className="px-6 py-3 rounded-lg border"
         >
           Batal

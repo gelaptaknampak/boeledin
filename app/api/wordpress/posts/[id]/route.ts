@@ -12,8 +12,9 @@ interface Params {
 export async function GET(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
+    const lang = req.nextUrl.searchParams.get("lang") || "id";
 
-    const post = await getPost(Number(id));
+    const post = await getPost(Number(id), lang as any);
 
     if (!post) {
       return NextResponse.json(
@@ -62,6 +63,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
+    const lang = req.nextUrl.searchParams.get("lang") || body.lang || "id";
+
     const post = await updatePost(
       Number(id),
       body.title,
@@ -74,6 +77,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         tags: body.tags,
       },
       token.value,
+      lang as any,
     );
 
     if (!post) {

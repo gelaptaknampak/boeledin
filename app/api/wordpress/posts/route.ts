@@ -3,9 +3,10 @@ import { cookies } from "next/headers";
 
 import { getPosts, createPost } from "@/lib/wordpress";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const posts = await getPosts();
+    const lang = req.nextUrl.searchParams.get("lang") || "id";
+    const posts = await getPosts(lang as any);
 
     return NextResponse.json(posts);
   } catch (error) {
@@ -41,6 +42,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const lang = req.nextUrl.searchParams.get("lang") || body.lang || "id";
+
     const post = await createPost(
       body.title,
       {
@@ -52,6 +55,7 @@ export async function POST(req: NextRequest) {
         tags: body.tags,
       },
       token.value,
+      lang as any,
     );
 
     if (!post) {

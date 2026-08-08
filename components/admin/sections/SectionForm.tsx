@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 import {
@@ -79,6 +79,10 @@ function setValue(obj: any, path: string, value: any) {
 }
 
 export default function SectionForm({ data, config }: Props) {
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
+  const returnUrl = `/admin/pages?lang=${lang}`;
+
   const [form, setForm] = useState(data);
 
   const [loading, setLoading] = useState(false);
@@ -186,7 +190,7 @@ export default function SectionForm({ data, config }: Props) {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/admin/pages/section", {
+      const res = await fetch(`/api/admin/pages/section?lang=${lang}`, {
         method: "POST",
 
         headers: {
@@ -196,6 +200,7 @@ export default function SectionForm({ data, config }: Props) {
         body: JSON.stringify({
           id: config.id,
           data: form,
+          lang,
         }),
       });
 
@@ -207,7 +212,7 @@ export default function SectionForm({ data, config }: Props) {
 
       toast.success(result.message ?? "Berhasil diperbarui");
 
-      router.back();
+      router.push(returnUrl);
     } catch (err: any) {
       console.error(err);
 
@@ -639,7 +644,15 @@ export default function SectionForm({ data, config }: Props) {
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => router.push(returnUrl)}
+          className="rounded-lg border px-8 py-3"
+        >
+          Batal
+        </button>
+
         <button
           type="submit"
           disabled={loading}

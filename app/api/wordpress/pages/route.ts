@@ -3,7 +3,8 @@ import { getPages } from '@/lib/wordpress'
 
 export async function GET(request: NextRequest) {
   try {
-    const pages = await getPages()
+    const lang = request.nextUrl.searchParams.get('lang') || 'id'
+    const pages = await getPages(undefined, lang as any)
     return Response.json(pages)
   } catch (error) {
     console.error('Error fetching pages:', error)

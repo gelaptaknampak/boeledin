@@ -2,18 +2,25 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getCustomPosts, createProduct } from "@/lib/wordpress";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const products = await getCustomPosts("products");
+    const { searchParams } = new URL(req.url);
+    const lang = searchParams.get("lang") || "id";
+
+    const products = await getCustomPosts(
+      "products",
+      undefined,
+      lang as any,
+    );
 
     return NextResponse.json(products);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error("GET PRODUCTS ERROR:", error);
 
     return NextResponse.json(
       {
-        message: "WordPress Error",
-        error: String(e),
+        message: "Gagal mengambil produk",
+        error: String(error),
       },
       {
         status: 500,
@@ -23,53 +30,72 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const token = (await cookies()).get("wp_token");
+  try {
+    const token = (await cookies()).get("wp_token")?.value;
 
-  if (!token) {
-    return NextResponse.json(
+    if (!token) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
+    const body = await req.json();
+
+    const { searchParams } = new URL(req.url);
+
+    const lang =
+      searchParams.get("lang") ||
+      body.lang ||
+      "id";
+
+    const product = await createProduct(
+      body.nama_produk,
       {
-        message: "Unauthorized",
+        nama_produk: body.nama_produk,
+        model_produk: body.model_produk,
+
+        short_description: body.short_description,
+        description: body.description,
+        spesifikasi: body.spesifikasi,
+
+        feature_image: body.feature_image,
+        gallery_ids: body.gallery_ids,
+        download_brosur: body.download_brosur,
       },
-      {
-        status: 401,
-      },
+      body.brand,
+      Number(body["jenis-produk"]),
+      token,
+      lang as any,
     );
-  }
 
-  const body = await req.json();
+    if (!product) {
+      return NextResponse.json(
+        {
+          message: "Gagal membuat produk",
+        },
+        {
+          status: 500,
+        },
+      );
+    }
 
-  const product = await createProduct(
-    body.nama_produk,
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error("CREATE PRODUCT ERROR:", error);
 
-    {
-      nama_produk: body.nama_produk,
-      model_produk: body.model_produk,
-
-      short_description: body.short_description,
-      description: body.description,
-      spesifikasi: body.spesifikasi,
-
-      feature_image: body.feature_image,
-      gallery_ids: body.gallery_ids,
-      download_brosur: body.download_brosur,
-    },
-
-    body.brand,
-    Number(body["jenis-produk"]),
-
-    token.value,
-  );
-
-  if (!product) {
     return NextResponse.json(
       {
         message: "Gagal membuat produk",
+        error: String(error),
       },
       {
         status: 500,
       },
     );
   }
-
-  return NextResponse.json(product);
 }

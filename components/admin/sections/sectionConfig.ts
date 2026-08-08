@@ -1264,3 +1264,59 @@ export const footerSectionConfig = {
     ],
   },
 } as const;
+
+export const productsSectionConfig = {
+  hero: {
+    id: 485,
+    title: "Products Hero",
+
+    fields: [
+      {
+        name: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        acf: "eyebrow",
+      },
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "title",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        acf: "description",
+      },
+    ],
+  },
+} as const;
+
+export const newsSectionConfig = {
+  hero: {
+    id: 487,
+    title: "News Hero",
+
+    fields: [
+      {
+        name: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        acf: "eyebrow",
+      },
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "title",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        acf: "description",
+      },
+    ],
+  },
+};

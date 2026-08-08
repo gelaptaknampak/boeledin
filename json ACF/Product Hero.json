@@ -1,0 +1,63 @@
+{
+  "key": "group_products_hero",
+  "title": "Products Hero",
+  "fields": [
+    {
+      "key": "field_products_hero_eyebrow",
+      "label": "Eyebrow",
+      "name": "eyebrow",
+      "type": "text",
+      "instructions": "Teks kecil yang tampil di atas judul.",
+      "required": 0,
+      "default_value": "Direktori Produk",
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_products_hero_title",
+      "label": "Title",
+      "name": "title",
+      "type": "text",
+      "instructions": "Judul utama pada Products Hero.",
+      "required": 0,
+      "default_value": "Katalog Model & Spesifikasi",
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "show_in_rest": 1
+    },
+    {
+      "key": "field_products_hero_description",
+      "label": "Description",
+      "name": "description",
+      "type": "textarea",
+      "instructions": "Deskripsi yang tampil di bawah judul.",
+      "required": 0,
+      "rows": 4,
+      "new_lines": "br",
+      "default_value": "Jelajahi lini Digital Signage, Interactive Flat Panel, dan LED Display kami. Gunakan filter merek dan jenis produk untuk menemukan solusi yang tepat.",
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "show_in_rest": 1
+    }
+  ],
+  "location": [],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "Content configuration for Products Hero section.",
+  "show_in_rest": 1
+}

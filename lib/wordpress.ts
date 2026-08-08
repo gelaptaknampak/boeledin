@@ -4,6 +4,9 @@ const WORDPRESS_URL = "https://wp.boeledin.com";
 const WORDPRESS_API = `${WORDPRESS_URL}/wp-json/wp/v2`;
 const ACF_API = `${WORDPRESS_URL}/wp-json/acf/v3`;
 
+export type LangCode = "id" | "en";
+const DEFAULT_LANG: LangCode = "id";
+
 export const wpClient = axios.create({
   baseURL: WORDPRESS_API,
   headers: {
@@ -22,9 +25,9 @@ export const wpClient = axios.create({
 //   }
 // }
 
-export async function getPostById(id: number) {
+export async function getPostById(id: number, lang: LangCode = DEFAULT_LANG) {
   try {
-    const response = await wpClient.get(`/posts/${id}`);
+    const response = await wpClient.get(`/posts/${id}`, { params: { lang } });
     return response.data;
   } catch (error) {
     console.error("Error fetching post:", error);
@@ -32,9 +35,11 @@ export async function getPostById(id: number) {
   }
 }
 
-export async function getPages(params?: any) {
+export async function getPages(params?: any, lang: LangCode = DEFAULT_LANG) {
   try {
-    const response = await wpClient.get("/pages", { params });
+    const response = await wpClient.get("/pages", {
+      params: { per_page: 100, lang, ...params },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching pages:", error);
@@ -42,9 +47,24 @@ export async function getPages(params?: any) {
   }
 }
 
-export async function getPageById(id: number) {
+export async function getPagesCount(lang: LangCode = DEFAULT_LANG) {
   try {
-    const response = await wpClient.get(`/pages/${id}`);
+    const response = await wpClient.get("/pages", {
+      params: { per_page: 1, lang },
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
+    return Number(response.headers["x-wp-total"] || 0);
+  } catch (error) {
+    console.error("Error fetching pages count:", error);
+    return 0;
+  }
+}
+
+export async function getPageById(id: number, lang: LangCode = DEFAULT_LANG) {
+  try {
+    const response = await wpClient.get(`/pages/${id}`, { params: { lang } });
     return response.data;
   } catch (error) {
     console.error("Error fetching page:", error);
@@ -53,9 +73,15 @@ export async function getPageById(id: number) {
 }
 
 // Custom Post Types (Products, News)
-export async function getCustomPosts(postType: string, params?: any) {
+export async function getCustomPosts(
+  postType: string,
+  params?: any,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
-    const response = await wpClient.get(`/${postType}`, { params });
+    const response = await wpClient.get(`/${postType}`, {
+      params: { per_page: 100, lang, ...params },
+    });
     return response.data;
   } catch (error) {
     console.error(`Error fetching ${postType}:`, error);
@@ -63,12 +89,40 @@ export async function getCustomPosts(postType: string, params?: any) {
   }
 }
 
-export async function getCustomPostById(postType: string, id: number) {
+export async function getCustomPostsCount(
+  postType: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
+  try {
+    const response = await axios.get(
+      `${WORDPRESS_URL}/wp-json/wp/v2/${postType}`,
+      {
+        params: { per_page: 1, lang },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      },
+    );
+    return Number(response.headers["x-wp-total"] || 0);
+  } catch (error) {
+    console.error(`Error fetching ${postType} count:`, error);
+    return 0;
+  }
+}
+
+export async function getCustomPostById(
+  postType: string,
+  id: number,
+  params?: any,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await axios.get(
       `${WORDPRESS_URL}/wp-json/wp/v2/${postType}/${id}`,
       {
         params: {
+          lang,
+          ...params,
           _: Date.now(),
         },
         headers: {
@@ -86,11 +140,15 @@ export async function getCustomPostById(postType: string, id: number) {
 }
 
 // Categories & Taxonomies
-export async function getCategories(postType: string = "post", params?: any) {
+export async function getCategories(
+  postType: string = "post",
+  params?: any,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await wpClient.get(
       postType === "post" ? "/categories" : `/${postType}_category`,
-      { params },
+      { params: { lang, ...params } },
     );
     return response.data;
   } catch (error) {
@@ -100,9 +158,13 @@ export async function getCategories(postType: string = "post", params?: any) {
 }
 
 // Search
-export async function searchContent(search: string, postType?: string) {
+export async function searchContent(
+  search: string,
+  postType?: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
-    const params: any = { search };
+    const params: any = { search, lang };
     if (postType) params.type = postType;
 
     const response = await wpClient.get("/search", { params });
@@ -114,9 +176,11 @@ export async function searchContent(search: string, postType?: string) {
 }
 
 // Media
-export async function getMedia(params?: any) {
+export async function getMedia(params?: any, lang: LangCode = DEFAULT_LANG) {
   try {
-    const response = await wpClient.get("/media", { params });
+    const response = await wpClient.get("/media", {
+      params: { lang, ...params },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching media:", error);
@@ -212,6 +276,60 @@ export async function updateACFFields(
   }
 }
 
+export async function updateACFTerm(
+  taxonomy: string,
+  termId: number,
+  fields: any,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
+  const config = {
+    params: { lang },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  };
+
+  const genericUrl = `${ACF_API}/${taxonomy}/${termId}`;
+  const fieldKeys =
+    fields && typeof fields === "object" ? Object.keys(fields) : [];
+
+  try {
+    const response = await axios.post(genericUrl, { fields }, config);
+    return response.data;
+  } catch (error: any) {
+    const payload = { fields };
+    console.error(
+      `Error updating ACF term for ${taxonomy}/${termId} with payload ${JSON.stringify(payload)}:`,
+      error.response?.data || error,
+    );
+
+    if (fieldKeys.length === 1) {
+      const fieldName = fieldKeys[0];
+      const fieldUrl = `${genericUrl}/${fieldName}`;
+      const fieldValue = fields[fieldName];
+
+      try {
+        const fallbackResponse = await axios.post(
+          fieldUrl,
+          { value: fieldValue },
+          config,
+        );
+
+        return fallbackResponse.data;
+      } catch (fallbackError: any) {
+        console.error(
+          `Fallback ACF field update for ${taxonomy}/${termId}/${fieldName} failed:`,
+          fallbackError.response?.data || fallbackError,
+        );
+      }
+    }
+
+    throw error;
+  }
+}
+
 // ===============================
 // Authentication
 // ===============================
@@ -242,25 +360,30 @@ function authHeader(token: string) {
 }
 
 // product
-export async function getProducts(params?: any) {
+export async function getProducts(lang: LangCode = DEFAULT_LANG, params?: any) {
   try {
     const response = await wpClient.get("/products", {
       params: {
         _embed: true,
+        lang,
         ...params,
       },
     });
 
     return response.data;
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching products:", error);
     return [];
   }
 }
-
-export async function getProduct(id: number) {
+export async function getProduct(id: number, lang: LangCode = DEFAULT_LANG) {
   try {
-    const response = await wpClient.get(`/products/${id}?_embed`);
+    const response = await wpClient.get(`/products/${id}`, {
+      params: {
+        _embed: true,
+        lang,
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -275,6 +398,7 @@ export async function createProduct(
   brand: number,
   jenisProduk: number,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
   try {
     const galleryIds = fields.feature_image
@@ -302,6 +426,7 @@ export async function createProduct(
     console.log(JSON.stringify(payload, null, 2));
 
     const response = await axios.post(`${WORDPRESS_API}/products`, payload, {
+      params: { lang },
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -327,6 +452,7 @@ export async function updateProduct(
   brand: number,
   jenisProduk: number,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
   try {
     const galleryIds = fields.feature_image
@@ -357,6 +483,7 @@ export async function updateProduct(
       `${WORDPRESS_API}/products/${id}`,
       payload,
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -422,20 +549,20 @@ export async function uploadProductImage(file: File, token: string) {
 
 // brand
 
-export async function getBrands(params?: any) {
+export async function getBrands(params?: any, lang: LangCode = DEFAULT_LANG) {
   try {
     const response = await wpClient.get("/brand", {
-      params,
+      params: { lang, ...params },
     });
 
     const brands = await Promise.all(
       response.data.map(async (brand: any) => {
-        let logo = "";
+        let logo = brand.acf?.brand_logo_url || "";
+        const brandLogoId = brand.acf?.brand_logo;
 
-        if (brand.acf?.brand_logo) {
+        if (!logo && brandLogoId) {
           try {
-            const media = await wpClient.get(`/media/${brand.acf.brand_logo}`);
-
+            const media = await wpClient.get(`/media/${brandLogoId}`);
             logo = media.data.source_url;
           } catch (err) {
             console.error(`Gagal mengambil logo brand ${brand.name}:`, err);
@@ -444,6 +571,10 @@ export async function getBrands(params?: any) {
 
         return {
           ...brand,
+          acf: {
+            ...brand.acf,
+            brand_logo_url: logo,
+          },
           logo,
         };
       }),
@@ -460,15 +591,21 @@ export async function createBrand(
   name: string,
   brand_logo: number | null,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
   try {
     const response = await axios.post(
       `${WORDPRESS_API}/brand`,
       {
         name,
-        brand_logo,
+        ...(brand_logo !== undefined && {
+          acf: {
+            brand_logo,
+          },
+        }),
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -485,35 +622,54 @@ export async function createBrand(
 export async function updateBrand(
   id: number,
   name: string,
-  brand_logo: number | null,
+  brand_logo: number | null | undefined,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
-
-  console.log({
-    id,
-    name,
-    brand_logo,
-  });
   try {
+    const payload: any = {
+      name,
+    };
+
+    // Update ACF melalui WP REST API v2
+    if (brand_logo !== undefined) {
+      payload.acf = {
+        brand_logo,
+      };
+    }
+
+    console.log("========================================");
+    console.log("UPDATE BRAND V2");
+    console.log("URL:", `${WORDPRESS_API}/brand/${id}`);
+    console.log("PAYLOAD:");
+    console.log(JSON.stringify(payload, null, 2));
+    console.log("========================================");
+
     const response = await axios.post(
       `${WORDPRESS_API}/brand/${id}`,
+      payload,
       {
-        name,
-        brand_logo, // kirim langsung ke v2
-      },
-      {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       },
     );
 
-    console.log(response.data);
+    console.log("UPDATE BRAND V2 RESPONSE:");
+    console.log(JSON.stringify(response.data, null, 2));
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data || error);
-    return null;
+    console.error("========== UPDATE BRAND V2 ERROR ==========");
+    console.error("STATUS:", error.response?.status);
+    console.error("DATA:", error.response?.data);
+    console.error("HEADERS:", error.response?.headers);
+    console.error("MESSAGE:", error.message);
+    console.error("===========================================");
+
+    throw error;
   }
 }
 
@@ -538,10 +694,13 @@ export async function deleteBrand(id: number, token: string) {
 
 // jenis-produk
 
-export async function getProductTypes(params?: any) {
+export async function getProductTypes(
+  params?: any,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await wpClient.get("/jenis-produk", {
-      params,
+      params: { lang, ...params },
     });
 
     return response.data;
@@ -551,7 +710,11 @@ export async function getProductTypes(params?: any) {
   }
 }
 
-export async function createProductType(name: string, token: string) {
+export async function createProductType(
+  name: string,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await axios.post(
       `${WORDPRESS_API}/jenis-produk`,
@@ -559,6 +722,7 @@ export async function createProductType(name: string, token: string) {
         name,
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -577,6 +741,7 @@ export async function updateProductType(
   id: number,
   name: string,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
   try {
     const response = await axios.put(
@@ -585,6 +750,7 @@ export async function updateProductType(
         name,
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -623,16 +789,18 @@ export async function deleteProductType(id: number, token: string) {
 
 // news
 
-export async function getPosts() {
+export async function getPosts(lang: LangCode = DEFAULT_LANG) {
   try {
-    const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/berita?_embed&per_page=100`,
-      {
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+    const response = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/berita`, {
+      params: {
+        _embed: true,
+        per_page: 100,
+        lang,
       },
-    );
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -641,10 +809,35 @@ export async function getPosts() {
   }
 }
 
-export async function getPost(id: number) {
+export async function getPostsCount(lang: LangCode = DEFAULT_LANG) {
+  try {
+    const response = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/berita`, {
+      params: {
+        per_page: 1,
+        lang,
+      },
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
+
+    return Number(response.headers["x-wp-total"] || 0);
+  } catch (error) {
+    console.error("Error fetching news count:", error);
+    return 0;
+  }
+}
+
+export async function getPost(id: number, lang: LangCode = DEFAULT_LANG) {
   try {
     const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}?_embed`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}`,
+      {
+        params: {
+          _embed: true,
+          lang,
+        },
+      },
     );
 
     return response.data;
@@ -654,7 +847,12 @@ export async function getPost(id: number) {
   }
 }
 
-export async function createPost(title: string, fields: any, token: string) {
+export async function createPost(
+  title: string,
+  fields: any,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await axios.post(
       `${WORDPRESS_URL}/wp-json/wp/v2/berita`,
@@ -671,6 +869,7 @@ export async function createPost(title: string, fields: any, token: string) {
         tags: fields.tags ?? [],
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -690,6 +889,7 @@ export async function updatePost(
   title: string,
   fields: any,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
   try {
     const response = await axios.post(
@@ -707,6 +907,7 @@ export async function updatePost(
         tags: fields.tags ?? [],
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -739,10 +940,16 @@ export async function deletePost(id: number, token: string) {
   }
 }
 
-export async function getPostCategories() {
+export async function getPostCategories(lang: LangCode = DEFAULT_LANG) {
   try {
     const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/kategori?per_page=100`,
+      `${WORDPRESS_URL}/wp-json/wp/v2/kategori`,
+      {
+        params: {
+          per_page: 100,
+          lang,
+        },
+      },
     );
 
     return response.data;
@@ -756,7 +963,11 @@ export async function getPostCategories() {
 // POST CATEGORIES
 // ===============================
 
-export async function createPostCategory(name: string, token: string) {
+export async function createPostCategory(
+  name: string,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await axios.post(
       `${WORDPRESS_URL}/wp-json/wp/v2/kategori`,
@@ -764,6 +975,7 @@ export async function createPostCategory(name: string, token: string) {
         name,
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -782,6 +994,7 @@ export async function updatePostCategory(
   id: number,
   name: string,
   token: string,
+  lang: LangCode = DEFAULT_LANG,
 ) {
   try {
     const response = await axios.post(
@@ -790,6 +1003,7 @@ export async function updatePostCategory(
         name,
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -822,17 +1036,24 @@ export async function deletePostCategory(id: number, token: string) {
   }
 }
 
-export async function getPostTags() {
-  const res = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/tags`);
+export async function getPostTags(lang: LangCode = DEFAULT_LANG) {
+  const res = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/tags`, {
+    params: { lang },
+  });
 
   return res.data;
 }
 
-export async function createPostTag(name: string, token: string) {
+export async function createPostTag(
+  name: string,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   const res = await axios.post(
     `${WORDPRESS_URL}/wp-json/wp/v2/tags`,
     { name },
     {
+      params: { lang },
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -842,11 +1063,17 @@ export async function createPostTag(name: string, token: string) {
   return res.data;
 }
 
-export async function updatePostTag(id: number, name: string, token: string) {
+export async function updatePostTag(
+  id: number,
+  name: string,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   const res = await axios.post(
     `${WORDPRESS_URL}/wp-json/wp/v2/tags/${id}`,
     { name },
     {
+      params: { lang },
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -866,12 +1093,16 @@ export async function deletePostTag(id: number, token: string) {
   return res.data;
 }
 
-export async function getPostBySlug(slug: string) {
+export async function getPostBySlug(
+  slug: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/posts`, {
       params: {
         slug,
         _embed: true,
+        lang,
       },
     });
 
@@ -882,7 +1113,12 @@ export async function getPostBySlug(slug: string) {
   }
 }
 
-export async function updatePostACF(id: number, fields: any, token: string) {
+export async function updatePostACF(
+  id: number,
+  fields: any,
+  token: string,
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     console.log("UPDATE ACF PAYLOAD:", fields);
 
@@ -892,6 +1128,7 @@ export async function updatePostACF(id: number, fields: any, token: string) {
         fields,
       },
       {
+        params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

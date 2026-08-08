@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSearchParams } from "next/navigation";
 
 interface Category {
   id: number;
@@ -30,14 +31,16 @@ export default function NewsManagement() {
   const [categoryName, setCategoryName] = useState("");
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [loadingCategory, setLoadingCategory] = useState(false);
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
 
   useEffect(() => {
     fetchPosts();
     fetchCategories();
-  }, []);
+  }, [lang]);
 
   async function fetchCategories() {
-    const res = await fetch("/api/wordpress/post-categories");
+    const res = await fetch(`/api/wordpress/post-categories?lang=${lang}`);
 
     if (!res.ok) return;
 
@@ -50,9 +53,12 @@ export default function NewsManagement() {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/wordpress/posts?_embed&_=${Date.now()}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `/api/wordpress/posts?_embed&lang=${lang}&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        },
+      );
 
       if (!res.ok) throw new Error();
 
@@ -72,7 +78,7 @@ export default function NewsManagement() {
 
     setLoadingCategory(true);
 
-    const res = await fetch("/api/wordpress/post-categories", {
+    const res = await fetch(`/api/wordpress/post-categories?lang=${lang}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -92,7 +98,7 @@ export default function NewsManagement() {
   }
 
   async function updateCategory(id: number) {
-    const res = await fetch(`/api/wordpress/post-categories/${id}`, {
+    const res = await fetch(`/api/wordpress/post-categories/${id}?lang=${lang}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +119,7 @@ export default function NewsManagement() {
   async function deleteCategory(id: number) {
     if (!confirm("Hapus kategori?")) return;
 
-    const res = await fetch(`/api/wordpress/post-categories/${id}`, {
+    const res = await fetch(`/api/wordpress/post-categories/${id}?lang=${lang}`, {
       method: "DELETE",
     });
 
@@ -131,7 +137,7 @@ export default function NewsManagement() {
     if (!confirm("Yakin ingin menghapus berita ini?")) return;
 
     try {
-      const res = await fetch(`/api/wordpress/posts/${id}`, {
+const res = await fetch(`/api/wordpress/posts/${id}?lang=${lang}`, {
         method: "DELETE",
       });
 
@@ -159,7 +165,7 @@ export default function NewsManagement() {
         </div>
 
         <Link
-          href="/admin/news/new"
+          href={`/admin/news/new?lang=${lang}`}
           className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-semibold"
         >
           <Plus className="w-5 h-5" />
@@ -295,7 +301,7 @@ export default function NewsManagement() {
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
                           <Link
-                            href={`/admin/news/${item.id}/edit`}
+                            href={`/admin/news/${item.id}/edit?lang=${lang}`}
                             className="p-2 rounded-lg hover:bg-accent"
                           >
                             <Edit className="w-4 h-4 text-primary" />

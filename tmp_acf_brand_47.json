@@ -1,0 +1,12 @@
+﻿{
+    "acf":  {
+                "brand_logo":  false,
+                "nama_produk":  "",
+                "model_produk":  "",
+                "short_description":  "",
+                "description":  "",
+                "spesifikasi":  "",
+                "feature_image":  "",
+                "download_brosur":  false
+            }
+}

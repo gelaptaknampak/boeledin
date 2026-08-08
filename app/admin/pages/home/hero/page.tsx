@@ -1,4 +1,5 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { homeSectionConfig } from "@/components/admin/sections/sectionConfig";
@@ -38,10 +39,18 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = homeSectionConfig.hero;
+  const rawLang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang;
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("Hero section tidak ditemukan");

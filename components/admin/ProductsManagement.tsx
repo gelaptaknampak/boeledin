@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import toast from "react-hot-toast";
@@ -11,43 +12,19 @@ export default function ProductsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  // const [products, setProducts] = useState([
-  //   {
-  //     id: 1,
-  //     name: 'Ultra-Slim 4K Commercial Display',
-  //     model: 'FBI-43Q6',
-  //     brand: 'FBI',
-  //     status: 'publish',
-  //     modified: '2024-02-14',
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Android SOC Digital Signage',
-  //     model: 'SR Series (SRAA05)',
-  //     brand: 'BOELED',
-  //     status: 'publish',
-  //     modified: '2024-02-13',
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Fine-Pitch LED Display',
-  //     model: 'BTQ Series (P1.25)',
-  //     brand: 'BOE',
-  //     status: 'draft',
-  //     modified: '2024-02-12',
-  //   },
-  // ])
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(lang);
+  }, [lang]);
 
-  async function fetchProducts() {
+  async function fetchProducts(lang: string) {
     try {
       setLoading(true);
 
       const res = await fetch(
-        `https://wp.boeledin.com/wp-json/wp/v2/products?_embed&_=${Date.now()}`,
+        `https://wp.boeledin.com/wp-json/wp/v2/products?lang=${lang}&_embed&_=${Date.now()}`,
         {
           cache: "no-store",
         },
@@ -78,7 +55,7 @@ export default function ProductsManagement() {
     if (!confirm("Yakin ingin menghapus produk ini?")) return;
 
     try {
-      const res = await fetch(`/api/wordpress/products/${id}`, {
+      const res = await fetch(`/api/wordpress/products/${id}?lang=${lang}`, {
         method: "DELETE",
       });
 
@@ -86,7 +63,7 @@ export default function ProductsManagement() {
 
       toast.success("Produk berhasil dihapus");
 
-      fetchProducts();
+      fetchProducts(lang);
     } catch {
       toast.error("Gagal menghapus produk");
     }
@@ -103,7 +80,7 @@ export default function ProductsManagement() {
           </p>
         </div>
         <Link
-          href="/admin/products/new"
+          href={`/admin/products/new?lang=${lang}`}
           className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -177,7 +154,7 @@ export default function ProductsManagement() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/admin/products/${product.id}/edit`}
+                        href={`/admin/products/${product.id}/edit?lang=${lang}`}
                         className="p-2 rounded-lg hover:bg-accent transition-colors"
                         title="Edit"
                       >

@@ -1,4 +1,5 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { aboutSectionConfig } from "@/components/admin/sections/sectionConfig";
@@ -25,10 +26,18 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function AboutHeroPage() {
+export default async function AboutHeroPage({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = aboutSectionConfig.hero;
+  const rawLang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang;
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("About Hero tidak ditemukan");
@@ -46,11 +55,11 @@ export default async function AboutHeroPage() {
     // }
 
     if (field.type === "image") {
-        if (value && typeof value === "object") {
-            value = value?.id ?? value?.url ?? "";
-        } else {
-            value = value || "";
-        }
+      if (value && typeof value === "object") {
+        value = value?.id ?? value?.url ?? "";
+      } else {
+        value = value || "";
+      }
     }
 
     setValue(data, field.name, value ?? "");

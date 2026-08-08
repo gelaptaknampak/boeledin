@@ -25,10 +25,17 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
-export default async function ProductShowcasePage() {
+export default async function ProductShowcasePage({
+  searchParams,
+}: {
+  searchParams: { lang?: string | string[] };
+}) {
   const config = homeSectionConfig.productShowcase;
+  const lang = Array.isArray(searchParams.lang)
+    ? searchParams.lang[0]
+    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id);
+  const post = await getPostById(config.id, lang);
 
   if (!post) {
     throw new Error("Product Showcase tidak ditemukan");

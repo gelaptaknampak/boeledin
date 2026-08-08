@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Edit, Trash2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,6 +19,9 @@ interface Brand {
 }
 
 export default function BrandManager() {
+  const searchParams = useSearchParams();
+  const lang = searchParams.get("lang") || "id";
+
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,13 +38,13 @@ export default function BrandManager() {
 
   useEffect(() => {
     fetchBrands();
-  }, []);
+  }, [lang]);
 
   async function fetchBrands() {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/wordpress/brands?_=${Date.now()}`, {
+      const res = await fetch(`/api/wordpress/brands?lang=${lang}&_=${Date.now()}`, {
         cache: "no-store",
       });
 
@@ -85,7 +89,7 @@ export default function BrandManager() {
         logoId = media.id;
       }
 
-      const res = await fetch("/api/wordpress/brands", {
+      const res = await fetch(`/api/wordpress/brands?lang=${lang}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +132,7 @@ export default function BrandManager() {
         logoId = media.id;
       }
 
-      const res = await fetch(`/api/wordpress/brands/${id}`, {
+      const res = await fetch(`/api/wordpress/brands/${id}?lang=${lang}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -159,7 +163,7 @@ export default function BrandManager() {
     if (!confirm("Yakin ingin menghapus brand ini?")) return;
 
     try {
-      const res = await fetch(`/api/wordpress/brands/${id}`, {
+      const res = await fetch(`/api/wordpress/brands/${id}?lang=${lang}`, {
         method: "DELETE",
       });
 
