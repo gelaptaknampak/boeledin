@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
@@ -24,8 +25,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    {
+      media: "(prefers-color-scheme: light)",
+      color: "#ffffff",
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      color: "#000000",
+    },
   ],
 };
 
@@ -35,13 +42,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <body
-        className={`${montserrat.className} antialiased bg-background text-foreground`}
-      >
-        <Providers>{children}</Providers>
-        {process.env.NODE_ENV === "production" && <Analytics />}
-      </body>
-    </html>
+    <body
+      className={`${montserrat.className} antialiased bg-background text-foreground`}
+    >
+      <Suspense fallback={null}>
+        {children}
+      </Suspense>
+
+      {process.env.NODE_ENV === "production" && <Analytics />}
+    </body>
   );
 }
