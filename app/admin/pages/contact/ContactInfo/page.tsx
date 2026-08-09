@@ -1,55 +1,126 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { contactSectionConfig } from "@/components/admin/sections/sectionConfig";
 
-function setValue(obj: any, path: string, value: any) {
-  const keys = path.split(".");
 
-  let current = obj;
+function setValue(obj:any,path:string,value:any){
 
-  keys.forEach((key, index) => {
-    const last = index === keys.length - 1;
-    const next = keys[index + 1];
+ const keys=path.split(".");
 
-    if (last) {
-      current[key] = value;
-      return;
-    }
+ let current=obj;
 
-    if (!(key in current)) {
-      current[key] = /^\d+$/.test(next) ? [] : {};
-    }
 
-    current = current[key];
-  });
-}
+ keys.forEach((key,index)=>{
 
-export default async function ContactInfoPage({
-  searchParams,
-}: {
-  searchParams: { lang?: string | string[] };
-}) {
-  const config = contactSectionConfig.info;
-  const lang = Array.isArray(searchParams.lang)
-    ? searchParams.lang[0]
-    : searchParams.lang || "id";
+  const last=index===keys.length-1;
+  const next=keys[index+1];
 
-  const post = await getPostById(config.id, lang);
 
-  if (!post) {
-    throw new Error("Contact Info tidak ditemukan");
+  if(last){
+    current[key]=value;
+    return;
   }
 
-  const acf = post.acf ?? {};
 
-  const data: any = {};
+  if(!(key in current)){
+    current[key]= /^\d+$/.test(next)
+      ? []
+      : {};
+  }
 
-  config.fields.forEach((field) => {
-    let value = acf[field.acf];
 
-    setValue(data, field.name, value ?? "");
-  });
+  current=current[key];
 
-  return <SectionForm data={data} config={config} />;
+ });
+
+}
+
+
+
+export default async function ContactInfoPage({
+ searchParams,
+}:{
+ searchParams:Promise<{
+  lang?:string|string[]
+ }>;
+}){
+
+
+ const config=contactSectionConfig.info;
+
+
+ const params=await searchParams;
+
+
+ const rawLang=
+ Array.isArray(params.lang)
+ ? params.lang[0]
+ : params.lang;
+
+
+
+ const lang:LangCode=
+ rawLang==="en"
+ ? "en"
+ : "id";
+
+
+
+ const postId=config.id[lang];
+
+
+ if(!postId){
+  throw new Error(
+   `Contact Info bahasa ${lang} belum dikonfigurasi`
+  );
+ }
+
+
+
+ const post=await getPostById(
+  postId,
+  lang
+ );
+
+
+
+ if(!post){
+  throw new Error(
+   "Contact Info tidak ditemukan"
+  );
+ }
+
+
+
+ const acf=post.acf ?? {};
+
+
+ const data:any={};
+
+
+
+ config.fields.forEach((field)=>{
+
+   setValue(
+    data,
+    field.name,
+    acf[field.acf] ?? ""
+   );
+
+ });
+
+
+
+ return (
+  <SectionForm
+    data={data}
+    config={{
+      ...config,
+      id:postId,
+    }}
+  />
+ );
+
 }

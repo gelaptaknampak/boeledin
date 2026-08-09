@@ -1,7 +1,9 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { contactSectionConfig } from "@/components/admin/sections/sectionConfig";
+
 
 function setValue(obj: any, path: string, value: any) {
   const keys = path.split(".");
@@ -25,29 +27,73 @@ function setValue(obj: any, path: string, value: any) {
   });
 }
 
+
 export default async function ContactHeroPage({
   searchParams,
 }: {
-  searchParams: { lang?: string | string[] };
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
 }) {
-  const config = contactSectionConfig.hero;
-  const lang = Array.isArray(searchParams.lang)
-    ? searchParams.lang[0]
-    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id, lang);
+  const config = contactSectionConfig.hero;
+
+  const params = await searchParams;
+
+
+  const rawLang = Array.isArray(params.lang)
+    ? params.lang[0]
+    : params.lang;
+
+
+  const lang: LangCode =
+    rawLang === "en" ? "en" : "id";
+
+
+  const postId = config.id[lang];
+
+
+  if (!postId) {
+    throw new Error(
+      `Contact Hero bahasa ${lang} belum dikonfigurasi`
+    );
+  }
+
+
+  const post = await getPostById(
+    postId,
+    lang
+  );
+
 
   if (!post) {
-    throw new Error("Contact Hero tidak ditemukan");
+    throw new Error(
+      "Contact Hero tidak ditemukan"
+    );
   }
+
 
   const acf = post.acf ?? {};
 
-  const data: any = {};
+  const data:any = {};
 
-  config.fields.forEach((field) => {
-    setValue(data, field.name, acf[field.acf] ?? "");
+
+  config.fields.forEach((field)=>{
+    setValue(
+      data,
+      field.name,
+      acf[field.acf] ?? ""
+    );
   });
 
-  return <SectionForm data={data} config={config} />;
+
+  return (
+    <SectionForm
+      data={data}
+      config={{
+        ...config,
+        id: postId,
+      }}
+    />
+  );
 }

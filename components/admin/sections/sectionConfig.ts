@@ -493,7 +493,10 @@ export const homeSectionConfig = {
 
 export const aboutSectionConfig = {
   hero: {
-    id: 254,
+    id: {
+      en: 254,
+      id: 570,
+    },
 
     title: "About Hero",
 
@@ -532,7 +535,10 @@ export const aboutSectionConfig = {
   },
 
   story: {
-    id: 262,
+    id: {
+      en: 262,
+      id: 580,
+    },
 
     title: "About Story",
 
@@ -589,7 +595,10 @@ export const aboutSectionConfig = {
   },
 
   stats: {
-    id: 260,
+    id: {
+      en: 260,
+      id: 582,
+    },
 
     title: "About Statistics",
 
@@ -649,7 +658,10 @@ export const aboutSectionConfig = {
   },
 
   values: {
-    id: 264,
+    id: {
+      en: 264,
+      id: 578,
+    },
 
     title: "About Values",
 
@@ -730,7 +742,10 @@ export const aboutSectionConfig = {
   },
 
   journey: {
-    id: 258,
+    id: {
+      en: 258,
+      id: 595,
+    },
 
     title: "About Journey",
 
@@ -827,7 +842,10 @@ export const aboutSectionConfig = {
   },
 
   cta: {
-    id: 256,
+    id: {
+      en: 256,
+      id: 597,
+    },
 
     title: "About CTA",
 
@@ -862,7 +880,10 @@ export const aboutSectionConfig = {
 
 export const contactSectionConfig = {
   hero: {
-    id: 397,
+    id: {
+      en: 397,
+      id: 568,
+    },
 
     title: "Contact Hero",
 
@@ -889,7 +910,10 @@ export const contactSectionConfig = {
   },
 
   form: {
-    id: 395,
+    id: {
+      en: 395,
+      id: 576,
+    },
 
     title: "Contact Form",
 
@@ -1099,7 +1123,10 @@ export const contactSectionConfig = {
   },
 
   info: {
-    id: 412,
+    id: {
+      en: 412,
+      id: 574,
+    },
 
     title: "Contact Info",
 
@@ -1183,7 +1210,10 @@ export const contactSectionConfig = {
 
 export const footerSectionConfig = {
   footer: {
-    id: 212,
+    id: {
+      en: 212,
+      id: 599,
+    },
     title: "Footer Section",
 
     fields: [
@@ -1288,7 +1318,10 @@ export const footerSectionConfig = {
 
 export const productsSectionConfig = {
   hero: {
-    id: 485,
+    id: {
+      en: 485,
+      id: 566,
+    },
     title: "Products Hero",
 
     fields: [
@@ -1316,7 +1349,10 @@ export const productsSectionConfig = {
 
 export const newsSectionConfig = {
   hero: {
-    id: 487,
+    id: {
+      en: 487,
+      id: 564,
+    },
     title: "News Hero",
 
     fields: [

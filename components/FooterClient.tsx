@@ -4,273 +4,674 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, Phone, MapPin } from "lucide-react";
+
+import {
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
+
 
 type SocialMediaItem = {
   logo: number;
   link: string;
 };
 
+
 type FooterProps = {
   data?: {
+
     image_logo?: number;
+
     image_logo_width?: number;
     image_logo_height?: number;
 
+
     footer_description?: string;
+
     copyright_text?: string;
 
+
     navigation_title?: string;
+
+    navigation_items?: string | {
+      label:string;
+      link:string;
+    }[];
+
+
+
     service_title?: string;
 
+    service_items?: string | {
+      label:string;
+      link:string;
+    }[];
+
+
+
     contact_title?: string;
+
     address?: string;
+
     phone?: string;
+
     email?: string;
 
-    social_media_list?: SocialMediaItem[];
+
+    social_media_list?: string | SocialMediaItem[];
+
   };
 };
 
-export default function FooterClient({ data }: FooterProps) {
-  const [logo, setLogo] = useState("/logo-white.png");
 
-  const [socialMedia, setSocialMedia] = useState<
-    {
-      logo: string;
-      link: string;
-    }[]
-  >([]);
 
-  useEffect(() => {
-    async function loadAssets() {
-      // Logo Footer
-      if (data?.image_logo) {
-        try {
-          const res = await fetch(
-            `/api/wordpress/media/page/${data.image_logo}`,
-          );
+export default function FooterClient({
+  data,
+}: FooterProps) {
 
-          const media = await res.json();
 
-          if (media?.source_url) {
-            setLogo(media.source_url);
+  const [logo, setLogo] =
+    useState("/logo-white.png");
+
+
+
+  const [socialMedia,setSocialMedia] =
+    useState<
+      {
+        logo:string;
+        link:string;
+      }[]
+    >([]);
+
+
+
+  useEffect(()=>{
+
+
+    async function loadAssets(){
+
+
+      // Logo
+      if(data?.image_logo){
+
+        try{
+
+          const res =
+            await fetch(
+              `/api/wordpress/media/page/${data.image_logo}`
+            );
+
+
+          const media =
+            await res.json();
+
+
+          if(media?.source_url){
+            setLogo(
+              media.source_url
+            );
           }
-        } catch (err) {
+
+
+        }catch(err){
+
           console.error(err);
+
         }
+
       }
+
+
+
+
 
       // Social Media
-      if (data?.social_media_list?.length) {
-        try {
-          const socials = await Promise.all(
-            data.social_media_list.map(async (item) => {
-              if (!item.logo) {
-                return {
-                  logo: "",
-                  link: item.link,
-                };
+      let socials:any[] = [];
+
+
+      try{
+
+
+        if(
+          typeof data?.social_media_list === "string"
+        ){
+
+          socials =
+            JSON.parse(
+              data.social_media_list
+            );
+
+        }else{
+
+          socials =
+            data?.social_media_list ?? [];
+
+        }
+
+
+
+      }catch{
+
+        socials=[];
+
+      }
+
+
+
+
+
+      if(
+        socials.length
+      ){
+
+        const result =
+          await Promise.all(
+
+            socials.map(
+              async(item)=>{
+
+
+                if(!item.logo){
+
+                  return {
+                    logo:"",
+                    link:item.link
+                  };
+
+                }
+
+
+
+                try{
+
+                  const res =
+                    await fetch(
+                      `/api/wordpress/media/page/${item.logo}`
+                    );
+
+
+                  const media =
+                    await res.json();
+
+
+                  return {
+
+                    logo:
+                      media?.source_url ?? "",
+
+                    link:
+                      item.link
+
+                  };
+
+
+                }catch{
+
+                  return {
+                    logo:"",
+                    link:item.link
+                  };
+
+                }
+
+
               }
+            )
 
-              const res = await fetch(`/api/wordpress/media/page/${item.logo}`);
-
-              const media = await res.json();
-
-              return {
-                logo: media?.source_url ?? "",
-                link: item.link,
-              };
-            }),
           );
 
-          setSocialMedia(socials);
-        } catch (err) {
-          console.error(err);
-        }
+
+        setSocialMedia(result);
+
       }
+
+
     }
 
-    loadAssets();
-  }, [data]);
 
-  const currentYear = new Date().getFullYear();
+    loadAssets();
+
+
+  },[data]);
+
+
+
+
+
+
+
+  function parseList(
+    value:any
+  ){
+
+    try{
+
+
+      if(
+        Array.isArray(value)
+      ){
+        return value;
+      }
+
+
+
+      if(
+        typeof value === "string"
+      ){
+
+        return JSON.parse(value);
+
+      }
+
+
+
+      return [];
+
+
+    }catch{
+
+      return [];
+
+    }
+
+  }
+
+
+
+
+
+
+  const navigationItems = [
+  {
+    label: "Home",
+    link: "/",
+  },
+  {
+    label: "About Us",
+    link: "/about",
+  },
+  {
+    label: "Products",
+    link: "/products",
+  },
+  {
+    label: "News",
+    link: "/news",
+  },
+  {
+    label: "Contact",
+    link: "/contact",
+  },
+];
+
+
+const serviceItems = [
+  {
+    label: "Digital Signage & FIDS",
+    link: "/products?category=electronics",
+  },
+  {
+    label: "Smart Command Center",
+    link: "/products?category=accessories",
+  },
+  {
+    label: "Pengalaman Immersive",
+    link: "/products?category=home",
+  },
+  {
+    label: "Integrasi IT & Software",
+    link: "/products?category=fashion",
+  },
+];
+
+
 
   const description =
     data?.footer_description ??
     "Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.";
 
-  const copyright = data?.copyright_text ?? "BOELEDIN. All rights reserved.";
 
-  const navigationTitle = data?.navigation_title ?? "Navigasi";
 
-  const serviceTitle = data?.service_title ?? "Layanan";
+  const copyright =
+    data?.copyright_text ??
+    "BOELEDIN. All rights reserved.";
 
-  const contactTitle = data?.contact_title ?? "Contact Us";
+
+
+  const navigationTitle =
+    data?.navigation_title ??
+    "Navigasi";
+
+
+
+  const serviceTitle =
+    data?.service_title ??
+    "Layanan";
+
+
+
+  const contactTitle =
+    data?.contact_title ??
+    "Contact Us";
+
+
 
   const address =
     data?.address ??
-    "Rukan Exclusive, Jl. Bukit Golf Mediterania, Pantai Indah Kapuk No.1A Blok G, RT.7/RW.2, Kamal Muara, Penjaringan, Jakarta Utara, DKI Jakarta 14470";
+    "Rukan Exclusive, Jakarta";
 
-  const phone = data?.phone ?? "+62 813-1906-0606";
 
-  const email = data?.email ?? "info@boeledin.com";
 
-  //   const logo =
-  //     data?.image_logo?.url ??
-  //     "/logo-white.png";
+  const phone =
+    data?.phone ??
+    "+62 813-1906-0606";
 
-  const navigationItems = [
-    {
-      label: "Home",
-      link: "/",
-    },
-    {
-      label: "About Us",
-      link: "/about",
-    },
-    {
-      label: "Products",
-      link: "/products",
-    },
-    {
-      label: "News",
-      link: "/news",
-    },
-    {
-      label: "Contact",
-      link: "/contact",
-    },
-  ];
 
-  const serviceItems = [
-    {
-      label: "Digital Signage & FIDS",
-      link: "/products?category=electronics",
-    },
-    {
-      label: "Smart Command Center",
-      link: "/products?category=accessories",
-    },
-    {
-      label: "Pengalaman Immersive",
-      link: "/products?category=home",
-    },
-    {
-      label: "Integrasi IT & Software",
-      link: "/products?category=fashion",
-    },
-  ];
 
-  const logoWidth = data?.image_logo_width ?? 220;
-  const logoHeight = data?.image_logo_height ?? 70;
+  const email =
+    data?.email ??
+    "info@boeledin.com";
 
-  return (
-    <footer className="bg-card border-t border-border mt-auto">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Company */}
-          <div>
-            <Image
-              src={logo}
-              alt="BOELED"
-              width={logoWidth}
-              height={logoHeight}
-              className="h-auto max-w-full object-contain"
-              unoptimized
-            />
 
-            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-              {description}
-            </p>
 
-            <div className="flex gap-3">
-              {socialMedia.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-lg bg-accent p-2 transition hover:bg-primary"
-                >
-                  <Image
-                    src={item.logo}
-                    alt={`Social Media ${index + 1}`}
-                    width={24}
-                    height={24}
-                    className="h-6 w-6 object-contain"
-                    unoptimized
-                  />
-                </Link>
-              ))}
-            </div>
-          </div>
+  const logoWidth =
+  Number(data?.image_logo_width) || 220;
 
-          {/* Navigation */}
-          <div>
-            <h4 className="mb-4 font-semibold">{navigationTitle}</h4>
+const logoHeight =
+  Number(data?.image_logo_height) || 70;
 
-            <ul className="space-y-2">
-              {navigationItems.map((item) => (
-                <li key={item.link}>
-                  <Link
-                    href={item.link}
-                    className="text-sm text-muted-foreground transition hover:text-primary"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
 
-          {/* Services */}
-          <div>
-            <h4 className="mb-4 font-semibold">{serviceTitle}</h4>
 
-            <ul className="space-y-2">
-              {serviceItems.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.link}
-                    className="text-sm text-muted-foreground transition hover:text-primary"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="mb-4 font-semibold">{contactTitle}</h4>
 
-            <ul className="space-y-3">
-              <li className="flex gap-2 text-sm text-muted-foreground">
-                <MapPin className="mt-1 h-4 w-4 shrink-0" />
-                <span>{address}</span>
-              </li>
+return (
 
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <a href={`tel:${phone}`}>{phone}</a>
-              </li>
+<footer className="border-t border-border">
 
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <a href={`mailto:${email}`}>{email}</a>
-              </li>
-            </ul>
-          </div>
-        </div>
+<div className="container mx-auto px-4 py-12">
 
-        <div className="mt-12 border-t border-border pt-8">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} {copyright}
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
+
+<div className="grid grid-cols-1 gap-10 md:grid-cols-4">
+
+
+{/* Company */}
+
+<div>
+
+
+<Image
+
+src={logo}
+
+alt="BOELEDIN"
+
+width={logoWidth}
+
+height={logoHeight}
+
+className="mb-5 h-auto w-auto"
+
+unoptimized
+
+/>
+
+
+
+<p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+
+{description}
+
+</p>
+
+
+
+<div className="flex gap-3">
+
+
+{socialMedia.map(
+(item,index)=>(
+
+<Link
+
+key={index}
+
+href={item.link}
+
+target="_blank"
+
+rel="noopener noreferrer"
+
+className="rounded-lg bg-accent p-2 transition hover:bg-primary"
+
+>
+
+
+<Image
+
+src={item.logo}
+
+alt="social"
+
+width={24}
+
+height={24}
+
+className="h-6 w-6 object-contain"
+
+unoptimized
+
+/>
+
+
+</Link>
+
+
+))}
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+{/* Navigation */}
+
+<div>
+
+
+<h4 className="mb-4 font-semibold">
+
+{navigationTitle}
+
+</h4>
+
+
+<ul className="space-y-2">
+
+
+{
+navigationItems.map(
+(item:any)=>(
+
+<li key={item.link}>
+
+<Link
+
+href={item.link}
+
+className="text-sm text-muted-foreground hover:text-primary"
+
+>
+
+{item.label}
+
+</Link>
+
+
+</li>
+
+)
+
+)}
+
+
+</ul>
+
+
+</div>
+
+
+
+
+
+
+{/* Services */}
+
+<div>
+
+
+<h4 className="mb-4 font-semibold">
+
+{serviceTitle}
+
+</h4>
+
+
+
+<ul className="space-y-2">
+
+
+{
+serviceItems.map(
+(item:any)=>(
+
+
+<li key={item.link}>
+
+
+<Link
+
+href={item.link}
+
+className="text-sm text-muted-foreground hover:text-primary"
+
+>
+
+
+{item.label}
+
+
+</Link>
+
+
+</li>
+
+
+)
+
+)}
+
+
+</ul>
+
+
+</div>
+
+
+
+
+
+
+{/* Contact */}
+
+<div>
+
+
+<h4 className="mb-4 font-semibold">
+
+{contactTitle}
+
+</h4>
+
+
+<ul className="space-y-3">
+
+
+<li className="flex gap-2 text-sm text-muted-foreground">
+
+<MapPin className="mt-1 h-4 w-4"/>
+
+<span>
+{address}
+</span>
+
+</li>
+
+
+
+<li className="flex gap-2 text-sm text-muted-foreground">
+
+<Phone className="h-4 w-4"/>
+
+<a href={`tel:${phone}`}>
+
+{phone}
+
+</a>
+
+</li>
+
+
+
+
+<li className="flex gap-2 text-sm text-muted-foreground">
+
+<Mail className="h-4 w-4"/>
+
+<a href={`mailto:${email}`}>
+
+{email}
+
+</a>
+
+</li>
+
+
+</ul>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div className="mt-12 border-t border-border pt-8">
+
+<p className="text-sm text-muted-foreground">
+
+© {new Date().getFullYear()} {copyright}
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+</footer>
+
+);
+
 }

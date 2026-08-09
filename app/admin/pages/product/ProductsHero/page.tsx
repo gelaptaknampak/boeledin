@@ -1,21 +1,15 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { productsSectionConfig } from "@/components/admin/sections/sectionConfig";
 
-function getValue(obj: any, path: string) {
-  return path.split(".").reduce((acc, key) => {
-    if (acc == null) return "";
 
-    if (/^\d+$/.test(key)) {
-      return acc[Number(key)];
-    }
-
-    return acc[key];
-  }, obj);
-}
-
-function setValue(obj: any, path: string, value: any) {
+function setValue(
+  obj: any,
+  path: string,
+  value: any
+) {
   const keys = path.split(".");
 
   let current = obj;
@@ -30,42 +24,145 @@ function setValue(obj: any, path: string, value: any) {
     }
 
     if (!(key in current)) {
-      current[key] = /^\d+$/.test(next) ? [] : {};
+      current[key] = /^\d+$/.test(next)
+        ? []
+        : {};
     }
 
     current = current[key];
   });
 }
 
+
+
 export default async function ProductsHeroPage({
   searchParams,
 }: {
-  searchParams: { lang?: string | string[] };
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
 }) {
+
+
   const config = productsSectionConfig.hero;
-  const lang = Array.isArray(searchParams.lang)
-    ? searchParams.lang[0]
-    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id, lang);
 
-  if (!post) {
-    throw new Error("Products Hero section tidak ditemukan");
+  const params = await searchParams;
+
+
+  const rawLang = Array.isArray(params.lang)
+    ? params.lang[0]
+    : params.lang;
+
+
+  const lang: LangCode =
+    rawLang === "en"
+      ? "en"
+      : "id";
+
+
+
+  // ambil ID sesuai bahasa
+  const postId =
+    config.id[lang];
+
+
+
+  if (!postId) {
+    throw new Error(
+      `Products Hero ${lang} belum dikonfigurasi`
+    );
   }
 
-  const acf = post.acf ?? {};
 
-  const data: any = {};
 
-  config.fields.forEach((field) => {
-    let value = acf[field.acf];
+  const post =
+    await getPostById(
+      postId,
+      lang
+    );
 
-    // if (field.type === "link" && value && typeof value === "object") {
-    //   value = value.url;
-    // }
 
-    setValue(data, field.name, value ?? "");
-  });
 
-  return <SectionForm data={data} config={config} />;
+  if (!post) {
+    throw new Error(
+      "Products Hero section tidak ditemukan"
+    );
+  }
+
+
+
+  const acf =
+    post.acf ?? {};
+
+
+
+  const data:any = {};
+
+
+
+  config.fields.forEach(
+    (field:any)=>{
+
+      let value =
+        acf[field.acf];
+
+
+      /*
+      =========================
+      LINK FIELD
+      =========================
+      */
+
+      if(
+        field.type === "link" &&
+        value &&
+        typeof value === "object"
+      ){
+        value =
+          value.url ?? "";
+      }
+
+
+
+      /*
+      =========================
+      IMAGE FIELD
+      =========================
+      */
+
+      if(
+        field.type === "image" &&
+        value &&
+        typeof value === "object"
+      ){
+        value =
+          value.id ?? "";
+      }
+
+
+
+      setValue(
+        data,
+        field.name,
+        value ?? ""
+      );
+
+    }
+  );
+
+
+
+  return (
+    <SectionForm
+      data={data}
+      config={{
+        ...config,
+
+        // penting untuk update
+        id: post.id,
+      }}
+    />
+  );
+
 }

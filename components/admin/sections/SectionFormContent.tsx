@@ -248,11 +248,14 @@ export default function SectionFormContent({
           },
 
           body: JSON.stringify({
-            id: config.id,
-            postId: config.id[lang],
-            data: form,
-            lang,
-          }),
+          id: config.id,
+          postId:
+            typeof config.id === "object"
+              ? config.id[lang]
+              : config.id,
+          data: form,
+          lang,
+        }),
         }
       );
 
@@ -293,17 +296,31 @@ export default function SectionFormContent({
    */
 
   function renderField(field: any) {
-    const rawValue = getValue(
-      form,
-      field.name
-    );
+  const rawValue = getValue(
+    form,
+    field.name
+  );
 
-    const value =
-      field.type === "brand-list" ||
-      field.type ===
-        "social-media-list"
-        ? (rawValue ?? [])
-        : (rawValue ?? "");
+  let value = rawValue ?? "";
+
+  if (
+    field.type === "brand-list" ||
+    field.type === "social-media-list"
+  ) {
+    try {
+      if (typeof value === "string") {
+        value = value
+          ? JSON.parse(value)
+          : [];
+      }
+
+      if (!Array.isArray(value)) {
+        value = [];
+      }
+    } catch {
+      value = [];
+    }
+  }
 
     const update = (
       newValue: any
@@ -960,58 +977,72 @@ export default function SectionFormContent({
    */
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6"
-    >
-      <div className="rounded-lg border bg-background p-6">
-        <h2 className="text-xl font-semibold">
-          {config.title}
-        </h2>
+  <form onSubmit={handleSubmit}>
 
-        <div className="mt-6 space-y-5">
-          {config.fields
-            .filter(
-              (field: any) =>
-                !field.hidden
+    <div className="rounded-lg border p-6">
+
+      <h2 className="text-xl font-semibold">
+        {config.title}
+      </h2>
+
+
+      <div className="mt-6 space-y-5">
+
+        {config.fields
+          .filter(
+            (field: any) =>
+              !field.hidden
+          )
+          .map(
+            (field: any) => (
+              <div
+                key={field.name}
+              >
+
+                <label className="mb-2 block font-medium">
+                  {field.label}
+                </label>
+
+
+                {renderField(field)}
+
+              </div>
             )
-            .map(
-              (field: any) => (
-                <div
-                  key={field.name}
-                >
-                  <label className="mb-2 block font-medium">
-                    {field.label}
-                  </label>
+          )}
 
-                  {renderField(field)}
-                </div>
-              )
-            )}
-        </div>
       </div>
 
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={() =>
-            router.push(returnUrl)
-          }
-          className="rounded-lg border px-8 py-3"
-        >
-          Batal
-        </button>
+    </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-primary px-8 py-3 text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading
-            ? "Menyimpan..."
-            : "Simpan Perubahan"}
-        </button>
-      </div>
-    </form>
-  );
+
+    <div className="mt-6 flex justify-end gap-3">
+
+      <button
+        type="button"
+        onClick={() =>
+          router.push(returnUrl)
+        }
+        className="rounded-lg border px-8 py-3"
+      >
+        Batal
+      </button>
+
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="rounded-lg bg-primary px-8 py-3 text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+      >
+
+        {loading
+          ? "Menyimpan..."
+          : "Simpan Perubahan"}
+
+      </button>
+
+    </div>
+
+
+  </form>
+);
 }

@@ -1071,65 +1071,97 @@ export async function deleteProductType(id: number, token: string) {
   }
 }
 
-// news
 
-export async function getPosts(lang: LangCode = DEFAULT_LANG) {
-  try {
-    const response = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/berita`, {
-      params: {
-        _embed: true,
-        per_page: 100,
-        lang,
-      },
-      headers: {
-        "Cache-Control": "no-cache",
-      },
-    });
+// news / berita
 
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
-export async function getPostsCount(lang: LangCode = DEFAULT_LANG) {
-  try {
-    const response = await axios.get(`${WORDPRESS_URL}/wp-json/wp/v2/berita`, {
-      params: {
-        per_page: 1,
-        lang,
-      },
-      headers: {
-        "Cache-Control": "no-cache",
-      },
-    });
-
-    return Number(response.headers["x-wp-total"] || 0);
-  } catch (error) {
-    console.error("Error fetching news count:", error);
-    return 0;
-  }
-}
-
-export async function getPost(id: number, lang: LangCode = DEFAULT_LANG) {
+export async function getPosts(
+  lang: LangCode = DEFAULT_LANG,
+) {
   try {
     const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}`,
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita`,
       {
         params: {
-          _embed: true,
           lang,
+        },
+        headers: {
+          "Cache-Control": "no-cache",
         },
       },
     );
 
     return response.data;
+  } catch (error: any) {
+    console.error(
+      "GET BERITA ERROR:",
+      error.response?.data || error,
+    );
+
+    return [];
+  }
+}
+
+
+export async function getPostsCount(
+  lang: LangCode = DEFAULT_LANG,
+) {
+  try {
+    const response = await axios.get(
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita`,
+      {
+        params: {
+          lang,
+        },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      },
+    );
+
+    /*
+     * Custom endpoint mengembalikan array berita,
+     * bukan header x-wp-total seperti wp/v2.
+     */
+    return Array.isArray(response.data)
+      ? response.data.length
+      : 0;
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching berita count:", error);
+    return 0;
+  }
+}
+
+
+export async function getPost(
+  id: number,
+  lang: LangCode = DEFAULT_LANG,
+) {
+  try {
+    const response = await axios.get(
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita/${id}`,
+      {
+        params: {
+          lang,
+          _: Date.now(),
+        },
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "GET BERITA BY ID ERROR:",
+      error.response?.data || error,
+    );
+
     return null;
   }
 }
+
 
 export async function createPost(
   title: string,
@@ -1138,22 +1170,42 @@ export async function createPost(
   lang: LangCode = DEFAULT_LANG,
 ) {
   try {
+    const payload = {
+      title,
+      content: fields.content ?? "",
+      excerpt: fields.excerpt ?? "",
+      status: fields.status ?? "publish",
+      featured_media: fields.featured_media ?? 0,
+
+      // taxonomy custom berita
+      kategori: Array.isArray(fields.kategori)
+        ? fields.kategori
+            .map(Number)
+            .filter((id: number) => id > 0)
+        : [],
+
+      tags: Array.isArray(fields.tags)
+        ? fields.tags
+            .map(Number)
+            .filter((id: number) => id > 0)
+        : [],
+    };
+
+    console.log("========== CREATE BERITA ==========");
+    console.log("LANG:", lang);
+    console.log("TITLE:", title);
+    console.log(
+      "PAYLOAD:",
+      JSON.stringify(payload, null, 2),
+    );
+
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/berita`,
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita`,
+      payload,
       {
-        title,
-        content: fields.content,
-        excerpt: fields.excerpt,
-        status: fields.status ?? "publish",
-
-        featured_media: fields.featured_media,
-
-        categories: fields.categories ?? [],
-
-        tags: fields.tags ?? [],
-      },
-      {
-        params: { lang },
+        params: {
+          lang,
+        },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -1161,12 +1213,33 @@ export async function createPost(
       },
     );
 
+    console.log(
+      "CREATE BERITA SUCCESS:",
+      JSON.stringify(response.data, null, 2),
+    );
+
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data);
+    console.error("========== CREATE BERITA ERROR ==========");
+    console.error("STATUS:", error.response?.status);
+    console.error(
+      "DATA:",
+      JSON.stringify(
+        error.response?.data,
+        null,
+        2,
+      ),
+    );
+    console.error("MESSAGE:", error.message);
+    console.error("URL:", error.config?.url);
+    console.error("METHOD:", error.config?.method);
+    console.error("REQUEST DATA:", error.config?.data);
+    console.error("=========================================");
+
     return null;
   }
 }
+
 
 export async function updatePost(
   id: number,
@@ -1177,21 +1250,20 @@ export async function updatePost(
 ) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}`,
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita/${id}`,
       {
         title,
         content: fields.content,
         excerpt: fields.excerpt,
         status: fields.status,
-
         featured_media: fields.featured_media,
-
-        categories: fields.categories ?? [],
-
+        categories: fields.kategori ?? [],
         tags: fields.tags ?? [],
       },
       {
-        params: { lang },
+        params: {
+          lang,
+        },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -1201,16 +1273,27 @@ export async function updatePost(
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data);
+    console.error(
+      "Error updating berita:",
+      error.response?.data || error,
+    );
+
     return null;
   }
 }
 
-export async function deletePost(id: number, token: string) {
+
+export async function deletePost(
+  id: number,
+  token: string,
+) {
   try {
     const response = await axios.delete(
-      `${WORDPRESS_URL}/wp-json/wp/v2/berita/${id}?force=true`,
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita/${id}`,
       {
+        params: {
+          force: true,
+        },
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -1219,7 +1302,11 @@ export async function deletePost(id: number, token: string) {
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data);
+    console.error(
+      "Error deleting berita:",
+      error.response?.data || error,
+    );
+
     return null;
   }
 }

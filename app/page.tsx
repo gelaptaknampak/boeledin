@@ -366,7 +366,13 @@ export default async function Home({
         />
       </main>
 
-      <Footer />
+      <Footer
+        lang={
+          params.lang === "en"
+            ? "en"
+            : "id"
+        }
+      />
     </>
   );
 }

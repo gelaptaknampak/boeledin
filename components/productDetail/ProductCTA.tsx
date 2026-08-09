@@ -1,19 +1,33 @@
+"use client";
+
+import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
+
 export default function ProductCTA() {
+  const { t } = useTranslation();
+
   return (
-    <section className="mt-20 rounded-2xl bg-primary p-12 text-center text-white">
+    <section className="mt-16 rounded-2xl bg-primary p-8 text-white">
+      <div className="flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
 
-      <h2 className="mb-4 text-3xl font-bold">
-        Need More Information?
-      </h2>
+        <div>
+          <h2 className="mb-4 text-3xl font-bold">
+            {t("product_cta.title")}
+          </h2>
 
-      <p className="mb-8 opacity-90">
-        Contact our team to get the best display solution for your business.
-      </p>
+          <p className="mb-0 opacity-90">
+            {t("product_cta.description")}
+          </p>
+        </div>
 
-      <button className="rounded-xl bg-white px-8 py-3 font-semibold text-primary">
-        Contact Us
-      </button>
+        <Link
+          href="/contact"
+          className="rounded-xl bg-white px-8 py-3 font-semibold text-primary transition hover:bg-gray-100"
+        >
+          {t("product_cta.button")}
+        </Link>
 
+      </div>
     </section>
   );
 }

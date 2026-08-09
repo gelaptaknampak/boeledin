@@ -1,11 +1,11 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { aboutSectionConfig } from "@/components/admin/sections/sectionConfig";
 
 function setValue(obj: any, path: string, value: any) {
   const keys = path.split(".");
-
   let current = obj;
 
   keys.forEach((key, index) => {
@@ -28,46 +28,66 @@ function setValue(obj: any, path: string, value: any) {
 export default async function AboutStatPage({
   searchParams,
 }: {
-  searchParams: { lang?: string | string[] };
+  searchParams: Promise<{ lang?: string | string[] }>;
 }) {
   const config = aboutSectionConfig.stats;
-  const lang = Array.isArray(searchParams.lang)
-    ? searchParams.lang[0]
-    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id, lang);
+  const params = await searchParams;
+
+  const rawLang = Array.isArray(params.lang)
+    ? params.lang[0]
+    : params.lang;
+
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
+
+  const postId = config.id[lang];
+
+  if (!postId) {
+    throw new Error(
+      `Post About Stats untuk bahasa ${lang} belum dikonfigurasi`
+    );
+  }
+
+  const post = await getPostById(postId, lang);
 
   if (!post) {
-    throw new Error("About Stats section tidak ditemukan");
+    throw new Error(
+      `About Stats untuk bahasa ${lang} tidak ditemukan`
+    );
   }
 
   const acf = post.acf ?? {};
-
   const data: any = {};
 
   config.fields.forEach((field) => {
     let value = acf[field.acf];
 
-    // ACF Link
-    // if (field.type === "link") {
-    //   if (value && typeof value === "object") {
-    //     value = value.url;
-    //   } else {
-    //     value = value ?? "";
-    //   }
-    // }
+    if (
+      // field.type === "link" &&
+      value &&
+      typeof value === "object"
+    ) {
+      value = value.url;
+    }
 
-    // ACF Image (Return Format = ID)
     // if (field.type === "image") {
     //   if (value && typeof value === "object") {
     //     value = value.id ?? value.url ?? "";
     //   } else {
-    //     value = value ?? "";
+    //     value = value || "";
     //   }
     // }
 
     setValue(data, field.name, value ?? "");
   });
 
-  return <SectionForm data={data} config={config} />;
+  return (
+    <SectionForm
+      data={data}
+      config={{
+        ...config,
+        id: postId,
+      }}
+    />
+  );
 }

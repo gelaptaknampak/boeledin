@@ -145,54 +145,66 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
     }
   }
 
-  async function fetchPost() {
-    if (!postId) return;
+async function fetchPost() {
+  if (!postId) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await fetch(
-        `/api/wordpress/posts/${postId}?_embed&lang=${lang}`,
-        {
-          cache: "no-store",
-        },
-      );
+    const res = await fetch(
+      `/api/wordpress/posts/${postId}?lang=${lang}&_=${Date.now()}`,
+      {
+        cache: "no-store",
+      },
+    );
 
-      if (!res.ok) throw new Error();
-
-      const post = await res.json();
-
-      console.log(post);
-
-      setForm({
-        title: post.title?.rendered ?? "",
-
-        excerpt: post.excerpt?.rendered?.replace(/<[^>]*>/g, "").trim() ?? "",
-
-        content: post.content?.rendered ?? "",
-
-        status: post.status,
-
-        kategori: post.kategori ?? [],
-
-        tags: post.tags ?? [],
-
-        featured_media:
-          post.featured_media && post.featured_media !== 0
-            ? post.featured_media
-            : null,
-
-        featured_media_url:
-          post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? "",
-      });
-    } catch (err) {
-      console.error(err);
-
-      toast.error("Gagal mengambil berita");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error();
     }
+
+    const post = await res.json();
+
+    console.log("========== NEWS DETAIL ==========");
+    console.log(post);
+    console.log("=================================");
+
+    setForm({
+      title: post.title ?? "",
+
+      excerpt: post.excerpt ?? "",
+
+      content: post.content ?? "",
+
+      status:
+        post.status === "draft"
+          ? "draft"
+          : "publish",
+
+      kategori: Array.isArray(post.kategori)
+        ? post.kategori
+        : [],
+
+      tags: Array.isArray(post.tags)
+        ? post.tags
+        : [],
+
+      featured_media:
+        post.featured_media &&
+        post.featured_media !== 0
+          ? post.featured_media
+          : null,
+
+      featured_media_url:
+        post.featured_media_url ?? "",
+    });
+  } catch (err) {
+    console.error("FETCH NEWS ERROR:", err);
+
+    toast.error("Gagal mengambil berita");
+  } finally {
+    setLoading(false);
   }
+}
 
   useEffect(() => {
     fetchCategories();
@@ -219,12 +231,16 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
     }));
   }
 
-  function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    setForm((prev) => ({
-      ...prev,
-      categories: [Number(e.target.value)],
-    }));
-  }
+  function handleCategoryChange(
+  e: React.ChangeEvent<HTMLSelectElement>,
+) {
+  const value = Number(e.target.value);
+
+  setForm((prev) => ({
+    ...prev,
+    kategori: value > 0 ? [value] : [],
+  }));
+}
 
   function handleTagChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const values = Array.from(e.target.selectedOptions, (option) =>
@@ -287,84 +303,172 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
   // Handle Submit
   // ===============================
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+async function handleSubmit(
+  e: React.FormEvent,
+) {
+  e.preventDefault();
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      let featuredMedia = form.featured_media;
+    let featuredMedia = form.featured_media;
 
-      if (featuredMedia instanceof File) {
-        const media = await uploadMedia(featuredMedia);
+    // ==========================================
+    // Upload featured image kalau user memilih
+    // file baru
+    // ==========================================
 
-        featuredMedia = media.id;
-      }
-
-      const payload = {
-        title: form.title,
-
-        excerpt: form.excerpt,
-
-        content: form.content,
-
-        status: form.status,
-
-        featured_media: featuredMedia,
-
-        kategori: form.kategori,
-
-        tags: form.tags,
-      };
-
-      const url =
-        mode === "create"
-          ? "/api/wordpress/posts"
-          : `/api/wordpress/posts/${postId}`;
-
-      const method = mode === "create" ? "POST" : "PUT";
-
-      const res = await fetch(`${url}?lang=${lang}`, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.status === 401) {
-        toast.error("Silakan login kembali.");
-
-        router.push("/admin/login");
-
-        return;
-      }
-
-      if (!res.ok) {
-        toast.error(data.message ?? "Terjadi kesalahan.");
-
-        return;
-      }
-
-      toast.success(
-        mode === "create"
-          ? "Berita berhasil dibuat."
-          : "Berita berhasil diperbarui.",
+    if (featuredMedia instanceof File) {
+      const media = await uploadMedia(
+        featuredMedia,
       );
 
-      router.push(returnUrl);
-
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-
-      toast.error("Terjadi kesalahan.");
-    } finally {
-      setLoading(false);
+      featuredMedia = media.id;
     }
+
+    // ==========================================
+    // Normalisasi data
+    // ==========================================
+
+    const payload = {
+      title: form.title.trim(),
+
+      excerpt: form.excerpt.trim(),
+
+      content: form.content,
+
+      status: form.status,
+
+      featured_media:
+        typeof featuredMedia === "number"
+          ? featuredMedia
+          : null,
+
+      kategori: Array.isArray(form.kategori)
+        ? form.kategori.filter(
+            (id) => Number(id) > 0,
+          )
+        : [],
+
+      tags: Array.isArray(form.tags)
+        ? form.tags.filter(
+            (id) => Number(id) > 0,
+          )
+        : [],
+    };
+
+    console.log(
+      "========== NEWS SUBMIT ==========",
+    );
+
+    console.log({
+      mode,
+      postId,
+      lang,
+      payload,
+    });
+
+    console.log(
+      "=================================",
+    );
+
+    // ==========================================
+    // Endpoint
+    // ==========================================
+
+    const url =
+      mode === "create"
+        ? "/api/wordpress/posts"
+        : `/api/wordpress/posts/${postId}`;
+
+    const method =
+      mode === "create"
+        ? "POST"
+        : "PUT";
+
+    const res = await fetch(
+      `${url}?lang=${lang}`,
+      {
+        method,
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const data = await res.json();
+
+    console.log(
+      "========== NEWS RESPONSE ==========",
+    );
+
+    console.log({
+      status: res.status,
+      ok: res.ok,
+      data,
+    });
+
+    console.log(
+      "===================================",
+    );
+
+    // ==========================================
+    // Unauthorized
+    // ==========================================
+
+    if (res.status === 401) {
+      toast.error(
+        "Silakan login kembali.",
+      );
+
+      router.push("/admin/login");
+
+      return;
+    }
+
+    // ==========================================
+    // Error
+    // ==========================================
+
+    if (!res.ok) {
+      toast.error(
+        data.message ??
+          "Terjadi kesalahan.",
+      );
+
+      return;
+    }
+
+    // ==========================================
+    // Success
+    // ==========================================
+
+    toast.success(
+      mode === "create"
+        ? "Berita berhasil dibuat."
+        : "Berita berhasil diperbarui.",
+    );
+
+    router.push(returnUrl);
+
+    router.refresh();
+  } catch (err) {
+    console.error(
+      "NEWS SUBMIT ERROR:",
+      err,
+    );
+
+    toast.error(
+      "Terjadi kesalahan.",
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8">
@@ -696,28 +800,30 @@ export default function NewsForm({ mode, postId }: NewsFormProps) {
       {/* Kategori */}
       {/* ========================= */}
 
-      <div>
-        <label className="block mb-2 font-semibold">Kategori</label>
+<div>
+  <label className="block mb-2 font-semibold">
+    Kategori
+  </label>
 
-        <select
-          value={form.kategori[0] ?? ""}
-          onChange={(e) =>
-            setForm((prev) => ({
-              ...prev,
-              kategori: [Number(e.target.value)],
-            }))
-          }
-          className="w-full rounded-lg border px-4 py-3 bg-white text-black"
-        >
-          <option value={0}>Pilih kategori</option>
+  <select
+    value={form.kategori[0] ?? ""}
+    onChange={handleCategoryChange}
+    className="w-full rounded-lg border px-4 py-3 bg-white text-black"
+  >
+    <option value="">
+      Pilih kategori
+    </option>
 
-          {categories.map((category: any) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
+    {categories.map((category) => (
+      <option
+        key={category.id}
+        value={category.id}
+      >
+        {category.name}
+      </option>
+    ))}
+  </select>
+</div>
 
       {/* ========================= */}
       {/* Tags */}

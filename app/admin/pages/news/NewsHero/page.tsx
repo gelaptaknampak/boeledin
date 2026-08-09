@@ -1,21 +1,15 @@
 import { getPostById } from "@/lib/wordpress";
+import type { LangCode } from "@/lib/wordpress";
 
 import SectionForm from "@/components/admin/sections/SectionForm";
 import { newsSectionConfig } from "@/components/admin/sections/sectionConfig";
 
-function getValue(obj: any, path: string) {
-  return path.split(".").reduce((acc, key) => {
-    if (acc == null) return "";
 
-    if (/^\d+$/.test(key)) {
-      return acc[Number(key)];
-    }
-
-    return acc[key];
-  }, obj);
-}
-
-function setValue(obj: any, path: string, value: any) {
+function setValue(
+  obj: any,
+  path: string,
+  value: any
+) {
   const keys = path.split(".");
 
   let current = obj;
@@ -30,42 +24,174 @@ function setValue(obj: any, path: string, value: any) {
     }
 
     if (!(key in current)) {
-      current[key] = /^\d+$/.test(next) ? [] : {};
+      current[key] = /^\d+$/.test(next)
+        ? []
+        : {};
     }
 
     current = current[key];
   });
 }
 
+
 export default async function NewsHeroPage({
   searchParams,
 }: {
-  searchParams: { lang?: string | string[] };
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
 }) {
-  const config = newsSectionConfig.hero;
-  const lang = Array.isArray(searchParams.lang)
-    ? searchParams.lang[0]
-    : searchParams.lang || "id";
 
-  const post = await getPostById(config.id, lang);
+  /*
+  =========================
+  CONFIG
+  =========================
+  */
 
-  if (!post) {
-    throw new Error("News Hero section tidak ditemukan");
+  const config =
+    newsSectionConfig.hero;
+
+
+  /*
+  =========================
+  LANGUAGE
+  =========================
+  */
+
+  const params =
+    await searchParams;
+
+  const rawLang =
+    Array.isArray(params.lang)
+      ? params.lang[0]
+      : params.lang;
+
+
+  const lang: LangCode =
+    rawLang === "en"
+      ? "en"
+      : "id";
+
+
+  /*
+  =========================
+  GET POST ID
+  =========================
+  */
+
+  const postId =
+    config.id[lang];
+
+
+  if (!postId) {
+    throw new Error(
+      `News Hero untuk bahasa ${lang} belum dikonfigurasi`
+    );
   }
 
-  const acf = post.acf ?? {};
+
+  /*
+  =========================
+  GET POST
+  =========================
+  */
+
+  const post =
+    await getPostById(
+      postId,
+      lang
+    );
+
+
+  if (!post) {
+    throw new Error(
+      "News Hero section tidak ditemukan"
+    );
+  }
+
+
+  /*
+  =========================
+  ACF DATA
+  =========================
+  */
+
+  const acf =
+    post.acf ?? {};
 
   const data: any = {};
 
-  config.fields.forEach((field) => {
-    let value = acf[field.acf];
 
-    // if (field.type === "link" && value && typeof value === "object") {
-    //   value = value.url;
-    // }
+  config.fields.forEach(
+    (field: any) => {
 
-    setValue(data, field.name, value ?? "");
-  });
+      let value =
+        acf[field.acf];
 
-  return <SectionForm data={data} config={config} />;
+
+      /*
+      =========================
+      LINK FIELD
+      =========================
+      */
+
+      if (
+        field.type === "link" &&
+        value &&
+        typeof value === "object"
+      ) {
+        value =
+          value.url ?? "";
+      }
+
+
+      /*
+      =========================
+      IMAGE FIELD
+      =========================
+      */
+
+      if (
+        field.type === "image" &&
+        value &&
+        typeof value === "object"
+      ) {
+        value =
+          value.id ?? "";
+      }
+
+
+      /*
+      =========================
+      SET FORM VALUE
+      =========================
+      */
+
+      setValue(
+        data,
+        field.name,
+        value ?? ""
+      );
+    }
+  );
+
+
+  /*
+  =========================
+  RENDER FORM
+  =========================
+  */
+
+  return (
+    <SectionForm
+      data={data}
+      config={{
+        ...config,
+
+        // ID post yang sedang diedit
+        id: post.id,
+      }}
+    />
+  );
 }
+
