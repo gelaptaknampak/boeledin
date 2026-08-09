@@ -52,7 +52,7 @@ export default async function Page({
 
   if (!postId) {
     throw new Error(
-      `Post Hero untuk bahasa ${lang} belum dikonfigurasi`
+      `Post Home untuk bahasa ${lang} belum dikonfigurasi`
     );
   }
 
@@ -62,7 +62,7 @@ export default async function Page({
 
   if (!post) {
     throw new Error(
-      `Hero section untuk bahasa ${lang} tidak ditemukan`
+      `Home section untuk bahasa ${lang} tidak ditemukan`
     );
   }
 

@@ -199,9 +199,10 @@ export default function SectionForm({ data, config }: Props) {
 
         body: JSON.stringify({
           id: config.id,
+          postId: config.id[lang],
           data: form,
           lang,
-        }),
+        })
       });
 
       const result = await res.json();

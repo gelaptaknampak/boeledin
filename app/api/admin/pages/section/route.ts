@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { updatePostACF } from "@/lib/wordpress";
+
 import {
   homeSectionConfig,
   aboutSectionConfig,
@@ -10,7 +11,8 @@ import {
   newsSectionConfig,
   footerSectionConfig,
 } from "@/components/admin/sections/sectionConfig";
-import Footer from "@/components/Footer";
+
+type LangCode = "id" | "en";
 
 function getValue(obj: any, path: string) {
   return path.split(".").reduce((current, key) => {
@@ -26,7 +28,27 @@ function getValue(obj: any, path: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, data, lang } = await req.json();
+    const body = await req.json();
+
+    const id = body.id;
+    const data = body.data;
+    const rawLang = body.lang;
+
+    const lang: LangCode =
+      rawLang === "en" ? "en" : "id";
+
+    console.log("=================================");
+    console.log("UPDATE SECTION REQUEST");
+    console.log("id:", id);
+    console.log("lang:", lang);
+    console.log("data:", data);
+    console.log("=================================");
+
+    /**
+     * ============================
+     * AUTH
+     * ============================
+     */
 
     const token = (await cookies()).get("wp_token")?.value;
 
@@ -42,7 +64,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // gabungkan semua config
+    /**
+     * ============================
+     * ALL SECTIONS
+     * ============================
+     */
+
     const allSections = [
       ...Object.values(homeSectionConfig),
       ...Object.values(aboutSectionConfig),
@@ -52,9 +79,68 @@ export async function POST(req: NextRequest) {
       ...Object.values(footerSectionConfig),
     ];
 
-    const config = allSections.find((section) => section.id === id);
+    /**
+     * ============================
+     * CARI CONFIG
+     * ============================
+     *
+     * Bisa menangani:
+     *
+     * id: 212
+     *
+     * maupun:
+     *
+     * id: {
+     *   id: 558,
+     *   en: 157
+     * }
+     */
+
+    const config = allSections.find((section) => {
+      if (
+        typeof section.id === "object" &&
+        section.id !== null
+      ) {
+        return (
+          section.id.id === id ||
+          section.id.en === id
+        );
+      }
+
+      return section.id === id;
+    });
+
+    /**
+     * DEBUG
+     */
+
+    console.log("SEARCHING CONFIG");
+    console.log("Requested ID:", id);
+    console.log(
+      "Found config:",
+      config?.title ?? "NOT FOUND"
+    );
+
+    /**
+     * ============================
+     * CONFIG NOT FOUND
+     * ============================
+     */
 
     if (!config) {
+      console.error(
+        "SECTION TIDAK DITEMUKAN UNTUK ID:",
+        id
+      );
+
+      console.error(
+        "AVAILABLE SECTIONS:",
+        allSections.map((section) => ({
+          title: section.title,
+          id: section.id,
+        }))
+      );
+
       return NextResponse.json(
         {
           success: false,
@@ -66,12 +152,46 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    /**
+     * ============================
+     * POST ID
+     * ============================
+     *
+     * Karena SectionForm sudah mengirim
+     * post ID aktual, langsung gunakan id.
+     */
+
+    const postId = Number(id);
+
+    if (!postId || Number.isNaN(postId)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Post ID tidak valid",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /**
+     * ============================
+     * BUILD ACF DATA
+     * ============================
+     */
+
     const acfData: Record<string, any> = {};
 
     for (const field of config.fields) {
-      let value = getValue(data, field.name);
+      let value = getValue(
+        data,
+        field.name
+      );
 
-      // ACF Link
+      /**
+       * ACF LINK
+       */
       if (field.type === "link") {
         value = {
           url: value ?? "",
@@ -80,18 +200,49 @@ export async function POST(req: NextRequest) {
         };
       }
 
-      // ACF Image (Return Format = ID)
+      /**
+       * ACF IMAGE
+       * Return format = ID
+       */
       if (field.type === "image") {
         value = value || null;
       }
 
+      /**
+       * Hidden field tetap ikut dikirim
+       *
+       * hidden hanya berarti tidak ditampilkan
+       * di form.
+       */
       acfData[field.acf] = value ?? "";
     }
 
-    console.log("UPDATE ACF:");
-    console.log(acfData);
+    /**
+     * ============================
+     * DEBUG ACF
+     * ============================
+     */
 
-    const result = await updatePostACF(id, acfData, token, lang || "id");
+    console.log("=================================");
+    console.log("UPDATE ACF");
+    console.log("SECTION:", config.title);
+    console.log("POST ID:", postId);
+    console.log("LANG:", lang);
+    console.log("ACF DATA:", acfData);
+    console.log("=================================");
+
+    /**
+     * ============================
+     * UPDATE WORDPRESS
+     * ============================
+     */
+
+    const result = await updatePostACF(
+      postId,
+      acfData,
+      token,
+      lang
+    );
 
     return NextResponse.json({
       success: true,
@@ -99,7 +250,15 @@ export async function POST(req: NextRequest) {
       data: result,
     });
   } catch (error: any) {
-    console.error(error);
+    console.error(
+      "UPDATE SECTION ERROR:",
+      error
+    );
+
+    console.error(
+      "RESPONSE:",
+      error?.response?.data
+    );
 
     return NextResponse.json(
       {
@@ -110,7 +269,8 @@ export async function POST(req: NextRequest) {
           "Gagal menyimpan",
       },
       {
-        status: error?.response?.status ?? 500,
+        status:
+          error?.response?.status ?? 500,
       }
     );
   }

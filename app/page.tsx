@@ -9,7 +9,12 @@ import StatsSection from "@/components/home/StatsSection";
 import NewsSection from "@/components/home/NewsSection";
 import CtaSection from "@/components/home/CtaSection";
 
-import { getPostBySlug, getACFFields } from "@/lib/wordpress";
+import { getPostById } from "@/lib/wordpress";
+import {
+  homeSectionConfig,
+} from "@/components/admin/sections/sectionConfig";
+
+import type { LangCode } from "@/lib/wordpress";
 
 export const metadata = {
   title:
@@ -18,43 +23,114 @@ export const metadata = {
     "PT Future Boeled Indonesia merancang dan mengintegrasikan LED display, digital signage, FIDS, dan interactive flat panel untuk bandara, korporasi, dan instansi publik di Indonesia.",
 };
 
-async function getHomeSection(slug: string) {
-  const post = await getPostBySlug(slug);
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
+}) {
+  // =========================
+  // LANGUAGE
+  // =========================
 
-  if (!post) return null;
+  const params = await searchParams;
 
-  console.log("POST DATA:", post);
+  const rawLang = Array.isArray(params.lang)
+    ? params.lang[0]
+    : params.lang;
 
-  return post.acf ?? null;
-}
+  const lang: LangCode =
+    rawLang === "en" ? "en" : "id";
 
-export default async function Home() {
+  console.log("================================");
+  console.log("HOME LANGUAGE:", lang);
+  console.log("================================");
+
+  // =========================
+  // GET SECTION ID
+  // =========================
+
+  const getSectionId = (section: any) => {
+    if (typeof section.id === "object") {
+      return section.id[lang];
+    }
+
+    return section.id;
+  };
+
+  const heroId = getSectionId(homeSectionConfig.hero);
+  const servicesId = getSectionId(homeSectionConfig.services);
+  const productId = getSectionId(homeSectionConfig.productShowcase);
+  const caseStudyId = getSectionId(homeSectionConfig.caseStudy);
+  const statsId = getSectionId(homeSectionConfig.statSection);
+  const newsId = getSectionId(homeSectionConfig.news);
+  const ctaId = getSectionId(homeSectionConfig.cta);
+
+  console.log("HOME SECTION IDS:", {
+    heroId,
+    servicesId,
+    productId,
+    caseStudyId,
+    statsId,
+    newsId,
+    ctaId,
+  });
+
+  // =========================
+  // GET WORDPRESS POSTS
+  // =========================
+
   const [
-    heroData,
-    servicesData,
-    productData,
-    caseStudyData,
-    statsData,
-    newsData,
-    ctaData,
+    heroPost,
+    servicesPost,
+    productPost,
+    caseStudyPost,
+    statsPost,
+    newsPost,
+    ctaPost,
   ] = await Promise.all([
-    getHomeSection("home-hero"),
-    getHomeSection("home-service"),
-    getHomeSection("product-showcase"),
-    getHomeSection("case-study"),
-    getHomeSection("stats-section"),
-    getHomeSection("news-section"),
-    getHomeSection("cta-section"),
+    getPostById(heroId, lang),
+    getPostById(servicesId, lang),
+    getPostById(productId, lang),
+    getPostById(caseStudyId, lang),
+    getPostById(statsId, lang),
+    getPostById(newsId, lang),
+    getPostById(ctaId, lang),
   ]);
 
-  console.log("FULL SERVICES DATA:", servicesData);
+  // =========================
+  // ACF DATA
+  // =========================
 
+  const heroData = heroPost?.acf ?? {};
+  const servicesData = servicesPost?.acf ?? {};
+  const productData = productPost?.acf ?? {};
+  const caseStudyData = caseStudyPost?.acf ?? {};
+  const statsData = statsPost?.acf ?? {};
+  const newsData = newsPost?.acf ?? {};
+  const ctaData = ctaPost?.acf ?? {};
+
+  console.log("HOME DATA:", {
+    lang,
+    hero: heroPost?.id,
+    services: servicesPost?.id,
+    product: productPost?.id,
+    caseStudy: caseStudyPost?.id,
+    stats: statsPost?.id,
+    news: newsPost?.id,
+    cta: ctaPost?.id,
+  });
 
   return (
     <>
       <Navigation />
 
       <main>
+        {/* =========================
+            HERO
+        ========================= */}
+
         <HeroSection
           data={{
             eyebrow: heroData?.hero_eyebrow,
@@ -66,155 +142,226 @@ export default async function Home() {
             primaryButton: {
               text: heroData?.primary_button_text,
 
-              url: heroData?.primary_button_link?.url ?? "#",
+              url:
+                heroData?.primary_button_link?.url ??
+                "#",
             },
 
             secondaryButton: {
               text: heroData?.secondary_button_text,
 
-              url: heroData?.secondary_button_link?.url ?? "#",
+              url:
+                heroData?.secondary_button_link?.url ??
+                "#",
             },
 
             stats: [
               {
                 number: heroData?.stat_1,
-
                 label: heroData?.label_1,
               },
 
               {
                 number: heroData?.stat_2,
-
                 label: heroData?.label_2,
               },
 
               {
                 number: heroData?.stat_3,
-
                 label: heroData?.label_3,
               },
             ],
           }}
         />
 
+        {/* =========================
+            SERVICES
+        ========================= */}
+
         <ServicesSection
           data={{
-            eyebrow: servicesData?.services_eyebrow,
+            eyebrow:
+              servicesData?.services_eyebrow,
 
-            title: servicesData?.services_title,
+            title:
+              servicesData?.services_title,
 
-            description: servicesData?.services_description,
+            description:
+              servicesData?.services_description,
 
             services: [
               {
-                number: servicesData?.service_1_number,
+                number:
+                  servicesData?.service_1_number,
 
-                title: servicesData?.service_1_title,
+                title:
+                  servicesData?.service_1_title,
 
-                description: servicesData?.service_1_description,
+                description:
+                  servicesData?.service_1_description,
 
-                icon: servicesData?.service_1_icon,
+                icon:
+                  servicesData?.service_1_icon,
               },
 
               {
-                number: servicesData?.service_2_number,
+                number:
+                  servicesData?.service_2_number,
 
-                title: servicesData?.service_2_title,
+                title:
+                  servicesData?.service_2_title,
 
-                description: servicesData?.service_2_description,
+                description:
+                  servicesData?.service_2_description,
 
-                icon: servicesData?.service_2_icon,
+                icon:
+                  servicesData?.service_2_icon,
               },
 
               {
-                number: servicesData?.service_3_number,
+                number:
+                  servicesData?.service_3_number,
 
-                title: servicesData?.service_3_title,
+                title:
+                  servicesData?.service_3_title,
 
-                description: servicesData?.service_3_description,
+                description:
+                  servicesData?.service_3_description,
 
-                icon: servicesData?.service_3_icon,
+                icon:
+                  servicesData?.service_3_icon,
               },
 
               {
-                number: servicesData?.service_4_number,
+                number:
+                  servicesData?.service_4_number,
 
-                title: servicesData?.service_4_title,
+                title:
+                  servicesData?.service_4_title,
 
-                description: servicesData?.service_4_description,
+                description:
+                  servicesData?.service_4_description,
 
-                icon: servicesData?.service_4_icon,
+                icon:
+                  servicesData?.service_4_icon,
               },
             ],
           }}
         />
 
+        {/* =========================
+            PRODUCTS
+        ========================= */}
+
         <ProductsShowcase
           data={{
-            product_eyebrow: productData?.product_eyebrow,
+            product_eyebrow:
+              productData?.product_eyebrow,
 
-            product_title: productData?.product_title,
+            product_title:
+              productData?.product_title,
 
-            product_description: productData?.product_description,
+            product_description:
+              productData?.product_description,
           }}
         />
+
+        {/* =========================
+            CASE STUDY
+        ========================= */}
 
         <CaseStudy
           data={{
-            casestudy_eyebrow: caseStudyData?.casestudy_eyebrow,
+            casestudy_eyebrow:
+              caseStudyData?.casestudy_eyebrow,
 
-            casestudy_title: caseStudyData?.casestudy_title,
+            casestudy_title:
+              caseStudyData?.casestudy_title,
 
-            casestudy_description: caseStudyData?.casestudy_description,
+            casestudy_description:
+              caseStudyData?.casestudy_description,
 
-            casestudy_button: caseStudyData?.casestudy_button,
+            casestudy_button:
+              caseStudyData?.casestudy_button,
 
-            casestudy_link: caseStudyData?.casestudy_link,
+            casestudy_link:
+              caseStudyData?.casestudy_link,
 
-            casestudy_image: caseStudyData?.casestudy_image,
+            casestudy_image:
+              caseStudyData?.casestudy_image,
           }}
         />
+
+        {/* =========================
+            STATS
+        ========================= */}
 
         <StatsSection
           data={{
-            stat_number_1: statsData?.stat_number_1,
+            stat_number_1:
+              statsData?.stat_number_1,
 
-            label_1: statsData?.label_1,
+            label_1:
+              statsData?.label_1,
 
-            stat_number_2: statsData?.stat_number_2,
+            stat_number_2:
+              statsData?.stat_number_2,
 
-            label_2: statsData?.label_2,
+            label_2:
+              statsData?.label_2,
 
-            stat_number_3: statsData?.stat_number_3,
+            stat_number_3:
+              statsData?.stat_number_3,
 
-            label_3: statsData?.label_3,
+            label_3:
+              statsData?.label_3,
 
-            stat_number_4: statsData?.stat_number_4,
+            stat_number_4:
+              statsData?.stat_number_4,
 
-            label_4: statsData?.label_4,
+            label_4:
+              statsData?.label_4,
 
-            stat_support: statsData?.stat_support,
+            stat_support:
+              statsData?.stat_support,
 
-            index_brand_list: statsData?.index_brand_list ?? [],
+            index_brand_list:
+              statsData?.index_brand_list ?? [],
           }}
         />
+
+        {/* =========================
+            NEWS
+        ========================= */}
 
         <NewsSection
           data={{
-            news_eyebrow: newsData?.news_eyebrow,
+            news_eyebrow:
+              newsData?.news_eyebrow,
 
-            news_title: newsData?.news_title,
+            news_title:
+              newsData?.news_title,
           }}
         />
 
+        {/* =========================
+            CTA
+        ========================= */}
+
         <CtaSection
           data={{
-            cta_title: ctaData?.cta_title,
-            cta_sub: ctaData?.cta_sub,
+            cta_title:
+              ctaData?.cta_title,
 
-            cta_button_text: ctaData?.cta_button_text,
+            cta_sub:
+              ctaData?.cta_sub,
 
-            cta_button_link: ctaData?.cta_button_link?.url ?? "#",
+            cta_button_text:
+              ctaData?.cta_button_text,
+
+            cta_button_link:
+              ctaData?.cta_button_link?.url ??
+              "#",
           }}
         />
       </main>

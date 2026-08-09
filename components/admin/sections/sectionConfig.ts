@@ -145,7 +145,10 @@ export const homeSectionConfig = {
   },
 
   services: {
-    id: 155,
+    id: {
+      en: 155,
+      id: 562,
+    },
 
     title: "Services Section",
 
@@ -276,7 +279,10 @@ export const homeSectionConfig = {
   },
 
   productShowcase: {
-    id: 202,
+    id: {
+      en: 485,
+      id: 586,
+    },
 
     title: "Product Showcase",
 
@@ -303,7 +309,10 @@ export const homeSectionConfig = {
   },
 
   caseStudy: {
-    id: 204,
+    id: {
+      en: 204,
+      id: 588,
+    },
 
     title: "Case Study",
 
@@ -348,7 +357,10 @@ export const homeSectionConfig = {
   },
 
   statSection: {
-    id: 206,
+    id: {
+      en: 206,
+      id: 591,
+    },
 
     title: "Statistics",
 
@@ -419,7 +431,10 @@ export const homeSectionConfig = {
   },
 
   news: {
-    id: 208,
+    id: {
+      en: 208,
+      id: 593,
+    },
 
     title: "News Section",
 
@@ -440,7 +455,10 @@ export const homeSectionConfig = {
   },
 
   cta: {
-    id: 210,
+    id: {
+      en: 210,
+      id: 572,
+    },
 
     title: "CTA Section",
 
