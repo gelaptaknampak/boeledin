@@ -16,9 +16,14 @@ interface RouteContext {
 }
 
 /**
- * Mengambil translation ID berdasarkan bahasa yang diminta.
+ * =========================================================
+ * GET TRANSLATION ID
+ * =========================================================
+ *
+ * Mencari product ID yang sesuai dengan bahasa yang diminta.
  *
  * Contoh:
+ *
  * Product EN:
  * 525
  *
@@ -28,10 +33,10 @@ interface RouteContext {
  *   id: 530
  * }
  *
- * request:
+ * Request:
  * /products/525?lang=id
  *
- * hasil:
+ * Result:
  * 530
  */
 async function getTranslationId(
@@ -53,11 +58,19 @@ async function getTranslationId(
 
   const data = await response.json();
 
+  if (!data?.id) {
+    throw new Error(
+      `Translation product untuk bahasa ${lang} tidak ditemukan`,
+    );
+  }
+
   return Number(data.id);
 }
 
 /**
+ * =========================================================
  * GET PRODUCT
+ * =========================================================
  */
 export async function GET(
   req: Request,
@@ -84,16 +97,23 @@ export async function GET(
     const lang = searchParams.get("lang") || "id";
 
     /**
-     * Ambil product sesuai language.
+     * Cari ID product yang sesuai dengan bahasa.
      *
-     * Custom multilingual API akan menentukan
-     * post ID translation yang benar.
+     * Kalau:
+     * requestedId = 525
+     * lang = id
+     *
+     * maka:
+     * translatedId = 530
      */
     const translatedId = await getTranslationId(
       requestedId,
       lang,
     );
 
+    /**
+     * Ambil data product menggunakan ID translation.
+     */
     const product = await getCustomPostById(
       "products",
       translatedId,
@@ -118,17 +138,18 @@ export async function GET(
       ...product,
 
       /**
-       * ID yang sedang digunakan oleh form.
+       * ID product yang benar-benar digunakan
+       * oleh form.
        */
       id: translatedId,
 
       /**
-       * ID awal yang dikirim dari URL.
+       * ID yang pertama kali dikirim melalui URL.
        */
       requested_id: requestedId,
 
       /**
-       * Bahasa product yang sedang diedit.
+       * Bahasa product yang sedang digunakan.
        */
       language: lang,
     });
@@ -138,7 +159,10 @@ export async function GET(
     return NextResponse.json(
       {
         message: "Gagal mengambil produk",
-        error: String(error),
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
       },
       {
         status: 500,
@@ -148,14 +172,18 @@ export async function GET(
 }
 
 /**
+ * =========================================================
  * DELETE PRODUCT
+ * =========================================================
  */
 export async function DELETE(
   req: Request,
   { params }: RouteContext,
 ) {
   try {
-    const token = (await cookies()).get("wp_token")?.value;
+    const token = (await cookies())
+      .get("wp_token")
+      ?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -201,12 +229,18 @@ export async function DELETE(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("DELETE PRODUCT ERROR:", error);
+    console.error(
+      "DELETE PRODUCT ERROR:",
+      error,
+    );
 
     return NextResponse.json(
       {
         message: "Gagal menghapus produk",
-        error: String(error),
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
       },
       {
         status: 500,
@@ -216,14 +250,18 @@ export async function DELETE(
 }
 
 /**
+ * =========================================================
  * UPDATE PRODUCT
+ * =========================================================
  */
 export async function PUT(
   req: Request,
   { params }: RouteContext,
 ) {
   try {
-    const token = (await cookies()).get("wp_token")?.value;
+    const token = (await cookies())
+      .get("wp_token")
+      ?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -261,7 +299,9 @@ export async function PUT(
       "id";
 
     /**
-     * Cari ID translation terlebih dahulu.
+     * =====================================================
+     * CARI TRANSLATION ID
+     * =====================================================
      *
      * Contoh:
      *
@@ -271,44 +311,76 @@ export async function PUT(
      * 525 = EN
      * 530 = ID
      *
-     * Maka update dilakukan ke 530.
+     * Maka:
+     * productId = 530
+     *
+     * Update TIDAK dilakukan ke 525.
      */
-    const productId = await getTranslationId(
-      requestedId,
-      lang,
-    );
+    const productId =
+      await getTranslationId(
+        requestedId,
+        lang,
+      );
 
-    const product = await updateProduct(
-      productId,
-      body.nama_produk,
-      {
-        nama_produk: body.nama_produk,
-        model_produk: body.model_produk,
+    /**
+     * =====================================================
+     * UPDATE PRODUCT
+     * =====================================================
+     */
+    const product =
+      await updateProduct(
+        productId,
 
-        short_description: body.short_description,
-        description: body.description,
-        spesifikasi: body.spesifikasi,
+        body.nama_produk,
 
-        feature_image: body.feature_image,
-        gallery_ids: body.gallery_ids,
+        {
+          nama_produk:
+            body.nama_produk,
 
-        download_brosur:
-          body.download_brosur === ""
-            ? null
-            : body.download_brosur
-              ? Number(body.download_brosur)
-              : null,
-      },
-      body.brand,
-      Number(body["jenis-produk"]),
-      token,
-      lang as any,
-    );
+          model_produk:
+            body.model_produk,
+
+          short_description:
+            body.short_description,
+
+          description:
+            body.description,
+
+          spesifikasi:
+            body.spesifikasi,
+
+          feature_image:
+            body.feature_image,
+
+          gallery_ids:
+            body.gallery_ids,
+
+          download_brosur:
+            body.download_brosur === ""
+              ? null
+              : body.download_brosur
+                ? Number(
+                    body.download_brosur,
+                  )
+                : null,
+        },
+
+        Number(body.brand),
+
+        Number(
+          body["jenis-produk"],
+        ),
+
+        token,
+
+        lang as any,
+      );
 
     if (!product) {
       return NextResponse.json(
         {
-          message: "Gagal update produk",
+          message:
+            "Gagal update produk",
         },
         {
           status: 500,
@@ -316,14 +388,39 @@ export async function PUT(
       );
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json({
+      ...product,
+
+      /**
+       * ID product yang benar-benar
+       * di-update.
+       */
+      id: productId,
+
+      /**
+       * ID yang dikirim dari frontend.
+       */
+      requested_id: requestedId,
+
+      /**
+       * Bahasa yang sedang di-update.
+       */
+      language: lang,
+    });
   } catch (error) {
-    console.error("UPDATE PRODUCT ERROR:", error);
+    console.error(
+      "UPDATE PRODUCT ERROR:",
+      error,
+    );
 
     return NextResponse.json(
       {
-        message: "Gagal update produk",
-        error: String(error),
+        message:
+          "Gagal update produk",
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
       },
       {
         status: 500,

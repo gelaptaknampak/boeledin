@@ -3,193 +3,478 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { Edit, Trash2, Search } from "lucide-react";
 import toast from "react-hot-toast";
+
 import BrandManager from "./BrandManager";
 import CategoryManager from "./CategoryManager";
 
 export default function ProductsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+
   const searchParams = useSearchParams();
   const lang = searchParams.get("lang") || "id";
+
 
   useEffect(() => {
     fetchProducts(lang);
   }, [lang]);
 
+
   async function fetchProducts(lang: string) {
     try {
-      setLoading(true);
-
       const res = await fetch(
-        `https://wp.boeledin.com/wp-json/wp/v2/products?lang=${lang}&_embed&_=${Date.now()}`,
+        `/api/wordpress/products?lang=${lang}&_=${Date.now()}`,
         {
           cache: "no-store",
-        },
+        }
       );
+
+
+      if (!res.ok) {
+        throw new Error("Gagal mengambil produk");
+      }
+
 
       const data = await res.json();
 
-      setProducts(data);
+      setProducts(
+        Array.isArray(data)
+          ? data
+          : []
+      );
+
     } catch (err) {
-      console.error(err);
-      toast.error("Gagal mengambil data produk");
-    } finally {
-      setLoading(false);
+      console.error(
+        "FETCH PRODUCTS ERROR:",
+        err
+      );
+
+      setProducts([]);
+
+      toast.error(
+        "Gagal mengambil data produk"
+      );
     }
   }
 
-  const filteredProducts = products.filter((product) => {
-    const title = product.title?.rendered ?? "";
-    const model = product.acf?.model_produk ?? "";
 
-    return (
-      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      model.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+
+  const filteredProducts = products.filter(
+    (product) => {
+
+      const title =
+        product.acf?.nama_produk ??
+        product.title ??
+        "";
+
+
+      const model =
+        product.acf?.model_produk ??
+        "";
+
+
+      return (
+        title
+          .toLowerCase()
+          .includes(
+            searchQuery.toLowerCase()
+          ) ||
+
+        model
+          .toLowerCase()
+          .includes(
+            searchQuery.toLowerCase()
+          )
+      );
+    }
+  );
+
+
 
   async function handleDelete(id: number) {
-    if (!confirm("Yakin ingin menghapus produk ini?")) return;
+
+    if (
+      !confirm(
+        "Yakin ingin menghapus produk ini?"
+      )
+    ) {
+      return;
+    }
+
 
     try {
-      const res = await fetch(`/api/wordpress/products/${id}?lang=${lang}`, {
-        method: "DELETE",
-      });
 
-      if (!res.ok) throw new Error();
+      const res = await fetch(
+        `/api/wordpress/products/${id}?lang=${lang}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      toast.success("Produk berhasil dihapus");
+
+      if (!res.ok) {
+        throw new Error();
+      }
+
+
+      toast.success(
+        "Produk berhasil dihapus"
+      );
+
 
       fetchProducts(lang);
+
+
     } catch {
-      toast.error("Gagal menghapus produk");
+
+      toast.error(
+        "Gagal menghapus produk"
+      );
+
     }
+
   }
 
+
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+
+
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
+
         <div>
-          <h1 className="text-3xl font-bold mb-2">Kelola Produk</h1>
+          <h1 className="text-2xl font-bold">
+            Kelola Produk
+          </h1>
+
           <p className="text-muted-foreground">
             Kelola semua produk dari WordPress CMS
           </p>
         </div>
+
+
         <Link
           href={`/admin/products/new?lang=${lang}`}
-          className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+          className="
+            flex items-center gap-2
+            px-6 py-2
+            bg-primary
+            text-primary-foreground
+            font-semibold
+            rounded-lg
+            hover:bg-primary/90
+            transition-colors
+          "
         >
-          <Plus className="w-5 h-5" />
           Tambah Produk
         </Link>
+
       </div>
+
+
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+
+        <Search
+          className="
+            absolute
+            left-3
+            top-3
+            w-5
+            h-5
+            text-muted-foreground
+          "
+        />
+
         <input
           type="text"
           placeholder="Cari produk..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          onChange={(e) =>
+            setSearchQuery(
+              e.target.value
+            )
+          }
+          className="
+            w-full
+            pl-10
+            pr-4
+            py-2
+            border
+            border-border
+            rounded-lg
+            bg-background
+            focus:outline-none
+            focus:ring-2
+            focus:ring-primary
+          "
         />
+
       </div>
 
-      {/* brand / category */}
+
+
+      {/* Brand & Category */}
       <div className="grid lg:grid-cols-2 gap-6">
+
         <BrandManager />
+
         <CategoryManager />
+
       </div>
 
-      {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+
+
+
+      {/* Product Table */}
+      <div
+        className="
+          bg-card
+          border
+          border-border
+          rounded-lg
+          overflow-hidden
+        "
+      >
+
         <div className="overflow-x-auto">
+
           <table className="w-full">
-            <thead className="bg-accent border-b border-border">
+
+
+            <thead
+              className="
+                bg-accent
+                border-b
+                border-border
+              "
+            >
+
               <tr>
+
                 <th className="px-6 py-4 text-left font-semibold">
                   Nama Produk
                 </th>
-                <th className="px-6 py-4 text-left font-semibold">Model</th>
-                <th className="px-6 py-4 text-left font-semibold">Merek</th>
-                <th className="px-6 py-4 text-left font-semibold">Status</th>
-                <th className="px-6 py-4 text-left font-semibold">Diubah</th>
-                <th className="px-6 py-4 text-left font-semibold">Aksi</th>
+
+
+                <th className="px-6 py-4 text-left font-semibold">
+                  Model
+                </th>
+
+
+                <th className="px-6 py-4 text-left font-semibold">
+                  Merek
+                </th>
+
+
+                <th className="px-6 py-4 text-left font-semibold">
+                  Diubah
+                </th>
+
+
+                <th className="px-6 py-4 text-left font-semibold">
+                  Aksi
+                </th>
+
               </tr>
+
             </thead>
+
+
+
             <tbody className="divide-y divide-border">
-              {filteredProducts.map((product) => (
+
+              {filteredProducts.map(
+                (product) => (
+
                 <tr
                   key={product.id}
-                  className="hover:bg-accent/50 transition-colors"
+                  className="
+                    hover:bg-accent/50
+                    transition-colors
+                  "
                 >
+
+
                   <td className="px-6 py-4 font-medium">
-                    {product.acf?.nama_produk}
+                    {
+                      product.acf?.nama_produk
+                    }
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {product.acf?.model_produk}
+
+
+
+                  <td
+                    className="
+                      px-6 py-4
+                      text-sm
+                      text-muted-foreground
+                    "
+                  >
+                    {
+                      product.acf?.model_produk
+                    }
                   </td>
-                  <td className="px-6 py-4 text-sm">{product.acf?.brand}</td>
+
+
+
+                  <td className="px-6 py-4 text-sm">
+                    {
+                      product.acf?.brand
+                    }
+                  </td>
+
+
+
+                  <td
+                    className="
+                      px-6 py-4
+                      text-sm
+                      text-muted-foreground
+                    "
+                  >
+
+                    {
+                      new Date(
+                        product.modified
+                      )
+                      .toLocaleDateString(
+                        "id-ID"
+                      )
+                    }
+
+                  </td>
+
+
+
                   <td className="px-6 py-4">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        product.status === "publish"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                      }`}
-                    >
-                      {product.status === "publish"
-                        ? "Dipublikasikan"
-                        : "Draft"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
-                    {new Date(product.modified).toLocaleDateString("id-ID")}
-                  </td>
-                  <td className="px-6 py-4">
+
                     <div className="flex items-center gap-2">
+
+
                       <Link
                         href={`/admin/products/${product.id}/edit?lang=${lang}`}
-                        className="p-2 rounded-lg hover:bg-accent transition-colors"
+                        className="
+                          p-2
+                          rounded-lg
+                          hover:bg-accent
+                          transition-colors
+                        "
                         title="Edit"
                       >
-                        <Edit className="w-4 h-4 text-primary" />
+
+                        <Edit
+                          className="
+                            w-4
+                            h-4
+                            text-primary
+                          "
+                        />
+
                       </Link>
+
+
+
                       <button
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2 rounded-lg hover:bg-accent transition-colors"
+                        onClick={() =>
+                          handleDelete(
+                            product.id
+                          )
+                        }
+                        className="
+                          p-2
+                          rounded-lg
+                          hover:bg-accent
+                          transition-colors
+                        "
                         title="Hapus"
                       >
-                        <Trash2 className="w-4 h-4 text-red-500" />
+
+                        <Trash2
+                          className="
+                            w-4
+                            h-4
+                            text-red-500
+                          "
+                        />
+
                       </button>
+
+
                     </div>
+
                   </td>
+
+
                 </tr>
+
               ))}
+
+
             </tbody>
+
           </table>
+
+
         </div>
 
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Tidak ada produk ditemukan</p>
-          </div>
-        )}
+
+
+        {
+          filteredProducts.length === 0 && (
+
+            <div className="text-center py-12">
+
+              <p className="text-muted-foreground">
+                Tidak ada produk ditemukan
+              </p>
+
+            </div>
+
+          )
+        }
+
+
       </div>
 
-      {/* Info Box */}
-      <div className="bg-accent border border-primary/30 rounded-lg p-6">
-        <h3 className="font-semibold mb-2">Informasi</h3>
+
+
+
+
+      {/* Info */}
+      <div
+        className="
+          bg-accent
+          border
+          border-primary/30
+          rounded-lg
+          p-6
+        "
+      >
+
+        <h3 className="font-semibold mb-2">
+          Informasi
+        </h3>
+
+
         <p className="text-sm text-muted-foreground">
-          Semua data produk disinkronkan dengan WordPress CMS. Anda dapat
-          mengedit produk menggunakan editor WordPress juga.
+
+          Semua data produk disinkronkan
+          dengan WordPress CMS.
+          Anda dapat mengedit produk
+          menggunakan editor WordPress juga.
+
         </p>
+
+
       </div>
+
+
     </div>
   );
 }

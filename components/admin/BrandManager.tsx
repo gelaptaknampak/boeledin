@@ -11,6 +11,13 @@ interface Brand {
   name: string;
   slug: string;
   count: number;
+  taxonomy: string;
+  language: "en" | "id" | null;
+
+  translations: {
+    en?: number;
+    id?: number;
+  };
 
   acf?: {
     brand_logo?: number;
@@ -40,26 +47,29 @@ export default function BrandManager() {
     fetchBrands();
   }, [lang]);
 
-  async function fetchBrands() {
-    try {
-      setLoading(true);
+ async function fetchBrands() {
+  try {
+    setLoading(true);
 
-      const res = await fetch(`/api/wordpress/brands?lang=${lang}&_=${Date.now()}`, {
+    const res = await fetch(
+      `/api/wordpress/brands?lang=${lang}&_=${Date.now()}`,
+      {
         cache: "no-store",
-      });
+      }
+    );
 
-      if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error();
 
-      const data = await res.json();
+    const data = await res.json();
 
-      setBrands(data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Gagal mengambil data brand");
-    } finally {
-      setLoading(false);
-    }
+    setBrands(data);
+  } catch (err) {
+    console.error(err);
+    toast.error("Gagal mengambil data brand");
+  } finally {
+    setLoading(false);
   }
+}
 
   async function uploadMedia(file: File) {
     const formData = new FormData();

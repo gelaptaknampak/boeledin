@@ -27,6 +27,18 @@ interface ProductFormData {
   download_brosur_url: string;
 }
 
+interface Brand {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export default function ProductForm({
   mode,
   productId,
@@ -40,8 +52,35 @@ export default function ProductForm({
 
   const [loading, setLoading] = useState(false);
 
-  const [brands, setBrands] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  /**
+   * =========================================================
+   * RESOLVED PRODUCT ID
+   * =========================================================
+   *
+   * productId:
+   * ID yang datang dari URL.
+   *
+   * resolvedProductId:
+   * ID product sesuai bahasa yang sedang diedit.
+   *
+   * Contoh:
+   *
+   * /admin/products/525/edit?lang=id
+   *
+   * 525 = EN
+   * 530 = ID
+   *
+   * Maka:
+   *
+   * productId         = 525
+   * resolvedProductId = 530
+   */
+  const [resolvedProductId, setResolvedProductId] = useState<
+    number | null
+  >(null);
+
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
@@ -64,10 +103,11 @@ export default function ProductForm({
   });
 
   /**
-   * ============================
+   * =========================================================
    * FETCH BRANDS
-   * ============================
+   * =========================================================
    */
+
   async function fetchBrands() {
     try {
       const res = await fetch(
@@ -83,18 +123,34 @@ export default function ProductForm({
 
       const data = await res.json();
 
-      setBrands(data);
+      const normalizedBrands: Brand[] = Array.isArray(data)
+        ? data
+            .map((item: any) => ({
+              id: Number(item.id),
+              name: item.name ?? "",
+              slug: item.slug ?? "",
+            }))
+            .filter((item: Brand) => item.id > 0)
+        : [];
+
+      console.log(`BRANDS [${lang}]:`, normalizedBrands);
+
+      setBrands(normalizedBrands);
     } catch (error) {
       console.error("FETCH BRANDS ERROR:", error);
+
+      setBrands([]);
+
       toast.error("Gagal mengambil brand");
     }
   }
 
   /**
-   * ============================
+   * =========================================================
    * FETCH PRODUCT TYPES
-   * ============================
+   * =========================================================
    */
+
   async function fetchCategories() {
     try {
       const res = await fetch(
@@ -110,35 +166,51 @@ export default function ProductForm({
 
       const data = await res.json();
 
-      setCategories(data);
+      const normalizedCategories: Category[] = Array.isArray(data)
+        ? data
+            .map((item: any) => ({
+              id: Number(item.id),
+              name: item.name ?? "",
+              slug: item.slug ?? "",
+            }))
+            .filter((item: Category) => item.id > 0)
+        : [];
+
+      console.log(
+        `CATEGORIES [${lang}]:`,
+        normalizedCategories,
+      );
+
+      setCategories(normalizedCategories);
     } catch (error) {
       console.error(
         "FETCH PRODUCT TYPES ERROR:",
         error,
       );
 
+      setCategories([]);
+
       toast.error("Gagal mengambil jenis produk");
     }
   }
 
   /**
-   * Load brand & category ketika language berubah.
+   * =========================================================
+   * LOAD BRAND & CATEGORY
+   * =========================================================
    */
-  useEffect(() => {
-    fetchBrands();
-    fetchCategories();
-  }, [lang]);
 
   /**
-   * ============================
+   * =========================================================
    * HANDLE INPUT
-   * ============================
+   * =========================================================
    */
+
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement |
-      HTMLTextAreaElement |
-      HTMLSelectElement
+        HTMLTextAreaElement |
+        HTMLSelectElement
     >,
   ) {
     const { name, value } = e.target;
@@ -154,178 +226,339 @@ export default function ProductForm({
   }
 
   /**
-   * ============================
-   * FETCH PRODUCT
-   * ============================
+   * =========================================================
+   * GET MEDIA URL
+   * =========================================================
    */
-  useEffect(() => {
-    if (
-      mode === "edit" &&
-      productId
-    ) {
-      fetchProduct();
-    }
-  }, [mode, productId, lang]);
 
-  async function fetchProduct() {
+  async function getMediaUrl(
+    mediaId: number | string,
+  ): Promise<string> {
     try {
-      setLoading(true);
+      const id = Number(mediaId);
 
-      /**
-       * Tidak perlu mencari translation
-       * di frontend.
-       *
-       * API /products/[id]
-       * akan otomatis menentukan
-       * translation ID berdasarkan lang.
-       */
+      if (!id) {
+        return "";
+      }
+
       const res = await fetch(
-        `/api/wordpress/products/${productId}?lang=${lang}`,
+        `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`,
         {
           cache: "no-store",
         },
       );
 
       if (!res.ok) {
-        throw new Error(
-          "Produk tidak ditemukan",
-        );
+        return "";
       }
 
-      const product = await res.json();
+      const media = await res.json();
 
-      /**
-       * ============================
-       * GALLERY
-       * ============================
-       */
-      const ids = (
-        product.acf?.feature_image ?? ""
-      )
-        .split(/[\n,]+/)
-        .map((id: string) => id.trim())
-        .filter(Boolean);
-
-      const urls: string[] = [];
-
-      for (const id of ids) {
-        try {
-          const imageRes = await fetch(
-            `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`,
-            {
-              cache: "no-store",
-            },
-          );
-
-          if (!imageRes.ok) continue;
-
-          const image = await imageRes.json();
-
-          if (image.source_url) {
-            urls.push(image.source_url);
-          }
-        } catch (error) {
-          console.error(
-            `Gagal mengambil image ${id}:`,
-            error,
-          );
-        }
-      }
-
-      /**
-       * ============================
-       * PDF
-       * ============================
-       */
-      let pdfUrl = "";
-
-      const pdfId =
-        product.acf?.download_brosur;
-
-      if (pdfId) {
-        try {
-          const pdfRes = await fetch(
-            `https://wp.boeledin.com/wp-json/wp/v2/media/${pdfId}`,
-            {
-              cache: "no-store",
-            },
-          );
-
-          if (pdfRes.ok) {
-            const pdf = await pdfRes.json();
-
-            pdfUrl = pdf.source_url ?? "";
-          }
-        } catch (error) {
-          console.error(
-            "Gagal mengambil PDF:",
-            error,
-          );
-        }
-      }
-
-      /**
-       * ============================
-       * SET FORM
-       * ============================
-       */
-      setForm({
-        nama_produk:
-          product.acf?.nama_produk ?? "",
-
-        model_produk:
-          product.acf?.model_produk ?? "",
-
-        brand:
-          product.brand?.[0] ?? 0,
-
-        jenis_produk:
-          product["jenis-produk"]?.[0] ?? 0,
-
-        short_description:
-          product.acf?.short_description ?? "",
-
-        description:
-          product.acf?.description ?? "",
-
-        spesifikasi:
-          product.acf?.spesifikasi ?? "",
-
-        feature_image:
-          product.acf?.feature_image ?? "",
-
-        feature_image_urls: urls,
-
-        download_brosur:
-          product.acf?.download_brosur ?? null,
-
-        download_brosur_url: pdfUrl,
-      });
+      return media.source_url ?? "";
     } catch (error) {
       console.error(
-        "FETCH PRODUCT ERROR:",
+        `Gagal mengambil media ${mediaId}:`,
         error,
       );
 
-      toast.error(
-        "Gagal mengambil produk",
-      );
-    } finally {
-      setLoading(false);
+      return "";
     }
   }
 
   /**
-   * ============================
-   * UPLOAD MEDIA
-   * ============================
+   * =========================================================
+   * FETCH PRODUCT
+   * =========================================================
    */
+
+useEffect(() => {
+  if (mode === "edit" && productId) {
+    fetchBrands();
+    fetchCategories();
+    fetchProduct();
+    return;
+  }
+
+  fetchBrands();
+  fetchCategories();
+}, [mode, productId, lang]);
+
+async function fetchProduct() {
+  try {
+    setLoading(true);
+    setResolvedProductId(null);
+
+    /**
+     * =====================================================
+     * FETCH PRODUCT DARI ENDPOINT YANG SUDAH LENGKAP
+     * =====================================================
+     *
+     * Endpoint ini sudah mengembalikan:
+     *
+     * {
+     *   id,
+     *   acf,
+     *   brand: {
+     *     id,
+     *     name,
+     *     slug
+     *   },
+     *   jenis_produk: {
+     *     id,
+     *     name,
+     *     slug
+     *   }
+     * }
+     */
+    const res = await fetch(
+      `/api/wordpress/products?lang=${lang}`,
+      {
+        cache: "no-store",
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error("Gagal mengambil daftar produk");
+    }
+
+    const products = await res.json();
+
+    /**
+     * Cari product berdasarkan ID yang sedang diedit
+     */
+    const product = Array.isArray(products)
+      ? products.find(
+          (item: any) =>
+            Number(item.id) === Number(productId),
+        )
+      : null;
+
+    if (!product) {
+      throw new Error(
+        `Produk dengan ID ${productId} tidak ditemukan`,
+      );
+    }
+
+    console.log("========================================");
+    console.log("PRODUCT RESPONSE:", product);
+    console.log("REQUESTED PRODUCT ID:", productId);
+    console.log("REQUESTED LANGUAGE:", lang);
+    console.log("RESOLVED PRODUCT ID:", product.id);
+    console.log("PRODUCT BRAND:", product.brand);
+    console.log(
+      "PRODUCT JENIS PRODUK:",
+      product.jenis_produk,
+    );
+    console.log("========================================");
+
+    /**
+     * =====================================================
+     * RESOLVE PRODUCT ID
+     * =====================================================
+     */
+
+    const currentProductId = Number(product.id);
+
+    if (!currentProductId) {
+      throw new Error("Product ID tidak valid");
+    }
+
+    setResolvedProductId(currentProductId);
+
+    /**
+     * =====================================================
+     * BRAND
+     * =====================================================
+     */
+
+    const brandId = Number(
+      product.brand?.id ?? 0,
+    );
+
+    console.log(
+      "RESOLVED BRAND ID:",
+      brandId,
+    );
+
+    if (brandId > 0) {
+  setBrands((prev) => {
+    const exists = prev.some(
+      (brand) => Number(brand.id) === brandId,
+    );
+
+    if (exists) {
+      return prev;
+    }
+
+    return [
+      ...prev,
+      {
+        id: brandId,
+        name: product.brand?.name ?? "",
+        slug: product.brand?.slug ?? "",
+      },
+    ];
+  });
+} else {
+      setBrands([]);
+    }
+
+    /**
+     * =====================================================
+     * JENIS PRODUK
+     * =====================================================
+     */
+
+    const jenisProdukId = Number(
+      product.jenis_produk?.id ?? 0,
+    );
+
+    console.log(
+      "RESOLVED JENIS PRODUK ID:",
+      jenisProdukId,
+    );
+
+    if (jenisProdukId > 0) {
+  setCategories((prev) => {
+    const exists = prev.some(
+      (category) =>
+        Number(category.id) === jenisProdukId,
+    );
+
+    if (exists) {
+      return prev;
+    }
+
+    return [
+      ...prev,
+      {
+        id: jenisProdukId,
+        name: product.jenis_produk?.name ?? "",
+        slug: product.jenis_produk?.slug ?? "",
+      },
+    ];
+  });
+} else {
+      setCategories([]);
+    }
+
+    /**
+     * =====================================================
+     * GALLERY
+     * =====================================================
+     */
+
+    const rawGallery =
+      product.acf?.feature_image ?? "";
+
+    const ids = String(rawGallery)
+      .split(/[\n,]+/)
+      .map((id: string) => id.trim())
+      .filter(Boolean);
+
+    const urls = await Promise.all(
+      ids.map((id: string) =>
+        getMediaUrl(id),
+      ),
+    );
+
+    const validUrls = urls.filter(Boolean);
+
+    /**
+     * =====================================================
+     * PDF
+     * =====================================================
+     */
+
+    let pdfUrl = "";
+
+    const pdfId =
+      product.acf?.download_brosur;
+
+    if (pdfId) {
+      pdfUrl = await getMediaUrl(pdfId);
+    }
+
+    /**
+     * =====================================================
+     * SET FORM
+     * =====================================================
+     */
+
+    setForm({
+      nama_produk:
+        product.acf?.nama_produk ?? "",
+
+      model_produk:
+        product.acf?.model_produk ?? "",
+
+      brand: brandId,
+
+      jenis_produk:
+        jenisProdukId,
+
+      short_description:
+        product.acf?.short_description ?? "",
+
+      description:
+        product.acf?.description ?? "",
+
+      spesifikasi:
+        product.acf?.spesifikasi ?? "",
+
+      feature_image:
+        rawGallery,
+
+      feature_image_urls:
+        validUrls,
+
+      download_brosur:
+        product.acf?.download_brosur
+          ? Number(
+              product.acf.download_brosur,
+            )
+          : null,
+
+      download_brosur_url:
+        pdfUrl,
+    });
+
+    console.log("========================================");
+    console.log("FORM VALUES SET:");
+    console.log({
+      brand: brandId,
+      jenis_produk: jenisProdukId,
+    });
+    console.log("========================================");
+
+  } catch (error) {
+    console.error(
+      "FETCH PRODUCT ERROR:",
+      error,
+    );
+
+    toast.error(
+      "Gagal mengambil produk",
+    );
+  } finally {
+    setLoading(false);
+  }
+}
+  /**
+   * =========================================================
+   * UPLOAD MEDIA
+   * =========================================================
+   */
+
   async function uploadMedia(
     file: File,
   ) {
     const formData = new FormData();
 
-    formData.append("file", file);
+    formData.append(
+      "file",
+      file,
+    );
 
     const res = await fetch(
       "/api/wordpress/media",
@@ -345,28 +578,80 @@ export default function ProductForm({
   }
 
   /**
-   * ============================
+   * =========================================================
    * SUBMIT
-   * ============================
+   * =========================================================
    */
+
   async function handleSubmit(
     e: React.FormEvent,
   ) {
     e.preventDefault();
 
+    /**
+     * Edit harus memiliki resolved product ID.
+     */
+
+    if (
+      mode === "edit" &&
+      !resolvedProductId
+    ) {
+      toast.error(
+        "ID produk sesuai bahasa belum ditemukan.",
+      );
+
+      return;
+    }
+
+    /**
+     * Brand dan category wajib valid.
+     */
+
+    if (
+      !form.brand ||
+      form.brand <= 0
+    ) {
+      toast.error(
+        "Silakan pilih brand.",
+      );
+
+      return;
+    }
+
+    if (
+      !form.jenis_produk ||
+      form.jenis_produk <= 0
+    ) {
+      toast.error(
+        "Silakan pilih jenis produk.",
+      );
+
+      return;
+    }
+
     setLoading(true);
 
     try {
+      /**
+       * =====================================================
+       * TARGET PRODUCT ID
+       * =====================================================
+       */
+
+      const targetProductId =
+        resolvedProductId;
+
       const url =
         mode === "create"
           ? `/api/wordpress/products?lang=${lang}`
-          : `/api/wordpress/products/${productId}?lang=${lang}`;
+          : `/api/wordpress/products/${targetProductId}?lang=${lang}`;
 
       /**
-       * ============================
+       * =====================================================
        * GALLERY
-       * ============================
+       * =====================================================
        */
+
       let gallery =
         form.feature_image;
 
@@ -379,7 +664,9 @@ export default function ProductForm({
           const media =
             await uploadMedia(file);
 
-          uploadedIds.push(media.id);
+          uploadedIds.push(
+            Number(media.id),
+          );
         }
 
         gallery = form.feature_image
@@ -388,10 +675,11 @@ export default function ProductForm({
       }
 
       /**
-       * ============================
+       * =====================================================
        * PDF
-       * ============================
+       * =====================================================
        */
+
       let pdfId =
         form.download_brosur;
 
@@ -404,14 +692,22 @@ export default function ProductForm({
             form.download_brosur,
           );
 
-        pdfId = pdf.id;
+        pdfId = Number(pdf.id);
       }
 
       /**
-       * ============================
+       * =====================================================
        * PAYLOAD
-       * ============================
+       * =====================================================
+       *
+       * Kirim number.
+       *
+       * updateProduct() akan mengubah:
+       *
+       * brand -> [brand]
+       * jenis-produk -> [jenisProduk]
        */
+
       const payload = {
         nama_produk:
           form.nama_produk,
@@ -419,10 +715,11 @@ export default function ProductForm({
         model_produk:
           form.model_produk,
 
-        brand: form.brand,
+        brand:
+          Number(form.brand),
 
         "jenis-produk":
-          [Number(form.jenis_produk)],
+          Number(form.jenis_produk),
 
         short_description:
           form.short_description,
@@ -439,6 +736,32 @@ export default function ProductForm({
         download_brosur:
           pdfId,
       };
+
+      console.log(
+        "========================================",
+      );
+
+      console.log(
+        "SUBMIT PRODUCT",
+        {
+          mode,
+          lang,
+          originalProductId:
+            productId,
+          resolvedProductId,
+          payload,
+        },
+      );
+
+      console.log(
+        "========================================",
+      );
+
+      /**
+       * =====================================================
+       * REQUEST
+       * =====================================================
+       */
 
       const res = await fetch(
         url,
@@ -462,7 +785,15 @@ export default function ProductForm({
       const data =
         await res.json();
 
-      if (res.status === 401) {
+      /**
+       * =====================================================
+       * AUTH ERROR
+       * =====================================================
+       */
+
+      if (
+        res.status === 401
+      ) {
         toast.error(
           "Sesi login telah habis. Silakan login kembali.",
         );
@@ -474,7 +805,18 @@ export default function ProductForm({
         return;
       }
 
+      /**
+       * =====================================================
+       * API ERROR
+       * =====================================================
+       */
+
       if (!res.ok) {
+        console.error(
+          "UPDATE PRODUCT ERROR RESPONSE:",
+          data,
+        );
+
         toast.error(
           data.message ||
             "Terjadi kesalahan",
@@ -483,13 +825,22 @@ export default function ProductForm({
         return;
       }
 
+      /**
+       * =====================================================
+       * SUCCESS
+       * =====================================================
+       */
+
       toast.success(
         mode === "create"
           ? `Produk ${lang.toUpperCase()} berhasil dibuat`
           : `Produk ${lang.toUpperCase()} berhasil diupdate`,
       );
 
-      router.push(returnUrl);
+      router.push(
+        returnUrl,
+      );
+
       router.refresh();
     } catch (error) {
       console.error(
@@ -506,10 +857,11 @@ export default function ProductForm({
   }
 
   /**
-   * ============================
+   * =========================================================
    * REMOVE IMAGE
-   * ============================
+   * =========================================================
    */
+
   function removeImage(
     index: number,
   ) {
@@ -532,6 +884,12 @@ export default function ProductForm({
     }));
   }
 
+  /**
+   * =========================================================
+   * RENDER
+   * =========================================================
+   */
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -552,9 +910,18 @@ export default function ProductForm({
               : "Indonesia"}
           </strong>
         </p>
+
+        {mode === "edit" &&
+          resolvedProductId && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Product ID:{" "}
+              {resolvedProductId}
+            </p>
+          )}
       </div>
 
-      {/* Nama */}
+      {/* Nama Produk */}
+
       <div>
         <label className="font-semibold block mb-2">
           Nama Produk
@@ -572,7 +939,8 @@ export default function ProductForm({
         />
       </div>
 
-      {/* Model */}
+      {/* Model Produk */}
+
       <div>
         <label className="font-semibold block mb-2">
           Model Produk
@@ -591,6 +959,7 @@ export default function ProductForm({
       </div>
 
       {/* Brand */}
+
       <div>
         <label className="font-semibold block mb-2">
           Brand
@@ -602,6 +971,7 @@ export default function ProductForm({
           onChange={
             handleChange
           }
+          disabled={loading}
           className="px-4 py-2 border rounded-lg w-full bg-white text-black"
         >
           <option value={0}>
@@ -619,9 +989,24 @@ export default function ProductForm({
             ),
           )}
         </select>
+
+        {mode === "edit" &&
+          form.brand > 0 &&
+          !brands.some(
+            (brand) =>
+              Number(brand.id) ===
+              form.brand,
+          ) && (
+            <p className="text-xs text-red-500 mt-1">
+              Brand ID {form.brand} tidak
+              ditemukan pada daftar brand
+              bahasa {lang.toUpperCase()}.
+            </p>
+          )}
       </div>
 
       {/* Jenis Produk */}
+
       <div>
         <label className="font-semibold block mb-2">
           Jenis Produk
@@ -635,6 +1020,7 @@ export default function ProductForm({
           onChange={
             handleChange
           }
+          disabled={loading}
           className="px-4 py-2 border rounded-lg w-full bg-white text-black"
         >
           <option value={0}>
@@ -654,9 +1040,26 @@ export default function ProductForm({
             ),
           )}
         </select>
+
+        {mode === "edit" &&
+          form.jenis_produk > 0 &&
+          !categories.some(
+            (category) =>
+              Number(category.id) ===
+              form.jenis_produk,
+          ) && (
+            <p className="text-xs text-red-500 mt-1">
+              Jenis produk ID{" "}
+              {form.jenis_produk} tidak
+              ditemukan pada daftar jenis
+              produk bahasa{" "}
+              {lang.toUpperCase()}.
+            </p>
+          )}
       </div>
 
       {/* Short Description */}
+
       <div>
         <label className="font-semibold block mb-2">
           Short Description
@@ -676,6 +1079,7 @@ export default function ProductForm({
       </div>
 
       {/* Description */}
+
       <div>
         <label className="font-semibold block mb-2">
           Description
@@ -695,6 +1099,7 @@ export default function ProductForm({
       </div>
 
       {/* Spesifikasi */}
+
       <div>
         <label className="font-semibold block mb-2">
           Spesifikasi
@@ -714,6 +1119,7 @@ export default function ProductForm({
       </div>
 
       {/* Gambar */}
+
       <div>
         <label className="font-semibold block mb-2">
           Gambar Produk
@@ -726,13 +1132,11 @@ export default function ProductForm({
           onChange={(e) => {
             const files =
               Array.from(
-                e.target.files ??
-                  [],
+                e.target.files ?? [],
               );
 
             if (
-              files.length ===
-              0
+              files.length === 0
             ) {
               return;
             }
@@ -761,8 +1165,7 @@ export default function ProductForm({
               }),
             );
 
-            e.target.value =
-              "";
+            e.target.value = "";
           }}
         />
 
@@ -776,7 +1179,9 @@ export default function ProductForm({
                 <img
                   src={url}
                   className="h-28 w-full rounded-lg object-cover border"
-                  alt={`Product image ${index + 1}`}
+                  alt={`Product image ${
+                    index + 1
+                  }`}
                 />
 
                 <button
@@ -797,6 +1202,7 @@ export default function ProductForm({
       </div>
 
       {/* PDF */}
+
       <div>
         <label className="font-semibold block mb-2">
           Download Brosur
@@ -844,10 +1250,15 @@ export default function ProductForm({
       </div>
 
       {/* Buttons */}
+
       <div className="flex gap-4">
         <button
           type="submit"
-          disabled={loading}
+          disabled={
+            loading ||
+            (mode === "edit" &&
+              !resolvedProductId)
+          }
           className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold disabled:opacity-50"
         >
           {loading

@@ -51,7 +51,10 @@ const iconOptions = [
 
 export const homeSectionConfig = {
   hero: {
-    id: 157,
+    id: {
+      en: 157,
+      id: 558,
+    },
     title: "Hero Section",
 
     fields: [

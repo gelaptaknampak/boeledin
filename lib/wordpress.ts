@@ -3,6 +3,7 @@ import axios from "axios";
 const WORDPRESS_URL = "https://wp.boeledin.com";
 const WORDPRESS_API = `${WORDPRESS_URL}/wp-json/wp/v2`;
 const ACF_API = `${WORDPRESS_URL}/wp-json/acf/v3`;
+const BOELEDIN_API = `${WORDPRESS_URL}/wp-json/boeledin/v1`;
 
 export type LangCode = "id" | "en";
 const DEFAULT_LANG: LangCode = "id";
@@ -25,12 +26,39 @@ export const wpClient = axios.create({
 //   }
 // }
 
-export async function getPostById(id: number, lang: LangCode = DEFAULT_LANG) {
+export async function getPostById(
+  id: number,
+  lang: LangCode = DEFAULT_LANG
+) {
   try {
-    const response = await wpClient.get(`/posts/${id}`, { params: { lang } });
+    const response = await wpClient.get(
+      `${BOELEDIN_API}/posts/${id}`,
+      {
+        params: { lang },
+      }
+    );
+
     return response.data;
   } catch (error) {
     console.error("Error fetching post:", error);
+    return null;
+  }
+}
+
+export async function getPostSection(
+  id: number,
+  lang: LangCode = DEFAULT_LANG,
+) {
+  try {
+    const post = await getPostById(id, lang);
+
+    if (!post) {
+      return null;
+    }
+
+    return post;
+  } catch (error) {
+    console.error("Error fetching post section:", error);
     return null;
   }
 }
@@ -407,39 +435,203 @@ export async function createProduct(
       .filter(Boolean);
 
     const featuredMedia =
-      galleryIds && galleryIds.length > 0 ? Number(galleryIds[0]) : 0;
+      galleryIds && galleryIds.length > 0
+        ? Number(galleryIds[0])
+        : 0;
 
+    /**
+     * =====================================================
+     * CREATE PRODUCT UTAMA
+     * =====================================================
+     *
+     * Product dibuat menggunakan bahasa yang diminta.
+     */
     const payload = {
       title,
       status: "publish",
       featured_media: featuredMedia,
 
-      // ACF
       acf: fields,
 
-      // Taxonomy
       brand: [Number(brand)],
       "jenis-produk": [Number(jenisProduk)],
     };
 
-    console.log("CREATE PAYLOAD");
-    console.log(JSON.stringify(payload, null, 2));
+    console.log("CREATE PRODUCT");
+    console.log("Language:", lang);
+    console.log(
+      JSON.stringify(payload, null, 2),
+    );
 
-    const response = await axios.post(`${WORDPRESS_API}/products`, payload, {
-      params: { lang },
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      `${WORDPRESS_API}/products`,
+      payload,
+      {
+        params: { lang },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
-    console.log("CREATE RESPONSE");
-    console.log(JSON.stringify(response.data, null, 2));
+    const createdProduct = response.data;
 
-    return response.data;
+    console.log("CREATED PRODUCT");
+    console.log(
+      JSON.stringify(
+        createdProduct,
+        null,
+        2,
+      ),
+    );
+
+    const sourceId = Number(
+      createdProduct.id,
+    );
+
+    if (!sourceId) {
+      throw new Error(
+        "Product berhasil dibuat tetapi ID tidak ditemukan.",
+      );
+    }
+
+    /**
+     * =====================================================
+     * CREATE TRANSLATION COUNTERPART
+     * =====================================================
+     *
+     * Jika create EN:
+     *   EN = product utama
+     *   ID = counterpart
+     *
+     * Jika create ID:
+     *   ID = product utama
+     *   EN = counterpart
+     */
+    const counterpartLang: LangCode =
+      lang === "en" ? "id" : "en";
+
+    /**
+     * Untuk sementara counterpart menggunakan
+     * data yang sama.
+     *
+     * User nantinya dapat mengedit counterpart
+     * menggunakan bahasa masing-masing.
+     */
+    const counterpartPayload = {
+      title,
+      status: "publish",
+      featured_media: featuredMedia,
+
+      acf: fields,
+
+      brand: [Number(brand)],
+      "jenis-produk": [Number(jenisProduk)],
+    };
+
+    console.log(
+      "CREATE COUNTERPART",
+    );
+    console.log(
+      "Language:",
+      counterpartLang,
+    );
+
+    const counterpartResponse =
+      await axios.post(
+        `${WORDPRESS_API}/products`,
+        counterpartPayload,
+        {
+          params: {
+            lang: counterpartLang,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+    const counterpart =
+      counterpartResponse.data;
+
+    const counterpartId = Number(
+      counterpart.id,
+    );
+
+    if (!counterpartId) {
+      throw new Error(
+        "Counterpart berhasil dibuat tetapi ID tidak ditemukan.",
+      );
+    }
+
+    console.log(
+      "COUNTERPART CREATED",
+    );
+    console.log(
+      JSON.stringify(
+        counterpart,
+        null,
+        2,
+      ),
+    );
+
+    /**
+     * =====================================================
+     * HUBUNGKAN DENGAN POLYLANG
+     * =====================================================
+     *
+     * Kita menggunakan endpoint custom:
+     *
+     * /wp-json/boeledin/v1/products/{id}/translation
+     *
+     * Endpoint ini nantinya bertugas menghubungkan
+     * kedua post menggunakan pll_set_post_language()
+     * dan pll_save_post_translations().
+     */
+
+    await axios.post(
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/products/${sourceId}/translation`,
+      {
+        source_language: lang,
+        target_language: counterpartLang,
+        target_id: counterpartId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    console.log(
+      "PRODUCT TRANSLATIONS LINKED",
+    );
+
+    /**
+     * Kembalikan product yang dibuat
+     * sebagai product utama.
+     */
+    return {
+      ...createdProduct,
+
+      translations: {
+        [lang]: sourceId,
+        [counterpartLang]:
+          counterpartId,
+      },
+    };
   } catch (error: any) {
-    console.error("CREATE PRODUCT ERROR");
-    console.error(error.response?.data || error);
+    console.error(
+      "CREATE PRODUCT ERROR",
+    );
+
+    console.error(
+      error.response?.data ||
+        error,
+    );
 
     return null;
   }
@@ -455,49 +647,163 @@ export async function updateProduct(
   lang: LangCode = DEFAULT_LANG,
 ) {
   try {
+    /**
+     * =====================================================
+     * RESOLVE TRANSLATION ID
+     * =====================================================
+     *
+     * Misalnya:
+     *
+     * id = 525
+     * lang = id
+     *
+     * maka API akan mencari:
+     *
+     * 525 -> translations -> id -> 526
+     *
+     * dan yang di-update adalah 526.
+     */
+
+    const translationResponse =
+      await axios.get(
+        `${WORDPRESS_URL}/wp-json/boeledin/v1/products/${id}`,
+        {
+          params: {
+            lang,
+          },
+        },
+        // optional
+      );
+
+    const product =
+      translationResponse.data;
+
+    const targetId = Number(
+      product.id,
+    );
+
+    if (!targetId) {
+      throw new Error(
+        "Translation product ID tidak ditemukan.",
+      );
+    }
+
+    console.log(
+      "UPDATE PRODUCT",
+    );
+
+    console.log(
+      "Requested ID:",
+      id,
+    );
+
+    console.log(
+      "Requested language:",
+      lang,
+    );
+
+    console.log(
+      "Resolved ID:",
+      targetId,
+    );
+
+    /**
+     * =====================================================
+     * GALLERY
+     * =====================================================
+     */
+
     const galleryIds = fields.feature_image
       ?.split(/[\n,]+/)
       .map((id: string) => id.trim())
       .filter(Boolean);
 
     const featuredMedia =
-      galleryIds && galleryIds.length > 0 ? Number(galleryIds[0]) : 0;
+      galleryIds &&
+      galleryIds.length > 0
+        ? Number(galleryIds[0])
+        : 0;
+
+    /**
+     * =====================================================
+     * UPDATE PAYLOAD
+     * =====================================================
+     */
 
     const payload = {
       title,
 
-      featured_media: featuredMedia,
+      featured_media:
+        featuredMedia,
 
-      // ACF
       acf: fields,
 
-      // Taxonomy
-      brand: [Number(brand)],
-      "jenis-produk": [Number(jenisProduk)],
+      brand: [
+        Number(brand),
+      ],
+
+      "jenis-produk": [
+        Number(jenisProduk),
+      ],
     };
 
-    console.log("UPDATE PAYLOAD");
-    console.log(JSON.stringify(payload, null, 2));
-
-    const response = await axios.post(
-      `${WORDPRESS_API}/products/${id}`,
-      payload,
-      {
-        params: { lang },
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      },
+    console.log(
+      "UPDATE PAYLOAD",
     );
 
-    console.log("UPDATE RESPONSE");
-    console.log(JSON.stringify(response.data, null, 2));
+    console.log(
+      JSON.stringify(
+        payload,
+        null,
+        2,
+      ),
+    );
+
+    /**
+     * =====================================================
+     * UPDATE TRANSLATION PRODUCT
+     * =====================================================
+     */
+
+    const response =
+      await axios.post(
+        `${WORDPRESS_API}/products/${targetId}`,
+        payload,
+        {
+          params: {
+            lang,
+          },
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+          },
+        },
+      );
+
+    console.log(
+      "UPDATE RESPONSE",
+    );
+
+    console.log(
+      JSON.stringify(
+        response.data,
+        null,
+        2,
+      ),
+    );
 
     return response.data;
   } catch (error: any) {
-    console.error("UPDATE PRODUCT ERROR");
-    console.error(error.response?.data || error);
+    console.error(
+      "UPDATE PRODUCT ERROR",
+    );
+
+    console.error(
+      error.response?.data ||
+        error,
+    );
 
     return null;
   }
@@ -549,38 +855,22 @@ export async function uploadProductImage(file: File, token: string) {
 
 // brand
 
-export async function getBrands(params?: any, lang: LangCode = DEFAULT_LANG) {
+export async function getBrands(
+  params?: any,
+  lang: LangCode = DEFAULT_LANG
+) {
   try {
-    const response = await wpClient.get("/brand", {
-      params: { lang, ...params },
-    });
-
-    const brands = await Promise.all(
-      response.data.map(async (brand: any) => {
-        let logo = brand.acf?.brand_logo_url || "";
-        const brandLogoId = brand.acf?.brand_logo;
-
-        if (!logo && brandLogoId) {
-          try {
-            const media = await wpClient.get(`/media/${brandLogoId}`);
-            logo = media.data.source_url;
-          } catch (err) {
-            console.error(`Gagal mengambil logo brand ${brand.name}:`, err);
-          }
-        }
-
-        return {
-          ...brand,
-          acf: {
-            ...brand.acf,
-            brand_logo_url: logo,
-          },
-          logo,
-        };
-      }),
+    const response = await wpClient.get(
+      `${BOELEDIN_API}/terms/brand`,
+      {
+        params: {
+          lang,
+          ...params,
+        },
+      }
     );
 
-    return brands;
+    return response.data;
   } catch (error) {
     console.error("Error fetching brands:", error);
     return [];
@@ -591,31 +881,31 @@ export async function createBrand(
   name: string,
   brand_logo: number | null,
   token: string,
-  lang: LangCode = DEFAULT_LANG,
+  lang: LangCode = DEFAULT_LANG
 ) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_API}/brand`,
+      `${BOELEDIN_API}/terms/brand`,
       {
         name,
-        ...(brand_logo !== undefined && {
-          acf: {
-            brand_logo,
-          },
-        }),
       },
       {
         params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data || error);
-    return null;
+    console.error(
+      "CREATE BRAND ERROR:",
+      error.response?.data || error
+    );
+
+    throw error;
   }
 }
 
@@ -624,50 +914,29 @@ export async function updateBrand(
   name: string,
   brand_logo: number | null | undefined,
   token: string,
-  lang: LangCode = DEFAULT_LANG,
+  lang: LangCode = DEFAULT_LANG
 ) {
   try {
-    const payload: any = {
-      name,
-    };
-
-    // Update ACF melalui WP REST API v2
-    if (brand_logo !== undefined) {
-      payload.acf = {
-        brand_logo,
-      };
-    }
-
-    console.log("========================================");
-    console.log("UPDATE BRAND V2");
-    console.log("URL:", `${WORDPRESS_API}/brand/${id}`);
-    console.log("PAYLOAD:");
-    console.log(JSON.stringify(payload, null, 2));
-    console.log("========================================");
-
-    const response = await axios.post(
-      `${WORDPRESS_API}/brand/${id}`,
-      payload,
+    const response = await axios.put(
+      `${BOELEDIN_API}/terms/brand/${id}`,
+      {
+        name,
+      },
       {
         params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      },
+      }
     );
-
-    console.log("UPDATE BRAND V2 RESPONSE:");
-    console.log(JSON.stringify(response.data, null, 2));
 
     return response.data;
   } catch (error: any) {
-    console.error("========== UPDATE BRAND V2 ERROR ==========");
-    console.error("STATUS:", error.response?.status);
-    console.error("DATA:", error.response?.data);
-    console.error("HEADERS:", error.response?.headers);
-    console.error("MESSAGE:", error.message);
-    console.error("===========================================");
+    console.error(
+      "UPDATE BRAND ERROR:",
+      error.response?.data || error
+    );
 
     throw error;
   }
@@ -696,16 +965,26 @@ export async function deleteBrand(id: number, token: string) {
 
 export async function getProductTypes(
   params?: any,
-  lang: LangCode = DEFAULT_LANG,
+  lang: LangCode = DEFAULT_LANG
 ) {
   try {
-    const response = await wpClient.get("/jenis-produk", {
-      params: { lang, ...params },
-    });
+    const response = await wpClient.get(
+      `${BOELEDIN_API}/terms/jenis-produk`,
+      {
+        params: {
+          lang,
+          ...params,
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching product types:", error);
+    console.error(
+      "Error fetching product types:",
+      error
+    );
+
     return [];
   }
 }
@@ -713,11 +992,11 @@ export async function getProductTypes(
 export async function createProductType(
   name: string,
   token: string,
-  lang: LangCode = DEFAULT_LANG,
+  lang: LangCode = DEFAULT_LANG
 ) {
   try {
     const response = await axios.post(
-      `${WORDPRESS_API}/jenis-produk`,
+      `${BOELEDIN_API}/terms/jenis-produk`,
       {
         name,
       },
@@ -725,15 +1004,19 @@ export async function createProductType(
         params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data || error);
+    console.error(
+      "CREATE PRODUCT TYPE ERROR:",
+      error.response?.data || error
+    );
 
-    return null;
+    throw error;
   }
 }
 
@@ -741,11 +1024,11 @@ export async function updateProductType(
   id: number,
   name: string,
   token: string,
-  lang: LangCode = DEFAULT_LANG,
+  lang: LangCode = DEFAULT_LANG
 ) {
   try {
     const response = await axios.put(
-      `${WORDPRESS_API}/jenis-produk/${id}`,
+      `${BOELEDIN_API}/terms/jenis-produk/${id}`,
       {
         name,
       },
@@ -753,18 +1036,19 @@ export async function updateProductType(
         params: { lang },
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
-
-    console.log(response.data.meta);
-    console.log(response.data.acf);
 
     return response.data;
   } catch (error: any) {
-    console.error(error.response?.data || error);
+    console.error(
+      "UPDATE PRODUCT TYPE ERROR:",
+      error.response?.data || error
+    );
 
-    return null;
+    throw error;
   }
 }
 
@@ -1120,10 +1404,10 @@ export async function updatePostACF(
   lang: LangCode = DEFAULT_LANG,
 ) {
   try {
-    console.log("UPDATE ACF PAYLOAD:", fields);
+    console.log("UPDATE POST ACF PAYLOAD:", fields);
 
     const response = await axios.post(
-      `${ACF_API}/posts/${id}`,
+      `${BOELEDIN_API}/posts/${id}`,
       {
         fields,
       },
@@ -1136,11 +1420,14 @@ export async function updatePostACF(
       },
     );
 
-    console.log("UPDATE ACF SUCCESS:", response.data);
+    console.log("UPDATE POST ACF SUCCESS:", response.data);
 
     return response.data;
   } catch (error: any) {
-    console.error("UPDATE ACF ERROR:", error.response?.data);
+    console.error(
+      "UPDATE POST ACF ERROR:",
+      error.response?.data || error,
+    );
 
     throw error;
   }

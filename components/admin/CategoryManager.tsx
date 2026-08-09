@@ -213,42 +213,53 @@ export default function CategoryManager() {
               </div>
               <div className="flex items-center gap-2">
                 {editingId === category.id ? (
-                  <>
-                    <button
-                      disabled={saving || !newCategory.trim()}
-                      onClick={() => handleUpdateCategory(category.id)}
-                      className="px-3 py-1 rounded bg-green-600 text-white"
-                    >
-                      Simpan
-                    </button>
+  <>
+    <button
+      disabled={saving || !editingName.trim()}
+      onClick={() =>
+        handleUpdateCategory(category.id)
+      }
+      className="px-3 py-1 rounded bg-green-600 text-white disabled:opacity-50"
+    >
+      {saving ? "Menyimpan..." : "Simpan"}
+    </button>
 
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="px-3 py-1 rounded border"
-                    >
-                      Batal
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => {
-                        setEditingId(category.id);
-                        setEditingName(category.name);
-                      }}
-                      className="p-2 rounded-lg hover:bg-accent"
-                    >
-                      <Edit className="w-4 h-4 text-primary" />
-                    </button>
+    <button
+      type="button"
+      disabled={saving}
+      onClick={() => {
+        setEditingId(null);
+        setEditingName("");
+      }}
+      className="px-3 py-1 rounded border disabled:opacity-50"
+    >
+      Batal
+    </button>
+  </>
+) : (
+  <>
+    <button
+      type="button"
+      onClick={() => {
+        setEditingId(category.id);
+        setEditingName(category.name);
+      }}
+      className="p-2 rounded-lg hover:bg-accent"
+    >
+      <Edit className="w-4 h-4 text-primary" />
+    </button>
 
-                    <button
-                      onClick={() => handleDeleteCategory(category.id)}
-                      className="p-2 rounded-lg hover:bg-accent"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
-                  </>
-                )}
+    <button
+      type="button"
+      onClick={() =>
+        handleDeleteCategory(category.id)
+      }
+      className="p-2 rounded-lg hover:bg-accent"
+    >
+      <Trash2 className="w-4 h-4 text-red-500" />
+    </button>
+  </>
+)}
               </div>
             </div>
           ))}

@@ -2,16 +2,38 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getCustomPosts, createProduct } from "@/lib/wordpress";
 
+const WORDPRESS_URL = "https://wp.boeledin.com";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
+
     const lang = searchParams.get("lang") || "id";
 
-    const products = await getCustomPosts(
-      "products",
-      undefined,
-      lang as any,
+    const response = await fetch(
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/products?lang=${lang}&_=${Date.now()}`,
+      {
+        cache: "no-store",
+      }
     );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error("WORDPRESS PRODUCTS ERROR:", errorText);
+
+      return NextResponse.json(
+        {
+          message: "Gagal mengambil produk dari WordPress",
+          error: errorText,
+        },
+        {
+          status: response.status,
+        }
+      );
+    }
+
+    const products = await response.json();
 
     return NextResponse.json(products);
   } catch (error) {
@@ -24,7 +46,7 @@ export async function GET(req: Request) {
       },
       {
         status: 500,
-      },
+      }
     );
   }
 }
