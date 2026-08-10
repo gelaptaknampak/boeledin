@@ -1138,12 +1138,21 @@ export async function updatePost(
       `${WORDPRESS_URL}/wp-json/boeledin/v1/berita/${id}`,
       {
         title,
-        content: fields.content,
-        excerpt: fields.excerpt,
-        status: fields.status,
-        featured_media: fields.featured_media,
-        categories: fields.kategori ?? [],
-        tags: fields.tags ?? [],
+        content: fields.content ?? "",
+        excerpt: fields.excerpt ?? "",
+        status: fields.status ?? "publish",
+
+        featured_media: Number(
+          fields.featured_media ?? 0
+        ),
+
+        kategori: Array.isArray(fields.kategori)
+          ? fields.kategori
+          : [],
+
+        tags: Array.isArray(fields.tags)
+          ? fields.tags
+          : [],
       },
       {
         params: {
@@ -1157,8 +1166,12 @@ export async function updatePost(
     );
 
     return response.data;
+
   } catch (error: any) {
-    console.error("Error updating berita:", error.response?.data || error);
+    console.error(
+      "Error updating berita:",
+      error.response?.data || error
+    );
 
     return null;
   }

@@ -48,7 +48,7 @@
 :root {
   color-scheme: light;
 
-  --background: #ffffff;
+  --background: #ececec;
   --foreground: #0f172a;
 
   --card: #ffffff;
@@ -70,9 +70,9 @@
   --accent: #e8f4ff;
   --accent-foreground: #1992ff;
 
-  --border: #dbeafe;
+  --border: #4494fd;
   --input: #dbeafe;
-  --ring: #1992ff;
+  --ring: #0088ff;
 
   --radius: 0.625rem;
 }

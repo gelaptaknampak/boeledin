@@ -5,50 +5,41 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import {
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
-
+import { Mail, Phone, MapPin } from "lucide-react";
 
 type SocialMediaItem = {
   logo: number;
   link: string;
 };
 
-
 type FooterProps = {
   data?: {
-
     image_logo?: number;
 
     image_logo_width?: number;
     image_logo_height?: number;
 
-
     footer_description?: string;
 
     copyright_text?: string;
 
-
     navigation_title?: string;
 
-    navigation_items?: string | {
-      label:string;
-      link:string;
-    }[];
-
-
+    navigation_items?:
+      | string
+      | {
+          label: string;
+          link: string;
+        }[];
 
     service_title?: string;
 
-    service_items?: string | {
-      label:string;
-      link:string;
-    }[];
-
-
+    service_items?:
+      | string
+      | {
+          label: string;
+          link: string;
+        }[];
 
     contact_title?: string;
 
@@ -58,620 +49,315 @@ type FooterProps = {
 
     email?: string;
 
-
     social_media_list?: string | SocialMediaItem[];
-
   };
 };
 
+export default function FooterClient({ data }: FooterProps) {
+  const [logo, setLogo] = useState("/logo-white.png");
 
+  const [socialMedia, setSocialMedia] = useState<
+    {
+      logo: string;
+      link: string;
+    }[]
+  >([]);
 
-export default function FooterClient({
-  data,
-}: FooterProps) {
-
-
-  const [logo, setLogo] =
-    useState("/logo-white.png");
-
-
-
-  const [socialMedia,setSocialMedia] =
-    useState<
-      {
-        logo:string;
-        link:string;
-      }[]
-    >([]);
-
-
-
-  useEffect(()=>{
-
-
-    async function loadAssets(){
-
-
+  useEffect(() => {
+    async function loadAssets() {
       // Logo
-      if(data?.image_logo){
-
-        try{
-
-          const res =
-            await fetch(
-              `/api/wordpress/media/page/${data.image_logo}`
-            );
-
-
-          const media =
-            await res.json();
-
-
-          if(media?.source_url){
-            setLogo(
-              media.source_url
-            );
-          }
-
-
-        }catch(err){
-
-          console.error(err);
-
-        }
-
-      }
-
-
-
-
-
-      // Social Media
-      let socials:any[] = [];
-
-
-      try{
-
-
-        if(
-          typeof data?.social_media_list === "string"
-        ){
-
-          socials =
-            JSON.parse(
-              data.social_media_list
-            );
-
-        }else{
-
-          socials =
-            data?.social_media_list ?? [];
-
-        }
-
-
-
-      }catch{
-
-        socials=[];
-
-      }
-
-
-
-
-
-      if(
-        socials.length
-      ){
-
-        const result =
-          await Promise.all(
-
-            socials.map(
-              async(item)=>{
-
-
-                if(!item.logo){
-
-                  return {
-                    logo:"",
-                    link:item.link
-                  };
-
-                }
-
-
-
-                try{
-
-                  const res =
-                    await fetch(
-                      `/api/wordpress/media/page/${item.logo}`
-                    );
-
-
-                  const media =
-                    await res.json();
-
-
-                  return {
-
-                    logo:
-                      media?.source_url ?? "",
-
-                    link:
-                      item.link
-
-                  };
-
-
-                }catch{
-
-                  return {
-                    logo:"",
-                    link:item.link
-                  };
-
-                }
-
-
-              }
-            )
-
+      if (data?.image_logo) {
+        try {
+          const res = await fetch(
+            `/api/wordpress/media/page/${data.image_logo}`,
           );
 
+          const media = await res.json();
 
-        setSocialMedia(result);
-
+          if (media?.source_url) {
+            setLogo(media.source_url);
+          }
+        } catch (err) {
+          console.error(err);
+        }
       }
 
+      // Social Media
+      let socials: any[] = [];
 
+      try {
+        if (typeof data?.social_media_list === "string") {
+          socials = JSON.parse(data.social_media_list);
+        } else {
+          socials = data?.social_media_list ?? [];
+        }
+      } catch {
+        socials = [];
+      }
+
+      if (socials.length) {
+        const result = await Promise.all(
+          socials.map(async (item) => {
+            if (!item.logo) {
+              return {
+                logo: "",
+                link: item.link,
+              };
+            }
+
+            try {
+              const res = await fetch(
+                `/api/wordpress/media/page/${item.logo}`,
+              );
+
+              const media = await res.json();
+
+              return {
+                logo: media?.source_url ?? "",
+                link: item.link,
+              };
+            } catch {
+              return {
+                logo: "",
+                link: item.link,
+              };
+            }
+          }),
+        );
+
+        setSocialMedia(result);
+      }
     }
 
-
     loadAssets();
+  }, [data]);
 
-
-  },[data]);
-
-
-
-
-
-
-
-  function parseList(
-    value:any
-  ){
-
-    try{
-
-
-      if(
-        Array.isArray(value)
-      ){
+  function parseList(value: any) {
+    try {
+      if (Array.isArray(value)) {
         return value;
       }
 
-
-
-      if(
-        typeof value === "string"
-      ){
-
+      if (typeof value === "string") {
         return JSON.parse(value);
-
       }
 
-
-
       return [];
-
-
-    }catch{
-
+    } catch {
       return [];
-
     }
-
   }
 
-
-
-
-
-
   const navigationItems = [
-  {
-    label: "Home",
-    link: "/",
-  },
-  {
-    label: "About Us",
-    link: "/about",
-  },
-  {
-    label: "Products",
-    link: "/products",
-  },
-  {
-    label: "News",
-    link: "/news",
-  },
-  {
-    label: "Contact",
-    link: "/contact",
-  },
-];
+    {
+      label: "Home",
+      link: "/",
+    },
+    {
+      label: "About Us",
+      link: "/about",
+    },
+    {
+      label: "Products",
+      link: "/products",
+    },
+    {
+      label: "News",
+      link: "/news",
+    },
+    {
+      label: "Contact",
+      link: "/contact",
+    },
+  ];
 
-
-const serviceItems = [
-  {
-    label: "Digital Signage & FIDS",
-    link: "/products?category=electronics",
-  },
-  {
-    label: "Smart Command Center",
-    link: "/products?category=accessories",
-  },
-  {
-    label: "Pengalaman Immersive",
-    link: "/products?category=home",
-  },
-  {
-    label: "Integrasi IT & Software",
-    link: "/products?category=fashion",
-  },
-];
-
-
+  const serviceItems = [
+    {
+      label: "Digital Signage & FIDS",
+      link: "/products?category=electronics",
+    },
+    {
+      label: "Smart Command Center",
+      link: "/products?category=accessories",
+    },
+    {
+      label: "Pengalaman Immersive",
+      link: "/products?category=home",
+    },
+    {
+      label: "Integrasi IT & Software",
+      link: "/products?category=fashion",
+    },
+  ];
 
   const description =
     data?.footer_description ??
     "Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.";
 
-
-
   const copyright =
-    data?.copyright_text ??
-    "BOELEDIN. All rights reserved.";
-
-
+    data?.copyright_text ?? "BOELEDIN. All rights reserved.";
 
   const navigationTitle =
-    data?.navigation_title ??
-    "Navigasi";
-
-
+    data?.navigation_title ?? "Navigasi";
 
   const serviceTitle =
-    data?.service_title ??
-    "Layanan";
-
-
+    data?.service_title ?? "Layanan";
 
   const contactTitle =
-    data?.contact_title ??
-    "Contact Us";
-
-
+    data?.contact_title ?? "Contact Us";
 
   const address =
-    data?.address ??
-    "Rukan Exclusive, Jakarta";
-
-
+    data?.address ?? "Rukan Exclusive, Jakarta";
 
   const phone =
-    data?.phone ??
-    "+62 813-1906-0606";
-
-
+    data?.phone ?? "+62 813-1906-0606";
 
   const email =
-    data?.email ??
-    "info@boeledin.com";
-
-
+    data?.email ?? "info@boeledin.com";
 
   const logoWidth =
-  Number(data?.image_logo_width) || 220;
-
-const logoHeight =
-  Number(data?.image_logo_height) || 70;
-
-
-
-
-
-return (
-
-<footer className="border-t border-border">
-
-<div className="container mx-auto px-4 py-12">
-
-
-<div className="grid grid-cols-1 gap-10 md:grid-cols-4">
-
-
-{/* Company */}
-
-<div>
-
-
-<Image
-
-src={logo}
-
-alt="BOELEDIN"
-
-width={logoWidth}
-
-height={logoHeight}
-
-className="mb-5 h-auto w-auto"
-
-unoptimized
-
-/>
-
-
-
-<p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-
-{description}
-
-</p>
-
-
-
-<div className="flex gap-3">
-
-
-{socialMedia.map(
-(item,index)=>(
-
-<Link
-
-key={index}
-
-href={item.link}
-
-target="_blank"
-
-rel="noopener noreferrer"
-
-className="rounded-lg bg-accent p-2 transition hover:bg-primary"
-
->
-
-
-<Image
-
-src={item.logo}
-
-alt="social"
-
-width={24}
-
-height={24}
-
-className="h-6 w-6 object-contain"
-
-unoptimized
-
-/>
-
-
-</Link>
-
-
-))}
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-{/* Navigation */}
-
-<div>
-
-
-<h4 className="mb-4 font-semibold">
-
-{navigationTitle}
-
-</h4>
-
-
-<ul className="space-y-2">
-
-
-{
-navigationItems.map(
-(item:any)=>(
-
-<li key={item.link}>
-
-<Link
-
-href={item.link}
-
-className="text-sm text-muted-foreground hover:text-primary"
-
->
-
-{item.label}
-
-</Link>
-
-
-</li>
-
-)
-
-)}
-
-
-</ul>
-
-
-</div>
-
-
-
-
-
-
-{/* Services */}
-
-<div>
-
-
-<h4 className="mb-4 font-semibold">
-
-{serviceTitle}
-
-</h4>
-
-
-
-<ul className="space-y-2">
-
-
-{
-serviceItems.map(
-(item:any)=>(
-
-
-<li key={item.link}>
-
-
-<Link
-
-href={item.link}
-
-className="text-sm text-muted-foreground hover:text-primary"
-
->
-
-
-{item.label}
-
-
-</Link>
-
-
-</li>
-
-
-)
-
-)}
-
-
-</ul>
-
-
-</div>
-
-
-
-
-
-
-{/* Contact */}
-
-<div>
-
-
-<h4 className="mb-4 font-semibold">
-
-{contactTitle}
-
-</h4>
-
-
-<ul className="space-y-3">
-
-
-<li className="flex gap-2 text-sm text-muted-foreground">
-
-<MapPin className="mt-1 h-4 w-4"/>
-
-<span>
-{address}
-</span>
-
-</li>
-
-
-
-<li className="flex gap-2 text-sm text-muted-foreground">
-
-<Phone className="h-4 w-4"/>
-
-<a href={`tel:${phone}`}>
-
-{phone}
-
-</a>
-
-</li>
-
-
-
-
-<li className="flex gap-2 text-sm text-muted-foreground">
-
-<Mail className="h-4 w-4"/>
-
-<a href={`mailto:${email}`}>
-
-{email}
-
-</a>
-
-</li>
-
-
-</ul>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<div className="mt-12 border-t border-border pt-8">
-
-<p className="text-sm text-muted-foreground">
-
-© {new Date().getFullYear()} {copyright}
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-</footer>
-
-);
-
+    Number(data?.image_logo_width) || 220;
+
+  const logoHeight =
+    Number(data?.image_logo_height) || 70;
+
+  return (
+    <footer
+      className="bg-[#071827] text-white"
+      style={{
+        backgroundColor: "#071827",
+        color: "#ffffff",
+      }}
+    >
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+
+          {/* Company */}
+          <div>
+            <Image
+              src={logo}
+              alt="BOELEDIN"
+              width={logoWidth}
+              height={logoHeight}
+              style={{
+                width: `${logoWidth}px`,
+                height: `${logoHeight}px`,
+              }}
+              className="mb-5 object-contain"
+              unoptimized
+            />
+
+            <p className="mb-4 text-sm leading-relaxed text-[#b8c5d3]">
+              {description}
+            </p>
+
+            <div className="flex gap-3">
+              {socialMedia.map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-[#12263d] p-2 transition hover:bg-[#1992ff]"
+                >
+                  <Image
+                    src={item.logo}
+                    alt="social"
+                    width={24}
+                    height={24}
+                    className="h-6 w-6 object-contain"
+                    unoptimized
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div>
+            <h4 className="mb-4 font-semibold text-white">
+              {navigationTitle}
+            </h4>
+
+            <ul className="space-y-2">
+              {navigationItems.map((item: any) => (
+                <li key={item.link}>
+                  <Link
+                    href={item.link}
+                    className="text-sm text-[#b8c5d3] transition hover:text-[#5db8ff]"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h4 className="mb-4 font-semibold text-white">
+              {serviceTitle}
+            </h4>
+
+            <ul className="space-y-2">
+              {serviceItems.map((item: any) => (
+                <li key={item.link}>
+                  <Link
+                    href={item.link}
+                    className="text-sm text-[#b8c5d3] transition hover:text-[#5db8ff]"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="mb-4 font-semibold text-white">
+              {contactTitle}
+            </h4>
+
+            <ul className="space-y-3">
+              <li className="flex gap-2 text-sm text-[#b8c5d3]">
+                <MapPin className="mt-1 h-4 w-4 shrink-0 text-[#5db8ff]" />
+
+                <span>{address}</span>
+              </li>
+
+              <li className="flex gap-2 text-sm text-[#b8c5d3]">
+                <Phone className="h-4 w-4 shrink-0 text-[#5db8ff]" />
+
+                <a
+                  href={`tel:${phone}`}
+                  className="transition hover:text-[#5db8ff]"
+                >
+                  {phone}
+                </a>
+              </li>
+
+              <li className="flex gap-2 text-sm text-[#b8c5d3]">
+                <Mail className="h-4 w-4 shrink-0 text-[#5db8ff]" />
+
+                <a
+                  href={`mailto:${email}`}
+                  className="transition hover:text-[#5db8ff]"
+                >
+                  {email}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="mt-12 border-t border-[#1b3856] pt-8">
+          <p className="text-sm text-[#8fa3b8]">
+            © {new Date().getFullYear()} {copyright}
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
 }

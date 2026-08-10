@@ -35,7 +35,7 @@ export default function CaseStudy({ data }: Props) {
 
 
   return (
-    <section className="py-14 sm:py-20 md:py-28">
+    <section className="py-14 sm:py-15 md:py-20">
 
       <div
         className="

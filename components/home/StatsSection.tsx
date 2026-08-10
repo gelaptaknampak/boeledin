@@ -70,8 +70,8 @@ export default function StatsSection({ data }: Props) {
     <section
       className="
         py-14
-        sm:py-20
-        md:py-28
+        sm:py-15
+        md:py-20
         bg-accent/5
       "
     >
