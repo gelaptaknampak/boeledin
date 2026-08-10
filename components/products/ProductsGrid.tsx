@@ -8,37 +8,18 @@ import Link from "next/link";
 
 import ProductCarousel from "./ProductCarousel";
 
-
 export default function ProductsGrid() {
+  const { t, language } = useTranslation();
 
-  const { t, language } =
-    useTranslation();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  const [brandFilter, setBrandFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [products, setProducts] =
-    useState<any[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-
-  const [brandFilter, setBrandFilter] =
-    useState("all");
-
-  const [categoryFilter, setCategoryFilter] =
-    useState("all");
-
-  const [searchQuery, setSearchQuery] =
-    useState("");
-
-
-  const [brands, setBrands] =
-    useState<any[]>([]);
-
-  const [productTypes, setProductTypes] =
-    useState<any[]>([]);
-
-
+  const [brands, setBrands] = useState<any[]>([]);
+  const [productTypes, setProductTypes] = useState<any[]>([]);
 
   /*
   =========================
@@ -46,12 +27,25 @@ export default function ProductsGrid() {
   =========================
   */
 
-  const currentLanguage =
-    language === "en"
-      ? "en"
-      : "id";
+  const currentLanguage = language === "en" ? "en" : "id";
 
+  /*
+  =========================
+  BRAND MAP
+  =========================
 
+  Membuat lookup brand berdasarkan slug
+  supaya logo brand bisa dicari dengan cepat.
+  */
+
+  const brandMap = useMemo(() => {
+    return new Map(
+      brands.map((brand) => [
+        brand.slug,
+        brand,
+      ])
+    );
+  }, [brands]);
 
   /*
   =========================
@@ -60,7 +54,6 @@ export default function ProductsGrid() {
   */
 
   useEffect(() => {
-
     /*
      * Reset filter ketika
      * bahasa berubah.
@@ -70,14 +63,10 @@ export default function ProductsGrid() {
     setCategoryFilter("all");
     setSearchQuery("");
 
-
     fetchProducts();
     fetchBrands();
     fetchProductTypes();
-
   }, [currentLanguage]);
-
-
 
   /*
   =========================
@@ -85,99 +74,91 @@ export default function ProductsGrid() {
   =========================
   */
 
-async function fetchProducts() {
-  try {
-    setLoading(true);
+  async function fetchProducts() {
+    try {
+      setLoading(true);
 
-    const res = await fetch(
-      `https://wp.boeledin.com/wp-json/boeledin/v1/products?lang=${currentLanguage}&_=${Date.now()}`,
-      {
-        cache: "no-store",
+      const res = await fetch(
+        `https://wp.boeledin.com/wp-json/boeledin/v1/products?lang=${currentLanguage}&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed fetch products");
       }
-    );
 
-    if (!res.ok) {
-      throw new Error("Failed fetch products");
-    }
+      const data = await res.json();
 
-    const data = await res.json();
+      console.log(
+        "PRODUCTS:",
+        currentLanguage,
+        data
+      );
 
-    console.log(
-      "PRODUCTS:",
-      currentLanguage,
-      data
-    );
-
-    const products =
-      Array.isArray(data)
+      const products = Array.isArray(data)
         ? data
         : [];
 
-    /*
-     * Load gallery
-     */
-    const productsWithGallery =
-      await Promise.all(
-        products.map(async (product: any) => {
-          const ids = String(
-            product.acf?.feature_image ?? ""
-          )
-            .split(/[\n,]+/)
-            .map((id: string) => id.trim())
-            .filter(Boolean);
+      /*
+       * Load gallery
+       */
 
-          const urls = await Promise.all(
-            ids.map(async (id: string) => {
-              try {
-                const res = await fetch(
-                  `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`,
-                  {
-                    cache: "no-store",
+      const productsWithGallery =
+        await Promise.all(
+          products.map(async (product: any) => {
+            const ids = String(
+              product.acf?.feature_image ?? ""
+            )
+              .split(/[\n,]+/)
+              .map((id: string) => id.trim())
+              .filter(Boolean);
+
+            const urls = await Promise.all(
+              ids.map(async (id: string) => {
+                try {
+                  const res = await fetch(
+                    `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`,
+                    {
+                      cache: "no-store",
+                    }
+                  );
+
+                  if (!res.ok) {
+                    return null;
                   }
-                );
 
-                if (!res.ok) {
+                  const media = await res.json();
+
+                  return (
+                    media?.source_url ?? null
+                  );
+                } catch {
                   return null;
                 }
+              })
+            );
 
-                const media =
-                  await res.json();
+            return {
+              ...product,
+              gallery: urls.filter(Boolean),
+            };
+          })
+        );
 
-                return (
-                  media?.source_url ?? null
-                );
-
-              } catch {
-                return null;
-              }
-            })
-          );
-
-          return {
-            ...product,
-            gallery: urls.filter(Boolean),
-          };
-        })
+      setProducts(productsWithGallery);
+    } catch (err) {
+      console.error(
+        "Failed loading products:",
+        err
       );
 
-    setProducts(
-      productsWithGallery
-    );
-
-  } catch (err) {
-    console.error(
-      "Failed loading products:",
-      err
-    );
-
-    setProducts([]);
-
-  } finally {
-    setLoading(false);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   }
-}
-
-
 
   /*
   =========================
@@ -186,48 +167,41 @@ async function fetchProducts() {
   */
 
   async function fetchBrands() {
-
     try {
-
-      const res =
-        await fetch(
-          `/api/wordpress/brands?lang=${currentLanguage}`,
-          {
-            cache: "no-store",
-          }
-        );
-
+      const res = await fetch(
+        `/api/wordpress/brands?lang=${currentLanguage}&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        }
+      );
 
       if (!res.ok) {
         setBrands([]);
         return;
       }
 
+      const data = await res.json();
 
-      const data =
-        await res.json();
-
+      console.log(
+        "BRANDS:",
+        currentLanguage,
+        data
+      );
 
       setBrands(
         Array.isArray(data)
           ? data
           : []
       );
-
     } catch (err) {
-
       console.error(
         "Failed loading brands:",
         err
       );
 
       setBrands([]);
-
     }
-
   }
-
-
 
   /*
   =========================
@@ -236,48 +210,35 @@ async function fetchProducts() {
   */
 
   async function fetchProductTypes() {
-
     try {
-
-      const res =
-        await fetch(
-          `/api/wordpress/product-types?lang=${currentLanguage}`,
-          {
-            cache: "no-store",
-          }
-        );
-
+      const res = await fetch(
+        `/api/wordpress/product-types?lang=${currentLanguage}&_=${Date.now()}`,
+        {
+          cache: "no-store",
+        }
+      );
 
       if (!res.ok) {
         setProductTypes([]);
         return;
       }
 
-
-      const data =
-        await res.json();
-
+      const data = await res.json();
 
       setProductTypes(
         Array.isArray(data)
           ? data
           : []
       );
-
     } catch (err) {
-
       console.error(
         "Failed loading product types:",
         err
       );
 
       setProductTypes([]);
-
     }
-
   }
-
-
 
   /*
   =========================
@@ -285,14 +246,29 @@ async function fetchProducts() {
   =========================
   */
 
- function getBrand(product: any) {
-  return product.brand?.slug ?? "";
-}
+  function getBrand(product: any) {
+    return product.brand?.slug ?? "";
+  }
 
-function getBrandName(product: any) {
-  return product.brand?.name ?? "-";
-}
+  function getBrandName(product: any) {
+    return product.brand?.name ?? "-";
+  }
 
+  function getBrandLogo(product: any) {
+    const brandSlug =
+      product.brand?.slug;
+
+    if (!brandSlug) {
+      return "";
+    }
+
+    const brand =
+      brandMap.get(brandSlug);
+
+    return (
+      brand?.acf?.brand_logo_url ?? ""
+    );
+  }
 
   /*
   =========================
@@ -300,15 +276,17 @@ function getBrandName(product: any) {
   =========================
   */
 
- function getCategory(product: any) {
-  return product.jenis_produk?.slug ?? "";
-}
+  function getCategory(product: any) {
+    return (
+      product.jenis_produk?.slug ?? ""
+    );
+  }
 
-function getCategoryName(product: any) {
-  return product.jenis_produk?.name ?? "-";
-}
-
-
+  function getCategoryName(product: any) {
+    return (
+      product.jenis_produk?.name ?? "-"
+    );
+  }
 
   /*
   =========================
@@ -316,79 +294,61 @@ function getCategoryName(product: any) {
   =========================
   */
 
-  const filteredProducts =
-    useMemo(() => {
+  const filteredProducts = useMemo(() => {
+    return products.filter(
+      (product) => {
+        const brand =
+          getBrand(product);
 
-      return products.filter(
-        (product) => {
+        const category =
+          getCategory(product);
 
-          const brand =
-            getBrand(product);
+        const brandMatch =
+          brandFilter === "all" ||
+          brand === brandFilter;
 
-          const category =
-            getCategory(product);
+        const categoryMatch =
+          categoryFilter === "all" ||
+          category === categoryFilter;
 
+        const search =
+          searchQuery
+            .trim()
+            .toLowerCase();
 
-          const brandMatch =
-            brandFilter === "all" ||
-            brand === brandFilter;
+        const title =
+          product.title?.rendered
+            ?.toLowerCase() ?? "";
 
+        const model = String(
+          product.acf?.model_produk ??
+            ""
+        ).toLowerCase();
 
-          const categoryMatch =
-            categoryFilter === "all" ||
-            category === categoryFilter;
+        const productName = String(
+          product.acf?.nama_produk ??
+            ""
+        ).toLowerCase();
 
+        const searchMatch =
+          search === "" ||
+          title.includes(search) ||
+          model.includes(search) ||
+          productName.includes(search);
 
-          const search =
-            searchQuery
-              .trim()
-              .toLowerCase();
-
-
-          const title =
-            product.title?.rendered
-              ?.toLowerCase() ?? "";
-
-
-          const model =
-            String(
-              product.acf?.model_produk ??
-              ""
-            ).toLowerCase();
-
-
-          const productName =
-            String(
-              product.acf?.nama_produk ??
-              ""
-            ).toLowerCase();
-
-
-          const searchMatch =
-            search === "" ||
-            title.includes(search) ||
-            model.includes(search) ||
-            productName.includes(search);
-
-
-          return (
-            brandMatch &&
-            categoryMatch &&
-            searchMatch
-          );
-
-        }
-      );
-
-    }, [
-      products,
-      brandFilter,
-      categoryFilter,
-      searchQuery,
-    ]);
-
-
-
+        return (
+          brandMatch &&
+          categoryMatch &&
+          searchMatch
+        );
+      }
+    );
+  }, [
+    products,
+    brandFilter,
+    categoryFilter,
+    searchQuery,
+  ]);
 
   /*
   =========================
@@ -397,7 +357,6 @@ function getCategoryName(product: any) {
   */
 
   if (loading) {
-
     return (
       <section className="container mx-auto px-4 py-20">
         <div className="text-center text-muted-foreground">
@@ -405,10 +364,7 @@ function getCategoryName(product: any) {
         </div>
       </section>
     );
-
   }
-
-
 
   /*
   =========================
@@ -417,11 +373,8 @@ function getCategoryName(product: any) {
   */
 
   return (
-
     <section className="container mx-auto px-4 py-12">
-
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-4">
-
 
         {/* ================================= */}
         {/* SIDEBAR */}
@@ -429,18 +382,14 @@ function getCategoryName(product: any) {
 
         <aside className="space-y-8 lg:col-span-1">
 
-
           {/* Search */}
 
           <div>
-
             <h3 className="mb-3 text-lg font-semibold">
               Cari Produk
             </h3>
 
-
             <div className="relative">
-
               <Search
                 className="
                   absolute
@@ -451,7 +400,6 @@ function getCategoryName(product: any) {
                   text-muted-foreground
                 "
               />
-
 
               <input
                 value={searchQuery}
@@ -475,124 +423,97 @@ function getCategoryName(product: any) {
                   focus:ring-primary
                 "
               />
-
             </div>
-
           </div>
-
-
 
           {/* Brand */}
 
           <div>
-
             <h3 className="mb-3 text-lg font-semibold">
               Brand
             </h3>
 
-
             <div className="flex flex-col gap-3">
-
               {[
                 {
                   slug: "all",
                   name: "Semua",
                 },
                 ...brands,
-              ].map(
-                (brand) => (
+              ].map((brand) => (
+                <button
+                  key={brand.slug}
+                  onClick={() =>
+                    setBrandFilter(
+                      brand.slug
+                    )
+                  }
+                  className={`
+                    rounded-xl
+                    border
+                    px-4
+                    py-3
+                    text-left
+                    transition
 
-                  <button
-                    key={brand.slug}
-                    onClick={() =>
-                      setBrandFilter(
-                        brand.slug
-                      )
+                    ${
+                      brandFilter ===
+                      brand.slug
+                        ? "border-primary bg-primary text-white"
+                        : "border-border hover:border-primary"
                     }
-                    className={`
-                      rounded-xl
-                      border
-                      px-4
-                      py-3
-                      text-left
-                      transition
-
-                      ${
-                        brandFilter ===
-                        brand.slug
-                          ? "border-primary bg-primary text-white"
-                          : "border-border hover:border-primary"
-                      }
-                    `}
-                  >
-                    {brand.name}
-                  </button>
-
-                )
-              )}
-
+                  `}
+                >
+                  {brand.name}
+                </button>
+              ))}
             </div>
-
           </div>
-
-
 
           {/* Jenis Produk */}
 
           <div>
-
             <h3 className="mb-3 text-lg font-semibold">
               Jenis Produk
             </h3>
 
-
             <div className="flex flex-col gap-3">
-
               {[
                 {
                   slug: "all",
                   name: "Semua",
                 },
                 ...productTypes,
-              ].map(
-                (cat) => (
+              ].map((cat) => (
+                <button
+                  key={cat.slug}
+                  onClick={() =>
+                    setCategoryFilter(
+                      cat.slug
+                    )
+                  }
+                  className={`
+                    rounded-xl
+                    border
+                    px-4
+                    py-3
+                    text-left
+                    transition
 
-                  <button
-                    key={cat.slug}
-                    onClick={() =>
-                      setCategoryFilter(
-                        cat.slug
-                      )
+                    ${
+                      categoryFilter ===
+                      cat.slug
+                        ? "border-primary bg-primary text-white"
+                        : "border-border hover:border-primary"
                     }
-                    className={`
-                      rounded-xl
-                      border
-                      px-4
-                      py-3
-                      text-left
-                      transition
-
-                      ${
-                        categoryFilter ===
-                        cat.slug
-                          ? "border-primary bg-primary text-white"
-                          : "border-border hover:border-primary"
-                      }
-                    `}
-                  >
-                    {cat.name}
-                  </button>
-
-                )
-              )}
-
+                  `}
+                >
+                  {cat.name}
+                </button>
+              ))}
             </div>
-
           </div>
-
         </aside>
-
-
 
         {/* ================================= */}
         {/* PRODUCT LIST */}
@@ -600,11 +521,8 @@ function getCategoryName(product: any) {
 
         <div className="lg:col-span-3">
 
-
           <div className="mb-6">
-
             <p className="text-sm text-muted-foreground">
-
               {t("products.showing")}{" "}
 
               <strong>
@@ -618,12 +536,8 @@ function getCategoryName(product: any) {
               </strong>{" "}
 
               {t("products.products")}
-
             </p>
-
           </div>
-
-
 
           <div
             className="
@@ -634,10 +548,8 @@ function getCategoryName(product: any) {
               xl:grid-cols-3
             "
           >
-
             {filteredProducts.map(
               (product) => (
-
                 <div
                   key={product.id}
                   className="
@@ -654,11 +566,11 @@ function getCategoryName(product: any) {
                   "
                 >
 
+                  {/* PRODUCT IMAGE */}
 
                   <Link
                     href={`/products/${product.slug}?lang=${currentLanguage}`}
                   >
-
                     <div className="relative h-72 bg-white">
 
                       <ProductCarousel
@@ -676,7 +588,6 @@ function getCategoryName(product: any) {
                           ""
                         }
                       />
-
 
                       <div
                         className="
@@ -697,13 +608,13 @@ function getCategoryName(product: any) {
                       </div>
 
                     </div>
-
                   </Link>
 
-
+                  {/* PRODUCT INFO */}
 
                   <div className="flex flex-1 flex-col p-5">
 
+                    {/* BRAND */}
 
                     <div>
 
@@ -721,43 +632,52 @@ function getCategoryName(product: any) {
                         )}
                       </p>
 
+                      {/* BRAND LOGO */}
 
-                      <p className="text-sm text-muted-foreground">
-                        {
-                          product.acf
-                            ?.model_produk
-                        }
+                      {getBrandLogo(product) && (
+                        <div className="mt-2 flex h-8 w-24 items-center">
+                          <Image
+                            src={getBrandLogo(product)}
+                            alt={`${getBrandName(product)} logo`}
+                            width={96}
+                            height={32}
+                            className="
+                              max-h-8
+                              w-auto
+                              object-contain
+                              object-left
+                            "
+                          />
+                        </div>
+                      )}
+
+                      {/* MODEL */}
+
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {product.acf?.model_produk}
                       </p>
 
                     </div>
 
-
+                    {/* PRODUCT NAME */}
 
                     <h3 className="mt-3 line-clamp-2 text-xl font-bold">
-                      {
-                        product.acf
-                          ?.nama_produk
-                      }
+                      {product.acf?.nama_produk}
                     </h3>
 
-
+                    {/* DESCRIPTION */}
 
                     <div className="mt-3">
 
                       <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {
-                          product.acf
-                            ?.short_description
-                        }
+                        {product.acf?.short_description}
                       </p>
-
 
                       {(
                         product.acf
                           ?.short_description
                           ?.length ?? 0
                       ) > 90 && (
-
                         <Link
                           href={`/products/${product.slug}?lang=${currentLanguage}`}
                           className="
@@ -771,12 +691,11 @@ function getCategoryName(product: any) {
                         >
                           Read more...
                         </Link>
-
                       )}
 
                     </div>
 
-
+                    {/* DETAIL BUTTON */}
 
                     <div className="mt-auto pt-6">
 
@@ -802,36 +721,25 @@ function getCategoryName(product: any) {
 
                     </div>
 
-
                   </div>
 
                 </div>
-
               )
             )}
-
           </div>
 
+          {/* EMPTY STATE */}
 
           {filteredProducts.length === 0 && (
-
             <div className="py-20 text-center">
-
               <p className="text-muted-foreground">
                 Tidak ada produk yang sesuai.
               </p>
-
             </div>
-
           )}
 
-
         </div>
-
       </div>
-
     </section>
-
   );
 }
-

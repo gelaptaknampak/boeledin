@@ -10,9 +10,7 @@ import NewsSection from "@/components/home/NewsSection";
 import CtaSection from "@/components/home/CtaSection";
 
 import { getPostById } from "@/lib/wordpress";
-import {
-  homeSectionConfig,
-} from "@/components/admin/sections/sectionConfig";
+import { homeSectionConfig } from "@/components/admin/sections/sectionConfig";
 
 import type { LangCode } from "@/lib/wordpress";
 
@@ -36,16 +34,40 @@ export default async function Home({
 
   const params = await searchParams;
 
-  const rawLang = Array.isArray(params.lang)
-    ? params.lang[0]
-    : params.lang;
+  const rawLang = Array.isArray(params.lang) ? params.lang[0] : params.lang;
 
-  const lang: LangCode =
-    rawLang === "en" ? "en" : "id";
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
 
   console.log("================================");
   console.log("HOME LANGUAGE:", lang);
   console.log("================================");
+
+  const getAcfLinkUrl = (link: any): string => {
+    if (!link) return "#";
+
+    // Kalau berupa object ACF Link
+    if (typeof link === "object") {
+      return link.url ?? link.href ?? "#";
+    }
+
+    // Kalau berupa string
+    if (typeof link === "string") {
+      const value = link.trim();
+
+      // Format Markdown:
+      // [https://example.com](https://example.com)
+      const markdownMatch = value.match(/^\[.*?\]\((.*?)\)$/);
+
+      if (markdownMatch?.[1]) {
+        return markdownMatch[1];
+      }
+
+      // Kalau sudah URL biasa
+      return value;
+    }
+
+    return "#";
+  };
 
   // =========================
   // GET SECTION ID
@@ -104,12 +126,25 @@ export default async function Home({
   // =========================
 
   const heroData = heroPost?.acf ?? {};
+  console.log(
+    "PRIMARY BUTTON LINK:",
+    JSON.stringify(heroData?.primary_button_link, null, 2),
+  );
+
+  console.log(
+    "SECONDARY BUTTON LINK:",
+    JSON.stringify(heroData?.secondary_button_link, null, 2),
+  );
   const servicesData = servicesPost?.acf ?? {};
   const productData = productPost?.acf ?? {};
   const caseStudyData = caseStudyPost?.acf ?? {};
   const statsData = statsPost?.acf ?? {};
   const newsData = newsPost?.acf ?? {};
   const ctaData = ctaPost?.acf ?? {};
+  console.log(
+    "CTA BUTTON LINK:",
+    JSON.stringify(ctaData?.cta_button_link, null, 2),
+  );
 
   console.log("HOME DATA:", {
     lang,
@@ -141,18 +176,13 @@ export default async function Home({
 
             primaryButton: {
               text: heroData?.primary_button_text,
-
-              url:
-                heroData?.primary_button_link?.url ??
-                "#",
+              url: getAcfLinkUrl(heroData?.primary_button_link),
             },
 
             secondaryButton: {
               text: heroData?.secondary_button_text,
 
-              url:
-                heroData?.secondary_button_link?.url ??
-                "#",
+              url: getAcfLinkUrl(heroData?.secondary_button_link),
             },
 
             stats: [
@@ -180,70 +210,51 @@ export default async function Home({
 
         <ServicesSection
           data={{
-            eyebrow:
-              servicesData?.services_eyebrow,
+            eyebrow: servicesData?.services_eyebrow,
 
-            title:
-              servicesData?.services_title,
+            title: servicesData?.services_title,
 
-            description:
-              servicesData?.services_description,
+            description: servicesData?.services_description,
 
             services: [
               {
-                number:
-                  servicesData?.service_1_number,
+                number: servicesData?.service_1_number,
 
-                title:
-                  servicesData?.service_1_title,
+                title: servicesData?.service_1_title,
 
-                description:
-                  servicesData?.service_1_description,
+                description: servicesData?.service_1_description,
 
-                icon:
-                  servicesData?.service_1_icon,
+                icon: servicesData?.service_1_icon,
               },
 
               {
-                number:
-                  servicesData?.service_2_number,
+                number: servicesData?.service_2_number,
 
-                title:
-                  servicesData?.service_2_title,
+                title: servicesData?.service_2_title,
 
-                description:
-                  servicesData?.service_2_description,
+                description: servicesData?.service_2_description,
 
-                icon:
-                  servicesData?.service_2_icon,
+                icon: servicesData?.service_2_icon,
               },
 
               {
-                number:
-                  servicesData?.service_3_number,
+                number: servicesData?.service_3_number,
 
-                title:
-                  servicesData?.service_3_title,
+                title: servicesData?.service_3_title,
 
-                description:
-                  servicesData?.service_3_description,
+                description: servicesData?.service_3_description,
 
-                icon:
-                  servicesData?.service_3_icon,
+                icon: servicesData?.service_3_icon,
               },
 
               {
-                number:
-                  servicesData?.service_4_number,
+                number: servicesData?.service_4_number,
 
-                title:
-                  servicesData?.service_4_title,
+                title: servicesData?.service_4_title,
 
-                description:
-                  servicesData?.service_4_description,
+                description: servicesData?.service_4_description,
 
-                icon:
-                  servicesData?.service_4_icon,
+                icon: servicesData?.service_4_icon,
               },
             ],
           }}
@@ -255,14 +266,11 @@ export default async function Home({
 
         <ProductsShowcase
           data={{
-            product_eyebrow:
-              productData?.product_eyebrow,
+            product_eyebrow: productData?.product_eyebrow,
 
-            product_title:
-              productData?.product_title,
+            product_title: productData?.product_title,
 
-            product_description:
-              productData?.product_description,
+            product_description: productData?.product_description,
           }}
         />
 
@@ -272,23 +280,17 @@ export default async function Home({
 
         <CaseStudy
           data={{
-            casestudy_eyebrow:
-              caseStudyData?.casestudy_eyebrow,
+            casestudy_eyebrow: caseStudyData?.casestudy_eyebrow,
 
-            casestudy_title:
-              caseStudyData?.casestudy_title,
+            casestudy_title: caseStudyData?.casestudy_title,
 
-            casestudy_description:
-              caseStudyData?.casestudy_description,
+            casestudy_description: caseStudyData?.casestudy_description,
 
-            casestudy_button:
-              caseStudyData?.casestudy_button,
+            casestudy_button: caseStudyData?.casestudy_button,
 
-            casestudy_link:
-              caseStudyData?.casestudy_link,
+            casestudy_link: caseStudyData?.casestudy_link,
 
-            casestudy_image:
-              caseStudyData?.casestudy_image,
+            casestudy_image: caseStudyData?.casestudy_image,
           }}
         />
 
@@ -298,35 +300,25 @@ export default async function Home({
 
         <StatsSection
           data={{
-            stat_number_1:
-              statsData?.stat_number_1,
+            stat_number_1: statsData?.stat_number_1,
 
-            label_1:
-              statsData?.label_1,
+            label_1: statsData?.label_1,
 
-            stat_number_2:
-              statsData?.stat_number_2,
+            stat_number_2: statsData?.stat_number_2,
 
-            label_2:
-              statsData?.label_2,
+            label_2: statsData?.label_2,
 
-            stat_number_3:
-              statsData?.stat_number_3,
+            stat_number_3: statsData?.stat_number_3,
 
-            label_3:
-              statsData?.label_3,
+            label_3: statsData?.label_3,
 
-            stat_number_4:
-              statsData?.stat_number_4,
+            stat_number_4: statsData?.stat_number_4,
 
-            label_4:
-              statsData?.label_4,
+            label_4: statsData?.label_4,
 
-            stat_support:
-              statsData?.stat_support,
+            stat_support: statsData?.stat_support,
 
-            index_brand_list:
-              statsData?.index_brand_list ?? [],
+            index_brand_list: statsData?.index_brand_list ?? [],
           }}
         />
 
@@ -336,11 +328,9 @@ export default async function Home({
 
         <NewsSection
           data={{
-            news_eyebrow:
-              newsData?.news_eyebrow,
+            news_eyebrow: newsData?.news_eyebrow,
 
-            news_title:
-              newsData?.news_title,
+            news_title: newsData?.news_title,
           }}
         />
 
@@ -350,29 +340,18 @@ export default async function Home({
 
         <CtaSection
           data={{
-            cta_title:
-              ctaData?.cta_title,
+            cta_title: ctaData?.cta_title,
 
-            cta_sub:
-              ctaData?.cta_sub,
+            cta_sub: ctaData?.cta_sub,
 
-            cta_button_text:
-              ctaData?.cta_button_text,
+            cta_button_text: ctaData?.cta_button_text,
 
-            cta_button_link:
-              ctaData?.cta_button_link?.url ??
-              "#",
+            cta_button_link: getAcfLinkUrl(ctaData?.cta_button_link),
           }}
         />
       </main>
 
-      <Footer
-        lang={
-          params.lang === "en"
-            ? "en"
-            : "id"
-        }
-      />
+      <Footer lang={params.lang === "en" ? "en" : "id"} />
     </>
   );
 }
