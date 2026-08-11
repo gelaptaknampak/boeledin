@@ -10,26 +10,21 @@ type Props = {
 export default function StatsSection({ data }: Props) {
   const [brandImages, setBrandImages] = useState<Record<string, string>>({});
 
-
   useEffect(() => {
     async function loadBrandImages() {
       const images: Record<string, string> = {};
 
       for (const brand of data?.index_brand_list ?? []) {
-
         if (!brand.logo) continue;
 
         try {
-          const res = await fetch(
-            `/api/wordpress/media/page/${brand.logo}`
-          );
+          const res = await fetch(`/api/wordpress/media/page/${brand.logo}`);
 
           const media = await res.json();
 
           if (media?.source_url) {
             images[brand.logo] = media.source_url;
           }
-
         } catch (err) {
           console.error(err);
         }
@@ -38,12 +33,8 @@ export default function StatsSection({ data }: Props) {
       setBrandImages(images);
     }
 
-
     loadBrandImages();
-
   }, [data]);
-
-
 
   const stats = [
     {
@@ -64,18 +55,15 @@ export default function StatsSection({ data }: Props) {
     },
   ];
 
-
-
   return (
     <section
       className="
-        py-14
-        sm:py-15
-        md:py-20
+        py-10
+        sm:py-12
+        md:py-12
         bg-accent/5
       "
     >
-
       <div
         className="
           container
@@ -85,8 +73,6 @@ export default function StatsSection({ data }: Props) {
           lg:px-8
         "
       >
-
-
         {/* Stats */}
         <div
           className="
@@ -99,15 +85,13 @@ export default function StatsSection({ data }: Props) {
             sm:mb-14
           "
         >
-
-          {stats.map((stat,index)=>(
+          {stats.map((stat, index) => (
             <div
               key={index}
               className="
                 text-center
               "
             >
-
               <div
                 className="
                   text-3xl
@@ -122,7 +106,6 @@ export default function StatsSection({ data }: Props) {
                 {stat.number ?? ""}
               </div>
 
-
               <div
                 className="
                   text-xs
@@ -133,15 +116,9 @@ export default function StatsSection({ data }: Props) {
               >
                 {stat.label ?? ""}
               </div>
-
-
             </div>
           ))}
-
         </div>
-
-
-
 
         <div
           className="
@@ -152,14 +129,8 @@ export default function StatsSection({ data }: Props) {
           "
         />
 
-
-
-
-
         {/* Brand Support */}
         <div>
-
-
           <div
             className="
               inline-flex
@@ -179,9 +150,6 @@ export default function StatsSection({ data }: Props) {
             {data?.stat_support ?? "Didukung Oleh"}
           </div>
 
-
-
-
           <div
             className="
               grid
@@ -193,10 +161,7 @@ export default function StatsSection({ data }: Props) {
               lg:gap-8
             "
           >
-
-            {(data?.index_brand_list ?? []).map(
-              (brand:any,index:number)=>(
-                
+            {(data?.index_brand_list ?? []).map((brand: any, index: number) => (
               <div
                 key={index}
                 className="
@@ -215,8 +180,6 @@ export default function StatsSection({ data }: Props) {
                   flex-col
                 "
               >
-
-
                 {/* Logo */}
                 <div
                   className="
@@ -233,9 +196,7 @@ export default function StatsSection({ data }: Props) {
                     px-3
                   "
                 >
-
                   {brandImages[brand.logo] ? (
-
                     <Image
                       src={brandImages[brand.logo]}
                       alt={brand.name}
@@ -248,9 +209,7 @@ export default function StatsSection({ data }: Props) {
                         w-auto
                       "
                     />
-
                   ) : (
-
                     <span
                       className="
                         text-xs
@@ -259,13 +218,8 @@ export default function StatsSection({ data }: Props) {
                     >
                       Logo
                     </span>
-
                   )}
-
                 </div>
-
-
-
 
                 {/* Divider */}
                 <div
@@ -278,10 +232,6 @@ export default function StatsSection({ data }: Props) {
                     sm:mb-5
                   "
                 />
-
-
-
-
 
                 {/* Name */}
                 <h3
@@ -297,9 +247,6 @@ export default function StatsSection({ data }: Props) {
                   {brand.name}
                 </h3>
 
-
-
-
                 {/* Description */}
                 <p
                   className="
@@ -313,11 +260,8 @@ export default function StatsSection({ data }: Props) {
                   {brand.description}
                 </p>
 
-
-
                 {/* Link */}
                 {brand.link && (
-
                   <a
                     href={brand.link}
                     target="_blank"
@@ -334,22 +278,12 @@ export default function StatsSection({ data }: Props) {
                   >
                     KUNJUNGI WEBSITE ↗
                   </a>
-
                 )}
-
-
               </div>
-
             ))}
-
           </div>
-
-
         </div>
-
-
       </div>
-
     </section>
   );
 }
