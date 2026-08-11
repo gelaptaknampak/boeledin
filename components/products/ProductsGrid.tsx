@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import ProductCarousel from "./ProductCarousel";
 
 export default function ProductsGrid() {
   const { t, language } = useTranslation();
-  const router = useRouter();
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,24 +224,18 @@ export default function ProductsGrid() {
       const brand = getBrand(product);
       const category = getCategory(product);
 
-      const brandMatch =
-        brandFilter === "all" || brand === brandFilter;
+      const brandMatch = brandFilter === "all" || brand === brandFilter;
 
       const categoryMatch =
         categoryFilter === "all" || category === categoryFilter;
 
       const search = searchQuery.trim().toLowerCase();
 
-      const title =
-        product.title?.rendered?.toLowerCase() ?? "";
+      const title = product.title?.rendered?.toLowerCase() ?? "";
 
-      const model = String(
-        product.acf?.model_produk ?? "",
-      ).toLowerCase();
+      const model = String(product.acf?.model_produk ?? "").toLowerCase();
 
-      const productName = String(
-        product.acf?.nama_produk ?? "",
-      ).toLowerCase();
+      const productName = String(product.acf?.nama_produk ?? "").toLowerCase();
 
       const searchMatch =
         search === "" ||
@@ -253,12 +245,7 @@ export default function ProductsGrid() {
 
       return brandMatch && categoryMatch && searchMatch;
     });
-  }, [
-    products,
-    brandFilter,
-    categoryFilter,
-    searchQuery,
-  ]);
+  }, [products, brandFilter, categoryFilter, searchQuery]);
 
   /* =========================
      LOADING
@@ -280,47 +267,6 @@ export default function ProductsGrid() {
 
   return (
     <section className="container mx-auto px-4 py-12">
-
-      {/* =========================
-          BACK BUTTON
-      ========================= */}
-
-      <div className="mb-8">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="
-            inline-flex
-            items-center
-            gap-2
-            rounded-lg
-            border
-            border-border
-            bg-card
-            px-4
-            py-2.5
-            text-sm
-            font-medium
-            text-foreground
-            transition-all
-            duration-200
-            hover:border-primary
-            hover:bg-primary
-            hover:text-white
-          "
-        >
-          <ArrowLeft className="h-4 w-4" />
-
-          {currentLanguage === "en"
-            ? "Back"
-            : "Kembali"}
-        </button>
-      </div>
-
-      {/* =========================
-          MAIN CONTENT
-      ========================= */}
-
       <div
         className="
           grid
@@ -330,19 +276,15 @@ export default function ProductsGrid() {
           xl:grid-cols-[240px_minmax(0,1fr)]
         "
       >
-
         {/* =================================
             SIDEBAR
         ================================= */}
 
         <aside className="space-y-8">
-
           {/* SEARCH */}
 
           <div>
-            <h3 className="mb-3 text-lg font-semibold">
-              Cari Produk
-            </h3>
+            <h3 className="mb-3 text-lg font-semibold">Cari Produk</h3>
 
             <div className="relative">
               <Search
@@ -358,9 +300,7 @@ export default function ProductsGrid() {
 
               <input
                 value={searchQuery}
-                onChange={(e) =>
-                  setSearchQuery(e.target.value)
-                }
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari produk..."
                 className="
                   w-full
@@ -382,9 +322,7 @@ export default function ProductsGrid() {
           {/* BRAND */}
 
           <div>
-            <h3 className="mb-3 text-lg font-semibold">
-              Brand
-            </h3>
+            <h3 className="mb-3 text-lg font-semibold">Brand</h3>
 
             <div className="flex flex-col gap-3">
               {[
@@ -396,9 +334,7 @@ export default function ProductsGrid() {
               ].map((brand) => (
                 <button
                   key={brand.slug}
-                  onClick={() =>
-                    setBrandFilter(brand.slug)
-                  }
+                  onClick={() => setBrandFilter(brand.slug)}
                   className={`
                     rounded-xl
                     border
@@ -423,9 +359,7 @@ export default function ProductsGrid() {
           {/* JENIS PRODUK */}
 
           <div>
-            <h3 className="mb-3 text-lg font-semibold">
-              Jenis Produk
-            </h3>
+            <h3 className="mb-3 text-lg font-semibold">Jenis Produk</h3>
 
             <div className="flex flex-col gap-3">
               {[
@@ -437,9 +371,7 @@ export default function ProductsGrid() {
               ].map((cat) => (
                 <button
                   key={cat.slug}
-                  onClick={() =>
-                    setCategoryFilter(cat.slug)
-                  }
+                  onClick={() => setCategoryFilter(cat.slug)}
                   className={`
                     rounded-xl
                     border
@@ -467,30 +399,26 @@ export default function ProductsGrid() {
         ================================= */}
 
         <div className="min-w-0">
-
           {/* PRODUCT COUNT */}
 
           <div className="mb-5">
             <p className="text-sm text-muted-foreground">
-              {t("products.showing")}{" "}
-              <strong>
-                {filteredProducts.length}
-              </strong>{" "}
-              {t("products.of")}{" "}
-              <strong>
-                {products.length}
-              </strong>{" "}
+              {t("products.showing")} <strong>{filteredProducts.length}</strong>{" "}
+              {t("products.of")} <strong>{products.length}</strong>{" "}
               {t("products.products")}
             </p>
           </div>
 
           {/* =================================
               PRODUCT GRID
-
-              MOBILE = 1
-              TABLET = 2
-              LAPTOP = 3
-              PC = 3
+              
+              MOBILE  = 1
+              TABLET  = 2
+              LAPTOP  = 3
+              PC      = 3
+              
+              Product ke-4 otomatis turun
+              ke baris berikutnya.
           ================================= */}
 
           <div
@@ -521,7 +449,6 @@ export default function ProductsGrid() {
                   hover:shadow-md
                 "
               >
-
                 {/* =================================
                     PRODUCT IMAGE
                 ================================= */}
@@ -530,7 +457,6 @@ export default function ProductsGrid() {
                   href={`/products/${product.slug}?lang=${currentLanguage}`}
                 >
                   <div className="relative h-60 bg-white">
-
                     <ProductCarousel
                       images={
                         product.gallery?.length > 0
@@ -572,7 +498,6 @@ export default function ProductsGrid() {
                 ================================= */}
 
                 <div className="flex flex-1 flex-col p-5">
-
                   {/* BRAND */}
 
                   <div>
@@ -643,8 +568,7 @@ export default function ProductsGrid() {
                       {product.acf?.short_description}
                     </p>
 
-                    {(product.acf?.short_description?.length ??
-                      0) > 90 && (
+                    {(product.acf?.short_description?.length ?? 0) > 90 && (
                       <Link
                         href={`/products/${product.slug}?lang=${currentLanguage}`}
                         className="
@@ -691,7 +615,9 @@ export default function ProductsGrid() {
             ))}
           </div>
 
-          {/* EMPTY STATE */}
+          {/* =================================
+              EMPTY STATE
+          ================================= */}
 
           {filteredProducts.length === 0 && (
             <div className="py-20 text-center">
