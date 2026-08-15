@@ -732,26 +732,56 @@ export async function deleteProduct(id: number, token: string) {
 export async function uploadProductImage(file: File, token: string) {
   const formData = new FormData();
 
-  formData.append("file", file);
+  formData.append("file", file, file.name);
+
+  const startTime = Date.now();
 
   try {
+    console.log("========== WORDPRESS MEDIA UPLOAD ==========");
+    console.log("FILE NAME:", file.name);
+    console.log("FILE SIZE:", file.size, "bytes");
+    console.log("FILE TYPE:", file.type);
+
     const response = await axios.post(`${WORDPRESS_API}/media`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Disposition": `attachment; filename="${file.name}"`,
       },
+
+      // Beri waktu maksimal 5 menit untuk proses upload
+      timeout: 300000,
+
+      // Jangan batasi ukuran request/response dari sisi Axios
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
     });
+
+    const duration = Date.now() - startTime;
+
+    console.log("========== WORDPRESS MEDIA SUCCESS ==========");
+    console.log("STATUS:", response.status);
+    console.log("MEDIA ID:", response.data?.id);
+    console.log("SOURCE URL:", response.data?.source_url);
+    console.log("UPLOAD TIME:", `${duration}ms`);
+    console.log("=============================================");
 
     return response.data;
   } catch (error: any) {
-    console.error("========== WORDPRESS ==========");
+    const duration = Date.now() - startTime;
+
+    console.error("========== WORDPRESS MEDIA ERROR ==========");
     console.error("STATUS:", error.response?.status);
     console.error("DATA:", error.response?.data);
-    console.error("HEADERS:", error.response?.headers);
     console.error("MESSAGE:", error.message);
-    console.error("===============================");
+    console.error("CODE:", error.code);
+    console.error("UPLOAD TIME:", `${duration}ms`);
+    console.error("URL:", error.config?.url);
+    console.error("=============================================");
 
-    return null;
+    // Jangan ubah error menjadi null.
+    // Lempar kembali agar route bisa mengetahui
+    // error asli dari WordPress/Hostinger.
+    throw error;
   }
 }
 
@@ -1142,17 +1172,11 @@ export async function updatePost(
         excerpt: fields.excerpt ?? "",
         status: fields.status ?? "publish",
 
-        featured_media: Number(
-          fields.featured_media ?? 0
-        ),
+        featured_media: Number(fields.featured_media ?? 0),
 
-        kategori: Array.isArray(fields.kategori)
-          ? fields.kategori
-          : [],
+        kategori: Array.isArray(fields.kategori) ? fields.kategori : [],
 
-        tags: Array.isArray(fields.tags)
-          ? fields.tags
-          : [],
+        tags: Array.isArray(fields.tags) ? fields.tags : [],
       },
       {
         params: {
@@ -1166,12 +1190,8 @@ export async function updatePost(
     );
 
     return response.data;
-
   } catch (error: any) {
-    console.error(
-      "Error updating berita:",
-      error.response?.data || error
-    );
+    console.error("Error updating berita:", error.response?.data || error);
 
     return null;
   }

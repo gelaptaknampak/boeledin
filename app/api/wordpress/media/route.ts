@@ -32,31 +32,69 @@ export async function POST(req: Request) {
       );
     }
 
-    const media = await uploadProductImage(file, token.value);
+    console.log("========================================");
+    console.log("PRODUCT IMAGE UPLOAD");
+    console.log("FILE NAME:", file.name);
+    console.log("FILE SIZE:", file.size, "bytes");
+    console.log("FILE TYPE:", file.type);
+    console.log("========================================");
 
-    if (!media) {
-      return NextResponse.json(
-        {
-          message: "Upload media gagal",
-        },
-        {
-          status: 500,
-        },
-      );
-    }
+    const startTime = Date.now();
+
+    const media = await uploadProductImage(
+      file,
+      token.value,
+    );
+
+    const duration = Date.now() - startTime;
+
+    console.log("========== UPLOAD ROUTE SUCCESS ==========");
+    console.log("MEDIA ID:", media?.id);
+    console.log("UPLOAD TIME:", `${duration}ms`);
+    console.log("==========================================");
 
     return NextResponse.json(media);
   } catch (error: any) {
-    console.error("STATUS:", error.response?.status);
-    console.error("DATA:", error.response?.data);
-    console.error("MESSAGE:", error.message);
+    console.error("========== UPLOAD ROUTE ERROR ==========");
+
+    console.error(
+      "STATUS:",
+      error.response?.status,
+    );
+
+    console.error(
+      "DATA:",
+      error.response?.data,
+    );
+
+    console.error(
+      "MESSAGE:",
+      error.message,
+    );
+
+    console.error(
+      "CODE:",
+      error.code,
+    );
+
+    console.error(
+      "URL:",
+      error.config?.url,
+    );
+
+    console.error("========================================");
 
     return NextResponse.json(
       {
-        message: error.response?.data ?? "Internal Server Error",
+        message:
+          error.response?.data ||
+          error.message ||
+          "Upload media gagal",
       },
       {
-        status: error.response?.status ?? 500,
+        status:
+          error.response?.status ||
+          500,
       },
     );
   }
