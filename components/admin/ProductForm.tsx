@@ -507,6 +507,139 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
       setLoading(false);
     }
   }
+
+async function resizeImage(
+  file: File,
+): Promise<File> {
+  const MAX_SIZE = 1600;
+  const JPEG_QUALITY = 0.85;
+
+  // Bukan gambar → jangan diproses
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+
+  const image = await new Promise<HTMLImageElement>(
+    (resolve, reject) => {
+      const img = new Image();
+
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(img);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(
+          new Error(`Gagal membaca gambar: ${file.name}`),
+        );
+      };
+
+      img.src = objectUrl;
+    },
+  );
+
+  const originalWidth = image.naturalWidth;
+  const originalHeight = image.naturalHeight;
+
+  console.log(
+    `[IMAGE] ${file.name}`,
+    `${originalWidth} × ${originalHeight}`,
+  );
+
+  /**
+   * Jika sudah <= 1600 di kedua sisi,
+   * tetap kita convert ke JPEG agar ukuran file
+   * lebih kecil dan format konsisten.
+   */
+  const scale = Math.min(
+    MAX_SIZE / originalWidth,
+    MAX_SIZE / originalHeight,
+    1,
+  );
+
+  const newWidth = Math.round(
+    originalWidth * scale,
+  );
+
+  const newHeight = Math.round(
+    originalHeight * scale,
+  );
+
+  console.log(
+    `[IMAGE] RESIZED`,
+    `${newWidth} × ${newHeight}`,
+  );
+
+  const canvas = document.createElement("canvas");
+
+  canvas.width = newWidth;
+  canvas.height = newHeight;
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error(
+      "Canvas tidak tersedia di browser.",
+    );
+  }
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+
+  context.drawImage(
+    image,
+    0,
+    0,
+    newWidth,
+    newHeight,
+  );
+
+  const blob = await new Promise<Blob>(
+    (resolve, reject) => {
+      canvas.toBlob(
+        (result) => {
+          if (!result) {
+            reject(
+              new Error(
+                `Gagal melakukan kompresi ${file.name}`,
+              ),
+            );
+
+            return;
+          }
+
+          resolve(result);
+        },
+        "image/jpeg",
+        JPEG_QUALITY,
+      );
+    },
+  );
+
+  const originalName = file.name.replace(
+    /\.[^/.]+$/,
+    "",
+  );
+
+  const resizedFile = new File(
+    [blob],
+    `${originalName}.jpg`,
+    {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    },
+  );
+
+  console.log(
+    `[IMAGE] SIZE`,
+    `${file.size} → ${resizedFile.size} bytes`,
+  );
+
+  return resizedFile;
+}  
   /**
    * =========================================================
    * UPLOAD MEDIA
@@ -514,21 +647,43 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
    */
 
   async function uploadMedia(file: File) {
-    const formData = new FormData();
+  /**
+   * Resize/compress dilakukan DI BROWSER
+   * sebelum file dikirim ke API.
+   */
+  const processedFile = await resizeImage(file);
 
-    formData.append("file", file);
+  const formData = new FormData();
 
-    const res = await fetch("/api/wordpress/media", {
-      method: "POST",
-      body: formData,
-    });
+  formData.append(
+    "file",
+    processedFile,
+    processedFile.name,
+  );
 
-    if (!res.ok) {
-      throw new Error("Upload media gagal");
-    }
+  const res = await fetch("/api/wordpress/media", {
+    method: "POST",
+    body: formData,
+  });
 
-    return res.json();
+  if (!res.ok) {
+    const errorData = await res.json().catch(
+      () => null,
+    );
+
+    console.error(
+      "UPLOAD MEDIA ERROR:",
+      errorData,
+    );
+
+    throw new Error(
+      errorData?.message ||
+        "Upload media gagal",
+    );
   }
+
+  return res.json();
+}
 
   /**
    * =========================================================
