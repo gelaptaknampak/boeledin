@@ -8,9 +8,9 @@ interface Props {
   params: Promise<{
     slug: string;
   }>;
-  searchParams?: {
+  searchParams: Promise<{
     lang?: string;
-  };
+  }>;
 }
 
 export default async function ProductDetail({
@@ -18,7 +18,12 @@ export default async function ProductDetail({
   searchParams,
 }: Props) {
   const { slug } = await params;
-  const lang = searchParams?.lang || "id";
+  const paramsSearch = await searchParams;
+
+  const lang =
+    paramsSearch.lang === "en"
+      ? "en"
+      : "id";
 
   const res = await fetch(
     `https://wp.boeledin.com/wp-json/wp/v2/products?slug=${slug}&_embed&lang=${lang}`,
@@ -32,7 +37,13 @@ export default async function ProductDetail({
   const product = data[0];
 
   if (!product) {
-    return <div>Produk tidak ditemukan</div>;
+    return (
+      <div>
+        {lang === "en"
+          ? "Product not found"
+          : "Produk tidak ditemukan"}
+      </div>
+    );
   }
 
   // ===========================
@@ -87,7 +98,8 @@ export default async function ProductDetail({
       if (mediaRes.ok) {
         const media = await mediaRes.json();
 
-        brochureUrl = media?.source_url ?? "";
+        brochureUrl =
+          media?.source_url ?? "";
       }
     } catch {}
   }

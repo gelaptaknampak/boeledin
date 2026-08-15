@@ -4,16 +4,16 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface BackButtonProps {
-  lang: string;
+  lang: "id" | "en";
 }
 
-export default function BackButton({ lang }: BackButtonProps) {
+export default function BackButton({
+  lang,
+}: BackButtonProps) {
   const router = useRouter();
 
-  const currentLanguage = lang === "en" ? "en" : "id";
-
   function handleBack() {
-    router.push(`/products?lang=${currentLanguage}`);
+    router.push(`/products?lang=${lang}`);
   }
 
   return (
@@ -41,7 +41,9 @@ export default function BackButton({ lang }: BackButtonProps) {
     >
       <ArrowLeft className="h-4 w-4" />
 
-      {currentLanguage === "en" ? "Back to Products" : "Kembali ke Produk"}
+      {lang === "en"
+        ? "Back to Products"
+        : "Kembali ke Produk"}
     </button>
   );
 }

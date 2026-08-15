@@ -9,7 +9,7 @@ import Link from "next/link";
 import ProductCarousel from "./ProductCarousel";
 
 export default function ProductsGrid() {
-  const { t, language } = useTranslation();
+  const { language } = useTranslation();
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,37 @@ export default function ProductsGrid() {
   const currentLanguage = language === "en" ? "en" : "id";
 
   /* =========================
+     STATIC UI TEXT
+  ========================= */
+
+  const uiText = {
+    searchTitle: currentLanguage === "en" ? "Search Product" : "Cari Produk",
+
+    searchPlaceholder:
+      currentLanguage === "en" ? "Search product..." : "Cari produk...",
+
+    brand: "Brand",
+
+    productType: currentLanguage === "en" ? "Product Type" : "Jenis Produk",
+
+    all: currentLanguage === "en" ? "All" : "Semua",
+
+    readMore:
+      currentLanguage === "en" ? "Read more..." : "Baca selengkapnya...",
+
+    productDetail:
+      currentLanguage === "en" ? "Product Detail" : "Detail Produk",
+
+    noProducts:
+      currentLanguage === "en"
+        ? "No products found."
+        : "Tidak ada produk yang sesuai.",
+
+    loading:
+      currentLanguage === "en" ? "Loading products..." : "Memuat produk...",
+  };
+
+  /* =========================
      BRAND MAP
   ========================= */
 
@@ -43,6 +74,10 @@ export default function ProductsGrid() {
     setBrandFilter("all");
     setCategoryFilter("all");
     setSearchQuery("");
+
+    setProducts([]);
+    setBrands([]);
+    setProductTypes([]);
 
     fetchProducts();
     fetchBrands();
@@ -171,6 +206,8 @@ export default function ProductsGrid() {
 
       const data = await res.json();
 
+      console.log("PRODUCT TYPES:", currentLanguage, data);
+
       setProductTypes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed loading product types:", err);
@@ -237,11 +274,16 @@ export default function ProductsGrid() {
 
       const productName = String(product.acf?.nama_produk ?? "").toLowerCase();
 
+      const shortDescription = String(
+        product.acf?.short_description ?? "",
+      ).toLowerCase();
+
       const searchMatch =
         search === "" ||
         title.includes(search) ||
         model.includes(search) ||
-        productName.includes(search);
+        productName.includes(search) ||
+        shortDescription.includes(search);
 
       return brandMatch && categoryMatch && searchMatch;
     });
@@ -255,7 +297,7 @@ export default function ProductsGrid() {
     return (
       <section className="container mx-auto px-4 py-20">
         <div className="text-center text-muted-foreground">
-          Memuat produk...
+          {uiText.loading}
         </div>
       </section>
     );
@@ -284,7 +326,7 @@ export default function ProductsGrid() {
           {/* SEARCH */}
 
           <div>
-            <h3 className="mb-3 text-lg font-semibold">Cari Produk</h3>
+            <h3 className="mb-3 text-lg font-semibold">{uiText.searchTitle}</h3>
 
             <div className="relative">
               <Search
@@ -301,16 +343,18 @@ export default function ProductsGrid() {
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari produk..."
+                placeholder={uiText.searchPlaceholder}
                 className="
                   w-full
                   rounded-xl
                   border
                   border-border
-                  bg-card
+                  text-black
+                  bg-white
                   py-3
                   pl-12
                   pr-4
+                  placeholder:text-gray-500
                   focus:outline-none
                   focus:ring-2
                   focus:ring-primary
@@ -322,13 +366,13 @@ export default function ProductsGrid() {
           {/* BRAND */}
 
           <div>
-            <h3 className="mb-3 text-lg font-semibold">Brand</h3>
+            <h3 className="mb-3 text-lg font-semibold">{uiText.brand}</h3>
 
             <div className="flex flex-col gap-3">
               {[
                 {
                   slug: "all",
-                  name: "Semua",
+                  name: uiText.all,
                 },
                 ...brands,
               ].map((brand) => (
@@ -359,13 +403,13 @@ export default function ProductsGrid() {
           {/* JENIS PRODUK */}
 
           <div>
-            <h3 className="mb-3 text-lg font-semibold">Jenis Produk</h3>
+            <h3 className="mb-3 text-lg font-semibold">{uiText.productType}</h3>
 
             <div className="flex flex-col gap-3">
               {[
                 {
                   slug: "all",
-                  name: "Semua",
+                  name: uiText.all,
                 },
                 ...productTypes,
               ].map((cat) => (
@@ -403,22 +447,16 @@ export default function ProductsGrid() {
 
           <div className="mb-5">
             <p className="text-sm text-muted-foreground">
-              {t("products.showing")} <strong>{filteredProducts.length}</strong>{" "}
-              {t("products.of")} <strong>{products.length}</strong>{" "}
-              {t("products.products")}
+              {language === "en" ? "Showing" : "Menampilkan"}{" "}
+              <strong>{filteredProducts.length}</strong>{" "}
+              {language === "en" ? "of" : "dari"}{" "}
+              <strong>{products.length}</strong>{" "}
+              {language === "en" ? "products" : "produk"}
             </p>
           </div>
 
           {/* =================================
               PRODUCT GRID
-              
-              MOBILE  = 1
-              TABLET  = 2
-              LAPTOP  = 3
-              PC      = 3
-              
-              Product ke-4 otomatis turun
-              ke baris berikutnya.
           ================================= */}
 
           <div
@@ -434,24 +472,24 @@ export default function ProductsGrid() {
               <div
                 key={product.id}
                 className="
-                  flex
-                  min-w-0
-                  flex-col
-                  overflow-hidden
-                  rounded-xl
-                  border
-                  border-border
-                  bg-card
-                  transition-all
-                  duration-200
-                  hover:-translate-y-1
-                  hover:border-primary
-                  hover:shadow-md
-                "
+                    flex
+                    min-w-0
+                    flex-col
+                    overflow-hidden
+                    rounded-xl
+                    border
+                    border-border
+                    bg-white
+                    transition-all
+                    duration-200
+                    hover:-translate-y-1
+                    hover:border-primary
+                    hover:shadow-md
+                  "
               >
                 {/* =================================
-                    PRODUCT IMAGE
-                ================================= */}
+                      PRODUCT IMAGE
+                  ================================= */}
 
                 <Link
                   href={`/products/${product.slug}?lang=${currentLanguage}`}
@@ -474,19 +512,19 @@ export default function ProductsGrid() {
 
                     <div
                       className="
-                        absolute
-                        bottom-3
-                        left-3
-                        max-w-[calc(100%-24px)]
-                        truncate
-                        rounded-md
-                        bg-black/70
-                        px-2
-                        py-1
-                        text-xs
-                        font-medium
-                        text-white
-                      "
+                          absolute
+                          bottom-3
+                          left-3
+                          max-w-[calc(100%-24px)]
+                          truncate
+                          rounded-md
+                          bg-black/70
+                          px-2
+                          py-1
+                          text-xs
+                          font-medium
+                          text-white
+                        "
                     >
                       {getCategoryName(product)}
                     </div>
@@ -494,8 +532,8 @@ export default function ProductsGrid() {
                 </Link>
 
                 {/* =================================
-                    PRODUCT INFO
-                ================================= */}
+                      PRODUCT INFO
+                  ================================= */}
 
                 <div className="flex flex-1 flex-col p-5">
                   {/* BRAND */}
@@ -503,13 +541,13 @@ export default function ProductsGrid() {
                   <div>
                     <p
                       className="
-                        truncate
-                        text-xs
-                        font-bold
-                        uppercase
-                        tracking-widest
-                        text-primary
-                      "
+                          truncate
+                          text-xs
+                          font-bold
+                          uppercase
+                          tracking-widest
+                          text-primary
+                        "
                     >
                       {getBrandName(product)}
                     </p>
@@ -517,25 +555,38 @@ export default function ProductsGrid() {
                     {/* BRAND LOGO */}
 
                     {getBrandLogo(product) && (
-                      <div className="mt-2 flex h-8 w-24 items-center">
+                      <div
+                        className="
+                            relative
+                            z-10
+                            mt-3
+                            flex
+                            min-h-10
+                            w-28
+                            items-center
+                          "
+                      >
                         <Image
                           src={getBrandLogo(product)}
                           alt={`${getBrandName(product)} logo`}
-                          width={96}
-                          height={32}
+                          width={112}
+                          height={40}
                           className="
-                            max-h-8
-                            w-auto
-                            object-contain
-                            object-left
-                          "
+                              relative
+                              z-10
+                              max-h-10
+                              w-auto
+                              max-w-full
+                              object-contain
+                              object-left
+                            "
                         />
                       </div>
                     )}
 
                     {/* MODEL */}
 
-                    <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+                    <p className="mt-1 line-clamp-1 text-sm text-black">
                       {product.acf?.model_produk}
                     </p>
                   </div>
@@ -544,12 +595,13 @@ export default function ProductsGrid() {
 
                   <h3
                     className="
-                      mt-3
-                      line-clamp-2
-                      text-xl
-                      font-bold
-                      leading-snug
-                    "
+                        mt-3
+                        line-clamp-2
+                        text-xl
+                        font-bold
+                        text-black
+                        leading-snug
+                      "
                   >
                     {product.acf?.nama_produk}
                   </h3>
@@ -559,11 +611,11 @@ export default function ProductsGrid() {
                   <div className="mt-3">
                     <p
                       className="
-                        line-clamp-2
-                        text-sm
-                        leading-relaxed
-                        text-muted-foreground
-                      "
+                          line-clamp-2
+                          text-sm
+                          leading-relaxed
+                          text-black
+                        "
                     >
                       {product.acf?.short_description}
                     </p>
@@ -572,15 +624,15 @@ export default function ProductsGrid() {
                       <Link
                         href={`/products/${product.slug}?lang=${currentLanguage}`}
                         className="
-                          mt-1
-                          inline-block
-                          text-sm
-                          font-medium
-                          text-primary
-                          hover:underline
-                        "
+                            mt-1
+                            inline-block
+                            text-sm
+                            font-medium
+                            text-primary
+                            hover:underline
+                          "
                       >
-                        Read more...
+                        {uiText.readMore}
                       </Link>
                     )}
                   </div>
@@ -591,23 +643,23 @@ export default function ProductsGrid() {
                     <Link
                       href={`/products/${product.slug}?lang=${currentLanguage}`}
                       className="
-                        block
-                        w-full
-                        rounded-lg
-                        border
-                        border-primary
-                        px-3
-                        py-3
-                        text-center
-                        text-sm
-                        font-semibold
-                        text-primary
-                        transition
-                        hover:bg-primary
-                        hover:text-white
-                      "
+                          block
+                          w-full
+                          rounded-lg
+                          border
+                          border-primary
+                          px-3
+                          py-3
+                          text-center
+                          text-sm
+                          font-semibold
+                          text-primary
+                          transition
+                          hover:bg-primary
+                          hover:text-white
+                        "
                     >
-                      Detail Produk
+                      {uiText.productDetail}
                     </Link>
                   </div>
                 </div>
@@ -621,9 +673,7 @@ export default function ProductsGrid() {
 
           {filteredProducts.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-muted-foreground">
-                Tidak ada produk yang sesuai.
-              </p>
+              <p className="text-muted-foreground">{uiText.noProducts}</p>
             </div>
           )}
         </div>
