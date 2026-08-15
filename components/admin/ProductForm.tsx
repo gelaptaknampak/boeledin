@@ -802,6 +802,12 @@ async function resizeImage(
 
         feature_image: gallery,
 
+        // TAMBAHKAN INI
+        gallery_ids: gallery
+          .split("\n")
+          .map((id) => Number(id.trim()))
+          .filter((id) => id > 0),
+
         download_brosur: pdfId,
       };
 
