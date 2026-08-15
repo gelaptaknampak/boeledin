@@ -729,58 +729,240 @@ export async function deleteProduct(id: number, token: string) {
   }
 }
 
-export async function uploadProductImage(file: File, token: string) {
-  const formData = new FormData();
-
-  formData.append("file", file, file.name);
-
-  const startTime = Date.now();
+export async function uploadProductImage(
+  file: File,
+  token: string,
+) {
+  const MAX_SIZE = 1600;
+  const JPEG_QUALITY = 0.85;
 
   try {
-    console.log("========== WORDPRESS MEDIA UPLOAD ==========");
-    console.log("FILE NAME:", file.name);
-    console.log("FILE SIZE:", file.size, "bytes");
-    console.log("FILE TYPE:", file.type);
+    console.log("========== IMAGE UPLOAD ==========");
+    console.log("ORIGINAL NAME:", file.name);
+    console.log("ORIGINAL SIZE:", file.size, "bytes");
+    console.log("ORIGINAL TYPE:", file.type);
 
-    const response = await axios.post(`${WORDPRESS_API}/media`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Disposition": `attachment; filename="${file.name}"`,
+    /**
+     * =====================================================
+     * 1. LOAD IMAGE DI BROWSER
+     * =====================================================
+     */
+
+    const image = await new Promise<HTMLImageElement>(
+      (resolve, reject) => {
+        const img = new Image();
+
+        const objectUrl = URL.createObjectURL(file);
+
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(img);
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(
+            new Error("Gagal membaca gambar."),
+          );
+        };
+
+        img.src = objectUrl;
       },
+    );
 
-      // Beri waktu maksimal 5 menit untuk proses upload
-      timeout: 300000,
+    const originalWidth = image.naturalWidth;
+    const originalHeight = image.naturalHeight;
 
-      // Jangan batasi ukuran request/response dari sisi Axios
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-    });
+    console.log(
+      "ORIGINAL DIMENSION:",
+      `${originalWidth} × ${originalHeight}`,
+    );
 
-    const duration = Date.now() - startTime;
+    /**
+     * =====================================================
+     * 2. HITUNG DIMENSI BARU
+     * =====================================================
+     *
+     * Aspect ratio tetap dipertahankan.
+     */
 
-    console.log("========== WORDPRESS MEDIA SUCCESS ==========");
-    console.log("STATUS:", response.status);
-    console.log("MEDIA ID:", response.data?.id);
-    console.log("SOURCE URL:", response.data?.source_url);
-    console.log("UPLOAD TIME:", `${duration}ms`);
-    console.log("=============================================");
+    const scale = Math.min(
+      MAX_SIZE / originalWidth,
+      MAX_SIZE / originalHeight,
+      1,
+    );
+
+    const newWidth = Math.round(
+      originalWidth * scale,
+    );
+
+    const newHeight = Math.round(
+      originalHeight * scale,
+    );
+
+    console.log(
+      "FINAL DIMENSION:",
+      `${newWidth} × ${newHeight}`,
+    );
+
+    /**
+     * =====================================================
+     * 3. BUAT CANVAS
+     * =====================================================
+     */
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error(
+        "Canvas tidak tersedia di browser.",
+      );
+    }
+
+    /**
+     * =====================================================
+     * 4. RENDER IMAGE KE CANVAS
+     * =====================================================
+     */
+
+    context.drawImage(
+      image,
+      0,
+      0,
+      newWidth,
+      newHeight,
+    );
+
+    /**
+     * =====================================================
+     * 5. CONVERT KE JPEG
+     * =====================================================
+     */
+
+    const compressedBlob =
+      await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(
+                new Error(
+                  "Gagal melakukan kompresi gambar.",
+                ),
+              );
+              return;
+            }
+
+            resolve(blob);
+          },
+          "image/jpeg",
+          JPEG_QUALITY,
+        );
+      });
+
+    /**
+     * =====================================================
+     * 6. BUAT FILE BARU
+     * =====================================================
+     *
+     * File baru inilah yang dikirim ke route.
+     */
+
+    const originalName =
+      file.name.replace(/\.[^/.]+$/, "");
+
+    const resizedFile = new File(
+      [compressedBlob],
+      `${originalName}.jpg`,
+      {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      },
+    );
+
+    console.log(
+      "COMPRESSED SIZE:",
+      resizedFile.size,
+      "bytes",
+    );
+
+    console.log(
+      "SIZE REDUCTION:",
+      `${(
+        (1 - resizedFile.size / file.size) *
+        100
+      ).toFixed(2)}%`,
+    );
+
+    /**
+     * =====================================================
+     * 7. KIRIM FILE HASIL RESIZE KE ROUTE
+     * =====================================================
+     */
+
+    const formData = new FormData();
+
+    formData.append(
+      "file",
+      resizedFile,
+      resizedFile.name,
+    );
+
+    const response = await axios.post(
+      "/api/upload-product-image",
+      formData,
+      {
+        // 5 menit
+        timeout: 300000,
+
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      },
+    );
+
+    console.log(
+      "========== IMAGE UPLOAD SUCCESS ==========",
+    );
+
+    console.log(
+      "MEDIA ID:",
+      response.data?.id,
+    );
 
     return response.data;
   } catch (error: any) {
-    const duration = Date.now() - startTime;
+    console.error(
+      "========== IMAGE UPLOAD ERROR ==========",
+    );
 
-    console.error("========== WORDPRESS MEDIA ERROR ==========");
-    console.error("STATUS:", error.response?.status);
-    console.error("DATA:", error.response?.data);
-    console.error("MESSAGE:", error.message);
-    console.error("CODE:", error.code);
-    console.error("UPLOAD TIME:", `${duration}ms`);
-    console.error("URL:", error.config?.url);
-    console.error("=============================================");
+    console.error(
+      "STATUS:",
+      error.response?.status,
+    );
 
-    // Jangan ubah error menjadi null.
-    // Lempar kembali agar route bisa mengetahui
-    // error asli dari WordPress/Hostinger.
+    console.error(
+      "DATA:",
+      error.response?.data,
+    );
+
+    console.error(
+      "MESSAGE:",
+      error.message,
+    );
+
+    console.error(
+      "CODE:",
+      error.code,
+    );
+
+    console.error(
+      "==========================================",
+    );
+
     throw error;
   }
 }
