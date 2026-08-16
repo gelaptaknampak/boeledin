@@ -747,16 +747,28 @@ async function resizeImage(
       const uploadedIds: number[] = [];
 
       if (selectedImages.length > 0) {
-        for (const file of selectedImages) {
-          const media = await uploadMedia(file);
+  for (const file of selectedImages) {
+    const media = await uploadMedia(file);
 
-          uploadedIds.push(Number(media.id));
-        }
+    const mediaId = Number(media.id);
 
-        gallery = form.feature_image
-          ? `${form.feature_image}\n${uploadedIds.join("\n")}`
-          : uploadedIds.join("\n");
-      }
+    if (mediaId > 0) {
+      uploadedIds.push(mediaId);
+    }
+  }
+
+  const existingIds = form.feature_image
+    .split(/[\n,]+/)
+    .map((id) => Number(id.trim()))
+    .filter((id) => id > 0);
+
+  const allGalleryIds = [
+    ...existingIds,
+    ...uploadedIds,
+  ];
+
+  gallery = allGalleryIds.join("\n");
+}
 
       /**
        * =====================================================
@@ -900,14 +912,80 @@ async function resizeImage(
    */
 
   function removeImage(index: number) {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+  setForm((prev) => {
+    // ID gambar lama yang saat ini tersimpan
+    const existingIds = prev.feature_image
+      .split(/[\n,]+/)
+      .map((id) => Number(id.trim()))
+      .filter((id) => id > 0);
 
-    setForm((prev) => ({
+    /**
+     * =====================================================
+     * REMOVE EXISTING IMAGE
+     * =====================================================
+     *
+     * Kalau index masih berada di dalam existingIds,
+     * berarti yang dihapus adalah gambar yang sudah ada
+     * di WordPress.
+     */
+    if (index < existingIds.length) {
+      const removedId = existingIds[index];
+
+      const newIds = existingIds.filter(
+        (_, i) => i !== index,
+      );
+
+      console.log("[IMAGE] REMOVE EXISTING MEDIA:", removedId);
+      console.log("[IMAGE] REMAINING MEDIA:", newIds);
+
+      return {
+        ...prev,
+
+        // HAPUS ID MEDIA DARI GALLERY
+        feature_image: newIds.join("\n"),
+
+        // HAPUS PREVIEW
+        feature_image_urls: prev.feature_image_urls.filter(
+          (_, i) => i !== index,
+        ),
+      };
+    }
+
+    /**
+     * =====================================================
+     * REMOVE NEW IMAGE
+     * =====================================================
+     *
+     * Gambar baru tidak ada di feature_image.
+     *
+     * Misalnya:
+     *
+     * existingIds = [755, 756]
+     * selectedImages = [fileA, fileB]
+     *
+     * index 2 berarti fileA
+     * index 3 berarti fileB
+     */
+    const newImageIndex = index - existingIds.length;
+
+    console.log(
+      "[IMAGE] REMOVE NEW IMAGE:",
+      newImageIndex,
+    );
+
+    setSelectedImages((files) =>
+      files.filter((_, i) => i !== newImageIndex),
+    );
+
+    return {
       ...prev,
 
-      feature_image_urls: prev.feature_image_urls.filter((_, i) => i !== index),
-    }));
-  }
+      feature_image_urls: prev.feature_image_urls.filter(
+        (_, i) => i !== index,
+      ),
+    };
+  });
+}
 
   /**
    * =========================================================
