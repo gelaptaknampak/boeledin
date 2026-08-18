@@ -508,9 +508,7 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     }
   }
 
-async function resizeImage(
-  file: File,
-): Promise<File> {
+async function resizeImage(file: File): Promise<File> {
   const MAX_SIZE = 1600;
   const JPEG_QUALITY = 0.85;
 
@@ -519,27 +517,25 @@ async function resizeImage(
     return file;
   }
 
-  const image = await new Promise<HTMLImageElement>(
-    (resolve, reject) => {
-      const img = new Image();
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
 
-      const objectUrl = URL.createObjectURL(file);
+    const objectUrl = URL.createObjectURL(file);
 
-      img.onload = () => {
-        URL.revokeObjectURL(objectUrl);
-        resolve(img);
-      };
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
 
-      img.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        reject(
-          new Error(`Gagal membaca gambar: ${file.name}`),
-        );
-      };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(
+        new Error(`Gagal membaca gambar: ${file.name}`),
+      );
+    };
 
-      img.src = objectUrl;
-    },
-  );
+    img.src = objectUrl;
+  });
 
   const originalWidth = image.naturalWidth;
   const originalHeight = image.naturalHeight;
@@ -547,26 +543,17 @@ async function resizeImage(
   console.log(
     `[IMAGE] ${file.name}`,
     `${originalWidth} × ${originalHeight}`,
+    file.type,
   );
 
-  /**
-   * Jika sudah <= 1600 di kedua sisi,
-   * tetap kita convert ke JPEG agar ukuran file
-   * lebih kecil dan format konsisten.
-   */
   const scale = Math.min(
     MAX_SIZE / originalWidth,
     MAX_SIZE / originalHeight,
     1,
   );
 
-  const newWidth = Math.round(
-    originalWidth * scale,
-  );
-
-  const newHeight = Math.round(
-    originalHeight * scale,
-  );
+  const newWidth = Math.round(originalWidth * scale);
+  const newHeight = Math.round(originalHeight * scale);
 
   console.log(
     `[IMAGE] RESIZED`,
@@ -581,13 +568,14 @@ async function resizeImage(
   const context = canvas.getContext("2d");
 
   if (!context) {
-    throw new Error(
-      "Canvas tidak tersedia di browser.",
-    );
+    throw new Error("Canvas tidak tersedia di browser.");
   }
 
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = "high";
+
+  // Pastikan canvas transparan
+  context.clearRect(0, 0, newWidth, newHeight);
 
   context.drawImage(
     image,
@@ -597,27 +585,51 @@ async function resizeImage(
     newHeight,
   );
 
-  const blob = await new Promise<Blob>(
-    (resolve, reject) => {
-      canvas.toBlob(
-        (result) => {
-          if (!result) {
-            reject(
-              new Error(
-                `Gagal melakukan kompresi ${file.name}`,
-              ),
-            );
+  /**
+   * =========================================================
+   * PERTAHANKAN TRANSPARENCY
+   * =========================================================
+   *
+   * PNG dan WebP bisa memiliki alpha channel.
+   * Jangan convert keduanya ke JPEG.
+   */
 
-            return;
-          }
+  const isPng = file.type === "image/png";
+  const isWebp = file.type === "image/webp";
 
-          resolve(result);
-        },
-        "image/jpeg",
-        JPEG_QUALITY,
-      );
-    },
-  );
+  const outputType =
+    isPng || isWebp
+      ? file.type
+      : "image/jpeg";
+
+  const extension =
+    outputType === "image/png"
+      ? "png"
+      : outputType === "image/webp"
+        ? "webp"
+        : "jpg";
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (result) => {
+        if (!result) {
+          reject(
+            new Error(
+              `Gagal melakukan kompresi ${file.name}`,
+            ),
+          );
+
+          return;
+        }
+
+        resolve(result);
+      },
+      outputType,
+      outputType === "image/jpeg"
+        ? JPEG_QUALITY
+        : undefined,
+    );
+  });
 
   const originalName = file.name.replace(
     /\.[^/.]+$/,
@@ -626,11 +638,21 @@ async function resizeImage(
 
   const resizedFile = new File(
     [blob],
-    `${originalName}.jpg`,
+    `${originalName}.${extension}`,
     {
-      type: "image/jpeg",
+      type: outputType,
       lastModified: Date.now(),
     },
+  );
+
+  console.log(
+    `[IMAGE] OUTPUT`,
+    `${file.name} → ${resizedFile.name}`,
+  );
+
+  console.log(
+    `[IMAGE] TYPE`,
+    `${file.type} → ${resizedFile.type}`,
   );
 
   console.log(
@@ -639,7 +661,7 @@ async function resizeImage(
   );
 
   return resizedFile;
-}  
+} 
   /**
    * =========================================================
    * UPLOAD MEDIA
