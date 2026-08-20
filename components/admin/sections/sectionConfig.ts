@@ -251,6 +251,14 @@ export const homeSectionConfig = {
         type: "textarea",
         acf: "product_description",
       },
+      {
+        name: "products",
+        acf: "product_showcase_products",
+        type: "post_object",
+        label: "Products to Display",
+        multiple: true,
+        postType: "products",
+      },
     ],
   },
 

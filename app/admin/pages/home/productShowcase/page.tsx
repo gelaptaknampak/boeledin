@@ -28,11 +28,12 @@ function setValue(obj: any, path: string, value: any) {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ lang?: string | string[] }>;
+  searchParams: Promise<{
+    lang?: string | string[];
+  }>;
 }) {
   const config = homeSectionConfig.productShowcase;
 
-  // IMPORTANT: searchParams harus di-await
   const params = await searchParams;
 
   const rawLang = Array.isArray(params.lang)
@@ -41,18 +42,17 @@ export default async function Page({
 
   const lang: LangCode = rawLang === "en" ? "en" : "id";
 
-  console.log("=== Home PAGE ===");
+  console.log("=== PRODUCT SHOWCASE PAGE ===");
   console.log("rawLang:", rawLang);
   console.log("lang:", lang);
 
-  // Ambil ID sesuai bahasa
   const postId = config.id[lang];
 
   console.log("postId:", postId);
 
   if (!postId) {
     throw new Error(
-      `Post Home untuk bahasa ${lang} belum dikonfigurasi`
+      `Post Home untuk bahasa ${lang} belum dikonfigurasi`,
     );
   }
 
@@ -62,7 +62,7 @@ export default async function Page({
 
   if (!post) {
     throw new Error(
-      `Home section untuk bahasa ${lang} tidak ditemukan`
+      `Home section untuk bahasa ${lang} tidak ditemukan`,
     );
   }
 
@@ -74,15 +74,21 @@ export default async function Page({
     let value = acf[field.acf];
 
     if (
-      // field.type === "link" &&
       value &&
-      typeof value === "object"
+      typeof value === "object" &&
+      !Array.isArray(value)
     ) {
       value = value.url;
     }
 
-    setValue(data, field.name, value ?? "");
+    setValue(
+      data,
+      field.name,
+      value ?? "",
+    );
   });
+
+  console.log("PRODUCT SHOWCASE DATA:", data);
 
   return (
     <SectionForm
@@ -90,7 +96,8 @@ export default async function Page({
       config={{
         ...config,
 
-        // SectionForm butuh ID POST aktual
+        // penting:
+        // SectionForm menggunakan ID post aktual
         id: postId,
       }}
     />

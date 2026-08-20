@@ -12,6 +12,10 @@ type Props = {
   config: any;
 };
 
+/* =========================================================
+   GET VALUE
+========================================================= */
+
 function getValue(obj: any, path: string) {
   return path.split(".").reduce((current, key) => {
     if (current == null) return "";
@@ -23,6 +27,10 @@ function getValue(obj: any, path: string) {
     return current[key];
   }, obj);
 }
+
+/* =========================================================
+   SET VALUE
+========================================================= */
 
 function setValue(obj: any, path: string, value: any) {
   const clone = structuredClone(obj);
@@ -50,6 +58,10 @@ function setValue(obj: any, path: string, value: any) {
   return clone;
 }
 
+/* =========================================================
+   COMPONENT
+========================================================= */
+
 export default function SectionFormContent({
   data,
   config,
@@ -57,35 +69,90 @@ export default function SectionFormContent({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  /*
-   * =========================
-   * LANGUAGE
-   * =========================
-   */
+  /* =========================================================
+     LANGUAGE
+  ========================================================= */
 
   const lang = searchParams.get("lang") || "id";
 
   const returnUrl = `/admin/pages?lang=${lang}`;
 
-  /*
-   * =========================
-   * FORM STATE
-   * =========================
-   */
+  /* =========================================================
+     FORM STATE
+  ========================================================= */
 
   const [form, setForm] = useState(data);
 
   const [loading, setLoading] = useState(false);
 
-  const [preview, setPreview] = useState<
-    Record<string, string>
-  >({});
+  /* =========================================================
+     IMAGE PREVIEW
+  ========================================================= */
 
-  /*
-   * =========================
-   * LOAD IMAGE PREVIEW
-   * =========================
-   */
+  const [preview, setPreview] = useState<Record<string, string>>(
+    {}
+  );
+
+  /* =========================================================
+     PRODUCTS
+  ========================================================= */
+
+  const [products, setProducts] = useState<any[]>([]);
+
+  const [productSearch, setProductSearch] = useState("");
+
+  const [productsLoading, setProductsLoading] = useState(false);
+
+  /* =========================================================
+     LOAD PRODUCTS
+  ========================================================= */
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        setProductsLoading(true);
+
+        const res = await fetch(
+          `/api/wordpress/products?lang=${lang}&per_page=100`,
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Gagal mengambil produk");
+        }
+
+        const result = await res.json();
+
+        /*
+         * API bisa saja mengembalikan:
+         * - array langsung
+         * - { data: [] }
+         */
+
+        const productList = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.data)
+          ? result.data
+          : [];
+
+        setProducts(productList);
+      } catch (error) {
+        console.error("LOAD PRODUCTS ERROR:", error);
+
+        toast.error("Gagal mengambil daftar produk");
+      } finally {
+        setProductsLoading(false);
+      }
+    }
+
+    loadProducts();
+  }, [lang]);
+
+  /* =========================================================
+     LOAD IMAGE PREVIEW
+  ========================================================= */
 
   useEffect(() => {
     async function loadImages() {
@@ -100,27 +167,17 @@ export default function SectionFormContent({
           continue;
         }
 
-        /*
-         * =========================
-         * BRAND LIST
-         * =========================
-         */
+        /* =====================================================
+           BRAND LIST
+        ===================================================== */
 
         if (field.type === "brand-list") {
-          const brands =
-            getValue(data, field.name) ?? [];
+          const brands = getValue(data, field.name) ?? [];
 
-          console.log("BRANDS");
-          console.log(brands);
-          console.log(typeof brands);
-          console.log(Array.isArray(brands));
+          if (!Array.isArray(brands)) continue;
 
-          for (
-            let i = 0;
-            i < brands.length;
-            i++
-          ) {
-            const logoId = brands[i].logo;
+          for (let i = 0; i < brands.length; i++) {
+            const logoId = brands[i]?.logo;
 
             if (!logoId) continue;
 
@@ -132,9 +189,8 @@ export default function SectionFormContent({
               const result = await res.json();
 
               if (result?.source_url) {
-                images[
-                  `${field.name}.${i}.logo`
-                ] = result.source_url;
+                images[`${field.name}.${i}.logo`] =
+                  result.source_url;
               }
             } catch (err) {
               console.error(err);
@@ -144,29 +200,17 @@ export default function SectionFormContent({
           continue;
         }
 
-        /*
-         * =========================
-         * SOCIAL MEDIA LIST
-         * =========================
-         */
+        /* =====================================================
+           SOCIAL MEDIA LIST
+        ===================================================== */
 
-        if (
-          field.type === "social-media-list"
-        ) {
-          const socials =
-            getValue(data, field.name) ?? [];
+        if (field.type === "social-media-list") {
+          const socials = getValue(data, field.name) ?? [];
 
-          console.log("SOCIALS");
-          console.log(socials);
-          console.log(typeof socials);
-          console.log(Array.isArray(socials));
+          if (!Array.isArray(socials)) continue;
 
-          for (
-            let i = 0;
-            i < socials.length;
-            i++
-          ) {
-            const logoId = socials[i].logo;
+          for (let i = 0; i < socials.length; i++) {
+            const logoId = socials[i]?.logo;
 
             if (!logoId) continue;
 
@@ -178,9 +222,8 @@ export default function SectionFormContent({
               const result = await res.json();
 
               if (result?.source_url) {
-                images[
-                  `${field.name}.${i}.logo`
-                ] = result.source_url;
+                images[`${field.name}.${i}.logo`] =
+                  result.source_url;
               }
             } catch (err) {
               console.error(err);
@@ -190,16 +233,11 @@ export default function SectionFormContent({
           continue;
         }
 
-        /*
-         * =========================
-         * SINGLE IMAGE
-         * =========================
-         */
+        /* =====================================================
+           SINGLE IMAGE
+        ===================================================== */
 
-        const id = getValue(
-          data,
-          field.name
-        );
+        const id = getValue(data, field.name);
 
         if (!id) continue;
 
@@ -211,8 +249,7 @@ export default function SectionFormContent({
           const result = await res.json();
 
           if (result?.source_url) {
-            images[field.name] =
-              result.source_url;
+            images[field.name] = result.source_url;
           }
         } catch (err) {
           console.error(err);
@@ -225,15 +262,11 @@ export default function SectionFormContent({
     loadImages();
   }, [config.fields, data]);
 
-  /*
-   * =========================
-   * SUBMIT
-   * =========================
-   */
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
 
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     try {
@@ -245,8 +278,7 @@ export default function SectionFormContent({
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
 
           body: JSON.stringify({
@@ -266,39 +298,31 @@ export default function SectionFormContent({
 
       const result = await res.json();
 
-      if (
-        !res.ok ||
-        result.success === false
-      ) {
+      if (!res.ok || result.success === false) {
         throw new Error(
-          result.message ||
-            "Gagal menyimpan"
+          result.message || "Gagal menyimpan"
         );
       }
 
       toast.success(
-        result.message ??
-          "Berhasil diperbarui"
+        result.message ?? "Berhasil diperbarui"
       );
 
       router.push(returnUrl);
     } catch (err: any) {
-      console.error(err);
+      console.error("SAVE SECTION ERROR:", err);
 
       toast.error(
-        err.message ??
-          "Gagal menyimpan"
+        err.message ?? "Gagal menyimpan"
       );
     } finally {
       setLoading(false);
     }
   }
 
-  /*
-   * =========================
-   * RENDER FIELD
-   * =========================
-   */
+  /* =========================================================
+     RENDER FIELD
+  ========================================================= */
 
   function renderField(field: any) {
     const rawValue = getValue(
@@ -308,9 +332,14 @@ export default function SectionFormContent({
 
     let value = rawValue ?? "";
 
+    /* =======================================================
+       NORMALIZE ARRAY FIELDS
+    ======================================================= */
+
     if (
       field.type === "brand-list" ||
-      field.type === "social-media-list"
+      field.type === "social-media-list" ||
+      field.type === "post_object"
     ) {
       try {
         if (typeof value === "string") {
@@ -320,16 +349,18 @@ export default function SectionFormContent({
         }
 
         if (!Array.isArray(value)) {
-          value = [];
+          value = value ? [value] : [];
         }
       } catch {
         value = [];
       }
     }
 
-    const update = (
-      newValue: any
-    ) => {
+    /* =======================================================
+       UPDATE
+    ======================================================= */
+
+    const update = (newValue: any) => {
       setForm(
         setValue(
           form,
@@ -339,13 +370,11 @@ export default function SectionFormContent({
       );
     };
 
-    switch (field.type) {
-      /*
-       * =========================
-       * TEXTAREA
-       * =========================
-       */
+    /* =========================================================
+       TEXTAREA
+    ========================================================= */
 
+    switch (field.type) {
       case "textarea":
       case "wysiwyg":
         return (
@@ -360,17 +389,14 @@ export default function SectionFormContent({
             />
 
             <p className="mt-2 text-right text-xs text-muted-foreground">
-              {String(value).length}{" "}
-              karakter
+              {String(value).length} karakter
             </p>
           </>
         );
 
-      /*
-       * =========================
-       * LINK
-       * =========================
-       */
+      /* =======================================================
+         LINK
+      ======================================================= */
 
       case "link":
         return (
@@ -384,11 +410,9 @@ export default function SectionFormContent({
           />
         );
 
-      /*
-       * =========================
-       * IMAGE
-       * =========================
-       */
+      /* =======================================================
+         IMAGE
+      ======================================================= */
 
       case "image":
         return (
@@ -463,9 +487,7 @@ export default function SectionFormContent({
 
             {preview[field.name] && (
               <Image
-                src={
-                  preview[field.name]
-                }
+                src={preview[field.name]}
                 alt=""
                 width={800}
                 height={450}
@@ -476,29 +498,23 @@ export default function SectionFormContent({
           </div>
         );
 
-      /*
-       * =========================
-       * ICON PICKER
-       * =========================
-       */
+      /* =======================================================
+         ICON PICKER
+      ======================================================= */
 
       case "icon":
         return (
           <IconPicker
-            value={String(
-              value ?? ""
-            )}
+            value={String(value ?? "")}
             onChange={(newValue) =>
               update(newValue)
             }
           />
         );
 
-      /*
-       * =========================
-       * SELECT
-       * =========================
-       */
+      /* =======================================================
+         SELECT
+      ======================================================= */
 
       case "select":
         return (
@@ -526,11 +542,314 @@ export default function SectionFormContent({
           </select>
         );
 
-      /*
-       * =========================
-       * BRAND LIST
-       * =========================
-       */
+      /* =======================================================
+         POST OBJECT
+         
+         Digunakan untuk:
+         product_showcase_products
+      ======================================================= */
+
+      case "post_object": {
+        const selectedIds = Array.isArray(value)
+          ? value.map(Number)
+          : [];
+
+        const filteredProducts =
+          products.filter((product) => {
+            const title =
+              product?.title?.rendered ??
+              product?.title ??
+              "";
+
+            const model =
+              product?.acf?.model_produk ??
+              "";
+
+            const search =
+              productSearch
+                .trim()
+                .toLowerCase();
+
+            if (!search) return true;
+
+            return (
+              String(title)
+                .toLowerCase()
+                .includes(search) ||
+              String(model)
+                .toLowerCase()
+                .includes(search)
+            );
+          });
+
+        function toggleProduct(productId: number) {
+          if (selectedIds.includes(productId)) {
+            update(
+              selectedIds.filter(
+                (id) => id !== productId
+              )
+            );
+
+            return;
+          }
+
+          update([
+            ...selectedIds,
+            productId,
+          ]);
+        }
+
+        function removeProduct(productId: number) {
+          update(
+            selectedIds.filter(
+              (id) => id !== productId
+            )
+          );
+        }
+
+        return (
+          <div className="space-y-4">
+            {/* =================================================
+                SELECTED PRODUCTS
+            ================================================= */}
+
+            <div>
+              <p className="mb-2 text-sm font-medium">
+                Produk Terpilih
+              </p>
+
+              {selectedIds.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                  Belum ada produk yang dipilih.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedIds.map(
+                    (productId, index) => {
+                      const product =
+                        products.find(
+                          (item) =>
+                            Number(item.id) ===
+                            Number(productId)
+                        );
+
+                      if (!product) {
+                        return (
+                          <div
+                            key={productId}
+                            className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3"
+                          >
+                            <div>
+                              <span className="mr-2 text-xs text-muted-foreground">
+                                #{index + 1}
+                              </span>
+
+                              <span>
+                                Product ID{" "}
+                                {productId}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeProduct(
+                                  productId
+                                )
+                              }
+                              className="text-sm font-medium text-red-500 hover:text-red-700"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      const title =
+                        product?.title
+                          ?.rendered ??
+                        product?.title ??
+                        `Product ${productId}`;
+
+                      return (
+                        <div
+                          key={productId}
+                          className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3"
+                        >
+                          <div className="min-w-0">
+                            <span className="mr-2 text-xs text-muted-foreground">
+                              #{index + 1}
+                            </span>
+
+                            <span className="font-medium">
+                              {title}
+                            </span>
+
+                            {product
+                              ?.acf
+                              ?.model_produk && (
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                (
+                                {
+                                  product
+                                    .acf
+                                    .model_produk
+                                }
+                                )
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeProduct(
+                                productId
+                              )
+                            }
+                            className="ml-4 shrink-0 text-sm font-medium text-red-500 hover:text-red-700"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* =================================================
+                SEARCH
+            ================================================= */}
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Cari Produk
+              </label>
+
+              <input
+                type="text"
+                value={productSearch}
+                onChange={(e) =>
+                  setProductSearch(
+                    e.target.value
+                  )
+                }
+                placeholder="Cari berdasarkan nama atau model produk..."
+                className="w-full rounded-lg border px-4 py-3"
+              />
+            </div>
+
+            {/* =================================================
+                PRODUCT LIST
+            ================================================= */}
+
+            <div>
+              <p className="mb-2 text-sm font-medium">
+                Daftar Produk
+              </p>
+
+              {productsLoading ? (
+                <div className="rounded-lg border p-5 text-center text-sm text-muted-foreground">
+                  Memuat produk...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
+                  Tidak ada produk.
+                </div>
+              ) : filteredProducts.length ===
+                0 ? (
+                <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
+                  Produk tidak ditemukan.
+                </div>
+              ) : (
+                <div className="max-h-[500px] space-y-2 overflow-y-auto rounded-lg border p-3">
+                  {filteredProducts.map(
+                    (product) => {
+                      const productId =
+                        Number(product.id);
+
+                      const selected =
+                        selectedIds.includes(
+                          productId
+                        );
+
+                      const title =
+                        product?.title
+                          ?.rendered ??
+                        product?.title ??
+                        `Product ${productId}`;
+
+                      const model =
+                        product?.acf
+                          ?.model_produk ??
+                        "";
+
+                      return (
+                        <button
+                          key={productId}
+                          type="button"
+                          onClick={() =>
+                            toggleProduct(
+                              productId
+                            )
+                          }
+                          className={`flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition ${
+                            selected
+                              ? "border-primary bg-primary/10"
+                              : "border-border hover:bg-muted"
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <div className="font-medium">
+                              {title}
+                            </div>
+
+                            {model && (
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                Model: {model}
+                              </div>
+                            )}
+                          </div>
+
+                          <div
+                            className={`ml-4 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                              selected
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border"
+                            }`}
+                          >
+                            {selected && (
+                              <span className="text-xs">
+                                ✓
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* =================================================
+                INFO
+            ================================================= */}
+
+            <p className="text-xs text-muted-foreground">
+              Pilih produk sesuai urutan yang ingin
+              ditampilkan. Produk yang dipilih tidak
+              otomatis berdasarkan tanggal terbaru.
+            </p>
+          </div>
+        );
+      }
+
+      /* =======================================================
+         BRAND LIST
+      ======================================================= */
 
       case "brand-list":
         return (
@@ -645,6 +964,7 @@ export default function SectionFormContent({
                         width={150}
                         height={80}
                         className="h-20 w-auto object-contain"
+                        unoptimized
                       />
                     )}
                   </div>
@@ -741,8 +1061,7 @@ export default function SectionFormContent({
                   {
                     logo: "",
                     name: "",
-                    description:
-                      "",
+                    description: "",
                   },
                 ]);
               }}
@@ -752,11 +1071,9 @@ export default function SectionFormContent({
           </div>
         );
 
-      /*
-       * =========================
-       * SOCIAL MEDIA LIST
-       * =========================
-       */
+      /* =======================================================
+         SOCIAL MEDIA LIST
+      ======================================================= */
 
       case "social-media-list":
         return (
@@ -947,11 +1264,9 @@ export default function SectionFormContent({
           </div>
         );
 
-      /*
-       * =========================
-       * TRUE / FALSE
-       * =========================
-       */
+      /* =======================================================
+         TRUE / FALSE
+      ======================================================= */
 
       case "true_false":
         return (
@@ -967,17 +1282,13 @@ export default function SectionFormContent({
               className="h-5 w-5 rounded border"
             />
 
-            <span>
-              Required
-            </span>
+            <span>Required</span>
           </label>
         );
 
-      /*
-       * =========================
-       * DEFAULT
-       * =========================
-       */
+      /* =======================================================
+         DEFAULT
+      ======================================================= */
 
       default:
         return (
@@ -993,11 +1304,9 @@ export default function SectionFormContent({
     }
   }
 
-  /*
-   * =========================
-   * RENDER FORM
-   * =========================
-   */
+  /* =========================================================
+     RENDER FORM
+  ========================================================= */
 
   return (
     <form onSubmit={handleSubmit}>
@@ -1027,6 +1336,10 @@ export default function SectionFormContent({
             )}
         </div>
       </div>
+
+      {/* =====================================================
+          BUTTONS
+      ===================================================== */}
 
       <div className="mt-6 flex justify-end gap-3">
         <button
