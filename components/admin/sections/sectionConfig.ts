@@ -1,60 +1,10 @@
-const iconOptions = [
-  {
-    value: "Zap",
-    label: "Zap",
-  },
-  {
-    value: "Settings",
-    label: "Settings",
-  },
-  {
-    value: "Grid3X3",
-    label: "Grid 3x3",
-  },
-  {
-    value: "Lightbulb",
-    label: "Lightbulb",
-  },
-  {
-    value: "Shield",
-    label: "Shield",
-  },
-  {
-    value: "Sparkles",
-    label: "Sparkles",
-  },
-  {
-    value: "Users",
-    label: "Users",
-  },
-  {
-    value: "Monitor",
-    label: "Monitor",
-  },
-  {
-    value: "Cpu",
-    label: "CPU",
-  },
-  {
-    value: "Globe",
-    label: "Globe",
-  },
-  {
-    value: "Building2",
-    label: "Building",
-  },
-  {
-    value: "Handshake",
-    label: "Handshake",
-  },
-];
-
 export const homeSectionConfig = {
   hero: {
     id: {
       en: 157,
       id: 558,
     },
+
     title: "Hero Section",
 
     fields: [
@@ -181,9 +131,8 @@ export const homeSectionConfig = {
       {
         name: "services.0.icon",
         label: "Service 1 Icon",
-        type: "select",
+        type: "icon",
         acf: "service_1_icon",
-        options: iconOptions,
       },
       {
         name: "services.0.title",
@@ -207,9 +156,8 @@ export const homeSectionConfig = {
       {
         name: "services.1.icon",
         label: "Service 2 Icon",
-        type: "select",
+        type: "icon",
         acf: "service_2_icon",
-        options: iconOptions,
       },
       {
         name: "services.1.title",
@@ -233,9 +181,8 @@ export const homeSectionConfig = {
       {
         name: "services.2.icon",
         label: "Service 3 Icon",
-        type: "select",
+        type: "icon",
         acf: "service_3_icon",
-        options: iconOptions,
       },
       {
         name: "services.2.title",
@@ -259,9 +206,8 @@ export const homeSectionConfig = {
       {
         name: "services.3.icon",
         label: "Service 4 Icon",
-        type: "select",
+        type: "icon",
         acf: "service_4_icon",
-        options: iconOptions,
       },
       {
         name: "services.3.title",
@@ -682,9 +628,8 @@ export const aboutSectionConfig = {
       {
         name: "values.0.icon",
         label: "Value 1 Icon",
-        type: "select",
+        type: "icon",
         acf: "about_value_1_icon",
-        options: iconOptions,
       },
       {
         name: "values.0.title",
@@ -702,9 +647,8 @@ export const aboutSectionConfig = {
       {
         name: "values.1.icon",
         label: "Value 2 Icon",
-        type: "select",
+        type: "icon",
         acf: "about_value_2_icon",
-        options: iconOptions,
       },
       {
         name: "values.1.title",
@@ -722,9 +666,8 @@ export const aboutSectionConfig = {
       {
         name: "values.2.icon",
         label: "Value 3 Icon",
-        type: "select",
+        type: "icon",
         acf: "about_value_3_icon",
-        options: iconOptions,
       },
       {
         name: "values.2.title",
@@ -1214,6 +1157,7 @@ export const footerSectionConfig = {
       en: 212,
       id: 599,
     },
+
     title: "Footer Section",
 
     fields: [
@@ -1294,18 +1238,21 @@ export const footerSectionConfig = {
         label: "Email",
         type: "text",
       },
+
       {
         name: "image_logo_width",
         acf: "image_logo_width",
         label: "Footer Logo Width",
         type: "number",
       },
+
       {
         name: "image_logo_height",
         acf: "image_logo_height",
         label: "Footer Logo Height",
         type: "number",
       },
+
       {
         name: "social_media_list",
         acf: "social_media_list",
@@ -1322,6 +1269,7 @@ export const productsSectionConfig = {
       en: 485,
       id: 566,
     },
+
     title: "Products Hero",
 
     fields: [
@@ -1353,6 +1301,7 @@ export const newsSectionConfig = {
       en: 487,
       id: 564,
     },
+
     title: "News Hero",
 
     fields: [
@@ -1376,4 +1325,4 @@ export const newsSectionConfig = {
       },
     ],
   },
-};
+} as const;
