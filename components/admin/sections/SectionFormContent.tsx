@@ -59,6 +59,62 @@ function setValue(obj: any, path: string, value: any) {
 }
 
 /* =========================================================
+   POST OBJECT HELPERS
+========================================================= */
+
+const DEFAULT_POST_SOURCE = {
+  endpoint: "/api/wordpress/products",
+  titleField: "title",
+  subtitleField: "model_produk",
+  searchFields: ["title", "model_produk"],
+};
+
+function getPostSource(field: any) {
+  return field.postSource ?? DEFAULT_POST_SOURCE;
+}
+
+function getItemTitle(item: any, source: any) {
+  const titleField = source?.titleField ?? "title";
+
+  const raw = item?.[titleField];
+
+  if (raw && typeof raw === "object" && "rendered" in raw) {
+    return raw.rendered;
+  }
+
+  return raw ?? item?.acf?.nama_produk ?? `Item ${item?.id}`;
+}
+
+function getItemSubtitle(item: any, source: any) {
+  if (!source?.subtitleField) return "";
+
+  const raw =
+    item?.acf?.[source.subtitleField] ??
+    item?.[source.subtitleField] ??
+    "";
+
+  if (raw && typeof raw === "object" && "rendered" in raw) {
+    return raw.rendered;
+  }
+
+  return raw;
+}
+
+function matchesPostSearch(item: any, source: any, search: string) {
+  if (!search) return true;
+
+  const query = search.toLowerCase();
+
+  const fields = source?.searchFields ?? [source?.titleField ?? "title"];
+
+  return fields.some((f: string) => {
+    const val = item?.acf?.[f] ?? item?.[f] ?? "";
+
+    return String(val).toLowerCase().includes(query);
+  });
+}
+
+/* =========================================================
    COMPONENT
 ========================================================= */
 
@@ -94,61 +150,84 @@ export default function SectionFormContent({
   );
 
   /* =========================================================
-     PRODUCTS
+     POST OBJECT (products, articles, dll)
   ========================================================= */
 
-  const [products, setProducts] = useState<any[]>([]);
+  const [postObjectItems, setPostObjectItems] = useState<
+    Record<string, any[]>
+  >({});
 
-  const [productSearch, setProductSearch] = useState("");
+  const [postObjectLoading, setPostObjectLoading] = useState<
+    Record<string, boolean>
+  >({});
 
-  const [productsLoading, setProductsLoading] = useState(false);
+  const [postObjectSearch, setPostObjectSearch] = useState<
+    Record<string, string>
+  >({});
 
   /* =========================================================
-     LOAD PRODUCTS
+     LOAD POST OBJECT FIELDS
   ========================================================= */
 
   useEffect(() => {
-    async function loadProducts() {
-      try {
-        setProductsLoading(true);
+    async function loadPostObjectFields() {
+      const postObjectFields = config.fields.filter(
+        (f: any) => f.type === "post_object"
+      );
 
-        const res = await fetch(
-          `/api/wordpress/products?lang=${lang}&per_page=100`,
-          {
-            cache: "no-store",
+      for (const field of postObjectFields) {
+        const source = getPostSource(field);
+
+        setPostObjectLoading((prev) => ({
+          ...prev,
+          [field.name]: true,
+        }));
+
+        try {
+          const res = await fetch(
+            `${source.endpoint}?lang=${lang}&per_page=100`,
+            {
+              cache: "no-store",
+            }
+          );
+
+          if (!res.ok) {
+            throw new Error("Gagal mengambil data");
           }
-        );
 
-        if (!res.ok) {
-          throw new Error("Gagal mengambil produk");
+          const result = await res.json();
+
+          const list = Array.isArray(result)
+            ? result
+            : Array.isArray(result?.data)
+            ? result.data
+            : [];
+
+          setPostObjectItems((prev) => ({
+            ...prev,
+            [field.name]: list,
+          }));
+        } catch (error) {
+          console.error(
+            "LOAD POST OBJECT ERROR:",
+            field.name,
+            error
+          );
+
+          toast.error(
+            `Gagal mengambil daftar untuk ${field.label}`
+          );
+        } finally {
+          setPostObjectLoading((prev) => ({
+            ...prev,
+            [field.name]: false,
+          }));
         }
-
-        const result = await res.json();
-
-        /*
-         * API bisa saja mengembalikan:
-         * - array langsung
-         * - { data: [] }
-         */
-
-        const productList = Array.isArray(result)
-          ? result
-          : Array.isArray(result?.data)
-          ? result.data
-          : [];
-
-        setProducts(productList);
-      } catch (error) {
-        console.error("LOAD PRODUCTS ERROR:", error);
-
-        toast.error("Gagal mengambil daftar produk");
-      } finally {
-        setProductsLoading(false);
       }
     }
 
-    loadProducts();
-  }, [lang]);
+    loadPostObjectFields();
+  }, [lang, config.fields]);
 
   /* =========================================================
      LOAD IMAGE PREVIEW
@@ -550,59 +629,42 @@ export default function SectionFormContent({
       ======================================================= */
 
       case "post_object": {
+        const source = getPostSource(field);
+
+        const items = postObjectItems[field.name] ?? [];
+
+        const isLoading = Boolean(
+          postObjectLoading[field.name]
+        );
+
+        const search = postObjectSearch[field.name] ?? "";
+
         const selectedIds = Array.isArray(value)
           ? value.map(Number)
           : [];
 
-        const filteredProducts =
-          products.filter((product) => {
-            const title =
-              product?.title?.rendered ??
-              product?.title ??
-              "";
+        const filteredItems = items.filter((item) =>
+          matchesPostSearch(item, source, search.trim().toLowerCase())
+        );
 
-            const model =
-              product?.acf?.model_produk ??
-              "";
-
-            const search =
-              productSearch
-                .trim()
-                .toLowerCase();
-
-            if (!search) return true;
-
-            return (
-              String(title)
-                .toLowerCase()
-                .includes(search) ||
-              String(model)
-                .toLowerCase()
-                .includes(search)
-            );
-          });
-
-        function toggleProduct(productId: number) {
-          if (selectedIds.includes(productId)) {
+        function toggleItem(itemId: number) {
+          if (selectedIds.includes(itemId)) {
             update(
               selectedIds.filter(
-                (id) => id !== productId
+                (id) => id !== itemId
               )
             );
 
             return;
           }
 
-          update([
-            ...selectedIds,
-            productId,
-          ]);
+          update([...selectedIds, itemId]);
         }
 
-        function removeProduct(productId: number) {
+        function removeItem(itemId: number) {
           update(
             selectedIds.filter(
-              (id) => id !== productId
+              (id) => id !== itemId
             )
           );
         }
@@ -610,33 +672,32 @@ export default function SectionFormContent({
         return (
           <div className="space-y-4">
             {/* =================================================
-                SELECTED PRODUCTS
+                SELECTED ITEMS
             ================================================= */}
 
             <div>
               <p className="mb-2 text-sm font-medium">
-                Produk Terpilih
+                {field.selectedLabel ?? "Item Terpilih"}
               </p>
 
               {selectedIds.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  Belum ada produk yang dipilih.
+                  Belum ada yang dipilih.
                 </div>
               ) : (
                 <div className="space-y-2">
                   {selectedIds.map(
-                    (productId, index) => {
-                      const product =
-                        products.find(
-                          (item) =>
-                            Number(item.id) ===
-                            Number(productId)
-                        );
+                    (itemId, index) => {
+                      const item = items.find(
+                        (it) =>
+                          Number(it.id) ===
+                          Number(itemId)
+                      );
 
-                      if (!product) {
+                      if (!item) {
                         return (
                           <div
-                            key={productId}
+                            key={itemId}
                             className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3"
                           >
                             <div>
@@ -645,16 +706,15 @@ export default function SectionFormContent({
                               </span>
 
                               <span>
-                                Product ID{" "}
-                                {productId}
+                                ID {itemId}
                               </span>
                             </div>
 
                             <button
                               type="button"
                               onClick={() =>
-                                removeProduct(
-                                  productId
+                                removeItem(
+                                  itemId
                                 )
                               }
                               className="text-sm font-medium text-red-500 hover:text-red-700"
@@ -665,15 +725,20 @@ export default function SectionFormContent({
                         );
                       }
 
-                      const title =
-                        product?.title
-                          ?.rendered ??
-                        product?.title ??
-                        `Product ${productId}`;
+                      const title = getItemTitle(
+                        item,
+                        source
+                      );
+
+                      const subtitle =
+                        getItemSubtitle(
+                          item,
+                          source
+                        );
 
                       return (
                         <div
-                          key={productId}
+                          key={itemId}
                           className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3"
                         >
                           <div className="min-w-0">
@@ -685,17 +750,9 @@ export default function SectionFormContent({
                               {title}
                             </span>
 
-                            {product
-                              ?.acf
-                              ?.model_produk && (
+                            {subtitle && (
                               <span className="ml-2 text-xs text-muted-foreground">
-                                (
-                                {
-                                  product
-                                    .acf
-                                    .model_produk
-                                }
-                                )
+                                ({subtitle})
                               </span>
                             )}
                           </div>
@@ -703,8 +760,8 @@ export default function SectionFormContent({
                           <button
                             type="button"
                             onClick={() =>
-                              removeProduct(
-                                productId
+                              removeItem(
+                                itemId
                               )
                             }
                             className="ml-4 shrink-0 text-sm font-medium text-red-500 hover:text-red-700"
@@ -725,74 +782,78 @@ export default function SectionFormContent({
 
             <div>
               <label className="mb-2 block text-sm font-medium">
-                Cari Produk
+                {field.searchLabel ?? "Cari"}
               </label>
 
               <input
                 type="text"
-                value={productSearch}
+                value={search}
                 onChange={(e) =>
-                  setProductSearch(
-                    e.target.value
-                  )
+                  setPostObjectSearch((prev) => ({
+                    ...prev,
+                    [field.name]: e.target.value,
+                  }))
                 }
-                placeholder="Cari berdasarkan nama atau model produk..."
+                placeholder={
+                  field.searchPlaceholder ??
+                  "Cari berdasarkan judul..."
+                }
                 className="w-full rounded-lg border px-4 py-3"
               />
             </div>
 
             {/* =================================================
-                PRODUCT LIST
+                LIST
             ================================================= */}
 
             <div>
               <p className="mb-2 text-sm font-medium">
-                Daftar Produk
+                {field.listLabel ?? "Daftar"}
               </p>
 
-              {productsLoading ? (
+              {isLoading ? (
                 <div className="rounded-lg border p-5 text-center text-sm text-muted-foreground">
-                  Memuat produk...
+                  Memuat data...
                 </div>
-              ) : products.length === 0 ? (
+              ) : items.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
-                  Tidak ada produk.
+                  Tidak ada data.
                 </div>
-              ) : filteredProducts.length ===
+              ) : filteredItems.length ===
                 0 ? (
                 <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
-                  Produk tidak ditemukan.
+                  Tidak ditemukan.
                 </div>
               ) : (
                 <div className="max-h-[500px] space-y-2 overflow-y-auto rounded-lg border p-3">
-                  {filteredProducts.map(
-                    (product) => {
-                      const productId =
-                        Number(product.id);
+                  {filteredItems.map(
+                    (item) => {
+                      const itemId =
+                        Number(item.id);
 
                       const selected =
                         selectedIds.includes(
-                          productId
+                          itemId
                         );
 
-                      const title =
-                        product?.title
-                          ?.rendered ??
-                        product?.title ??
-                        `Product ${productId}`;
+                      const title = getItemTitle(
+                        item,
+                        source
+                      );
 
-                      const model =
-                        product?.acf
-                          ?.model_produk ??
-                        "";
+                      const subtitle =
+                        getItemSubtitle(
+                          item,
+                          source
+                        );
 
                       return (
                         <button
-                          key={productId}
+                          key={itemId}
                           type="button"
                           onClick={() =>
-                            toggleProduct(
-                              productId
+                            toggleItem(
+                              itemId
                             )
                           }
                           className={`flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition ${
@@ -802,13 +863,13 @@ export default function SectionFormContent({
                           }`}
                         >
                           <div className="min-w-0">
-                            <div className="font-medium">
+                            <div className="line-clamp-1 font-medium">
                               {title}
                             </div>
 
-                            {model && (
-                              <div className="mt-1 text-xs text-muted-foreground">
-                                Model: {model}
+                            {subtitle && (
+                              <div className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                                {subtitle}
                               </div>
                             )}
                           </div>
@@ -839,9 +900,8 @@ export default function SectionFormContent({
             ================================================= */}
 
             <p className="text-xs text-muted-foreground">
-              Pilih produk sesuai urutan yang ingin
-              ditampilkan. Produk yang dipilih tidak
-              otomatis berdasarkan tanggal terbaru.
+              {field.helperText ??
+                "Pilih item sesuai urutan yang ingin ditampilkan."}
             </p>
           </div>
         );
@@ -1282,7 +1342,9 @@ export default function SectionFormContent({
               className="h-5 w-5 rounded border"
             />
 
-            <span>Required</span>
+            <span>
+              {field.checkboxLabel ?? field.label}
+            </span>
           </label>
         );
 

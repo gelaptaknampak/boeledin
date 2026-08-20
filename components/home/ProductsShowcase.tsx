@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslation } from "@/hooks/useTranslation";
-import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Props = {
   data: any;
 };
+
+const WORDPRESS_URL = "https://wp.boeledin.com";
 
 export default function ProductsShowcase({ data }: Props) {
   const { language } = useTranslation();
@@ -15,83 +17,162 @@ export default function ProductsShowcase({ data }: Props) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [brandFilter, setBrandFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  /*
+   * =========================================================
+   * HEADER DATA
+   * =========================================================
+   */
 
-  const [brands, setBrands] = useState<any[]>([]);
-  const [productTypes, setProductTypes] = useState<any[]>([]);
+  const eyebrow =
+    data?.product_eyebrow ??
+    data?.eyebrow ??
+    "";
+
+  const title =
+    data?.product_title ??
+    data?.title ??
+    "";
+
+  const description =
+    data?.product_description ??
+    data?.description ??
+    "";
 
   /*
    * =========================================================
-   * SELECTED PRODUCT IDS
+   * RAW PRODUCT IDS FROM CMS
    * =========================================================
    *
-   * ACF Post Object -> Return Format: Post ID
-   *
-   * Example:
-   * data.products = [123, 456, 789]
-   *
+   * page.tsx meneruskan data.products = array ID
+   * yang berasal dari ACF field product_showcase_products.
+   */
+
+  const rawProducts = useMemo(() => {
+    return (
+      data?.products ??
+      data?.selected_products ??
+      data?.product_showcase_products ??
+      data?.acf?.products ??
+      data?.acf?.selected_products ??
+      data?.acf?.product_showcase_products ??
+      []
+    );
+  }, [data]);
+
+  /*
+   * =========================================================
+   * NORMALIZE PRODUCT IDS
+   * =========================================================
    */
 
   const selectedProductIds = useMemo(() => {
-    const value = data?.products;
-
-    if (!value) {
+    if (
+      rawProducts === null ||
+      rawProducts === undefined ||
+      rawProducts === ""
+    ) {
       return [];
     }
 
-    if (Array.isArray(value)) {
-      return value
-        .map((item) => {
-          if (typeof item === "number") {
-            return item;
-          }
+    const normalizeId = (item: any): number | null => {
+      if (typeof item === "number") {
+        return item > 0 ? item : null;
+      }
 
-          if (typeof item === "string") {
-            const id = Number(item);
-            return Number.isNaN(id) ? null : id;
-          }
+      if (typeof item === "string") {
+        const trimmed = item.trim();
 
-          // Fallback jika ACF ternyata mengembalikan object
-          if (item && typeof item === "object") {
-            return Number(item.id);
-          }
-
+        if (!trimmed) {
           return null;
-        })
-        .filter(
-          (id): id is number =>
-            typeof id === "number" &&
-            !Number.isNaN(id) &&
-            id > 0
-        );
+        }
+
+        const id = Number(trimmed);
+
+        return Number.isFinite(id) && id > 0 ? id : null;
+      }
+
+      if (item && typeof item === "object") {
+        const possibleId =
+          item.id ??
+          item.ID ??
+          item.value ??
+          item.post_id ??
+          item.postId;
+
+        const id = Number(possibleId);
+
+        if (Number.isFinite(id) && id > 0) {
+          return id;
+        }
+
+        if (item.post && typeof item.post === "object") {
+          const nestedId = Number(item.post.id ?? item.post.ID);
+
+          if (Number.isFinite(nestedId) && nestedId > 0) {
+            return nestedId;
+          }
+        }
+      }
+
+      return null;
+    };
+
+    if (Array.isArray(rawProducts)) {
+      return rawProducts
+        .map(normalizeId)
+        .filter((id): id is number => id !== null);
     }
 
-    if (typeof value === "number") {
-      return [value];
-    }
+    const id = normalizeId(rawProducts);
 
-    if (typeof value === "string") {
-      const id = Number(value);
-
-      return Number.isNaN(id) ? [] : [id];
-    }
-
-    return [];
-  }, [data?.products]);
+    return id !== null ? [id] : [];
+  }, [rawProducts]);
 
   /*
    * =========================================================
-   * FETCH DATA
+   * RESOLVE FEATURE IMAGE
    * =========================================================
+   *
+   * acf.feature_image tersimpan sebagai attachment ID
+   * (textarea, ID per baris/koma) karena ACF yang dipakai
+   * bukan versi Pro (tidak ada Gallery field).
+   *
+   * Resolve ID -> URL lewat endpoint media bawaan WordPress.
    */
 
-  useEffect(() => {
-    fetchSelectedProducts();
-    fetchBrands();
-    fetchProductTypes();
-  }, [language, selectedProductIds]);
+  async function resolveFeatureImages(product: any): Promise<string[]> {
+    const ids = String(product?.acf?.feature_image ?? "")
+      .split(/[\n,]+/)
+      .map((id: string) => id.trim())
+      .filter(Boolean);
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const urls = await Promise.all(
+      ids.map(async (id: string) => {
+        try {
+          const res = await fetch(
+            `${WORDPRESS_URL}/wp-json/wp/v2/media/${id}`,
+            { cache: "no-store" }
+          );
+
+          if (!res.ok) {
+            return null;
+          }
+
+          const media = await res.json();
+
+          return media?.source_url ?? null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    return urls.filter(Boolean) as string[];
+  }
 
   /*
    * =========================================================
@@ -99,275 +180,134 @@ export default function ProductsShowcase({ data }: Props) {
    * =========================================================
    */
 
-  async function fetchSelectedProducts() {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    let cancelled = false;
 
-      /*
-       * Tidak ada produk yang dipilih admin
-       */
+    async function fetchSelectedProducts() {
       if (selectedProductIds.length === 0) {
-        setProducts([]);
+        if (!cancelled) {
+          setProducts([]);
+          setLoading(false);
+        }
+
         return;
       }
 
-      /*
-       * WordPress REST API:
-       *
-       * ?include=123,456,789
-       *
-       * Hanya mengambil product yang dipilih.
-       */
-
-      const include = selectedProductIds.join(",");
-
-      const res = await fetch(
-        `https://wp.boeledin.com/wp-json/wp/v2/products?_embed&include=${include}&per_page=100&lang=${language}`,
-        {
-          cache: "no-store",
+      try {
+        if (!cancelled) {
+          setLoading(true);
         }
-      );
 
-      if (!res.ok) {
-        throw new Error(
-          "Gagal mengambil produk yang dipilih"
-        );
-      }
+        const include = selectedProductIds.join(",");
 
-      const result = await res.json();
+        const url =
+          `/api/wordpress/products` +
+          `?lang=${encodeURIComponent(language)}` +
+          `&include=${encodeURIComponent(include)}`;
 
-      /*
-       * WordPress kadang tidak menjamin urutan
-       * berdasarkan include.
-       *
-       * Jadi kita susun kembali sesuai urutan
-       * pilihan admin di ACF.
-       */
+        const res = await fetch(url, { cache: "no-store" });
 
-      const orderedProducts = selectedProductIds
-        .map((id) =>
-          result.find(
-            (product: any) =>
-              Number(product.id) === Number(id)
+        if (!res.ok) {
+          const errorText = await res.text();
+
+          console.error("PRODUCT SHOWCASE API ERROR:", errorText);
+
+          throw new Error(`Gagal mengambil produk (${res.status})`);
+        }
+
+        const result = await res.json();
+
+        if (!Array.isArray(result)) {
+          console.error(
+            "PRODUCT SHOWCASE: RESULT BUKAN ARRAY:",
+            result
+          );
+
+          if (!cancelled) {
+            setProducts([]);
+          }
+
+          return;
+        }
+
+        /*
+         * Susun ulang sesuai urutan yang dipilih di CMS.
+         */
+
+        const orderedProducts = selectedProductIds
+          .map((selectedId) =>
+            result.find(
+              (product: any) => Number(product?.id) === Number(selectedId)
+            )
           )
-        )
-        .filter(Boolean);
+          .filter(Boolean);
 
-      setProducts(orderedProducts);
-    } catch (error) {
-      console.error(
-        "FETCH SELECTED PRODUCTS ERROR:",
-        error
-      );
+        if (orderedProducts.length !== selectedProductIds.length) {
+          const foundIds = orderedProducts.map((product: any) =>
+            Number(product.id)
+          );
 
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }
+          const missingIds = selectedProductIds.filter(
+            (id) => !foundIds.includes(Number(id))
+          );
 
-  /*
-   * =========================================================
-   * FETCH BRANDS
-   * =========================================================
-   */
-
-  async function fetchBrands() {
-    try {
-      const res = await fetch(
-        `/api/wordpress/brands?lang=${language}`,
-        {
-          cache: "no-store",
+          console.warn("PRODUCT SHOWCASE: ID TIDAK DITEMUKAN:", missingIds);
         }
-      );
 
-      if (!res.ok) {
-        setBrands([]);
-        return;
-      }
+        /*
+         * Resolve gambar untuk tiap produk.
+         */
 
-      const result = await res.json();
+        const productsWithGallery = await Promise.all(
+          orderedProducts.map(async (product: any) => {
+            const gallery = await resolveFeatureImages(product);
 
-      setBrands(
-        Array.isArray(result)
-          ? result
-          : []
-      );
-    } catch (error) {
-      console.error(
-        "FETCH BRANDS ERROR:",
-        error
-      );
+            return {
+              ...product,
+              gallery,
+            };
+          })
+        );
 
-      setBrands([]);
-    }
-  }
-
-  /*
-   * =========================================================
-   * FETCH PRODUCT TYPES
-   * =========================================================
-   */
-
-  async function fetchProductTypes() {
-    try {
-      const res = await fetch(
-        `/api/wordpress/product-types?lang=${language}`,
-        {
-          cache: "no-store",
+        if (!cancelled) {
+          setProducts(productsWithGallery);
         }
-      );
+      } catch (error) {
+        console.error("PRODUCT SHOWCASE ERROR:", error);
 
-      if (!res.ok) {
-        setProductTypes([]);
-        return;
+        if (!cancelled) {
+          setProducts([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-
-      const result = await res.json();
-
-      setProductTypes(
-        Array.isArray(result)
-          ? result
-          : []
-      );
-    } catch (error) {
-      console.error(
-        "FETCH PRODUCT TYPES ERROR:",
-        error
-      );
-
-      setProductTypes([]);
     }
-  }
+
+    fetchSelectedProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, selectedProductIds]);
 
   /*
    * =========================================================
-   * GET BRAND
+   * BRAND / CATEGORY
    * =========================================================
-   */
-
-  function getBrand(product: any) {
-    return (
-      product?._embedded?.["wp:term"]
-        ?.flat()
-        ?.find(
-          (term: any) =>
-            term.taxonomy === "brand"
-        )?.slug ?? ""
-    );
-  }
-
-  /*
-   * =========================================================
-   * GET BRAND NAME
-   * =========================================================
+   *
+   * boeledin/v1/products mengembalikan brand & jenis_produk
+   * sebagai object top-level, bukan lewat _embedded["wp:term"].
    */
 
   function getBrandName(product: any) {
-    return (
-      product?._embedded?.["wp:term"]
-        ?.flat()
-        ?.find(
-          (term: any) =>
-            term.taxonomy === "brand"
-        )?.name ?? "-"
-    );
+    return product?.brand?.name ?? "-";
   }
-
-  /*
-   * =========================================================
-   * GET CATEGORY
-   * =========================================================
-   */
-
-  function getCategory(product: any) {
-    return (
-      product?._embedded?.["wp:term"]
-        ?.flat()
-        ?.find(
-          (term: any) =>
-            term.taxonomy ===
-            "jenis-produk"
-        )?.slug ?? ""
-    );
-  }
-
-  /*
-   * =========================================================
-   * GET CATEGORY NAME
-   * =========================================================
-   */
 
   function getCategoryName(product: any) {
-    return (
-      product?._embedded?.["wp:term"]
-        ?.flat()
-        ?.find(
-          (term: any) =>
-            term.taxonomy ===
-            "jenis-produk"
-        )?.name ?? "-"
-    );
+    return product?.jenis_produk?.name ?? "-";
   }
-
-  /*
-   * =========================================================
-   * FILTER PRODUCTS
-   * =========================================================
-   */
-
-  const filteredProducts = useMemo(() => {
-    return products.filter(
-      (product) => {
-        const brand =
-          getBrand(product);
-
-        const category =
-          getCategory(product);
-
-        const brandMatch =
-          brandFilter === "all" ||
-          brand === brandFilter;
-
-        const categoryMatch =
-          categoryFilter === "all" ||
-          category === categoryFilter;
-
-        const title =
-          product?.title?.rendered ??
-          "";
-
-        const model =
-          product?.acf?.model_produk ??
-          "";
-
-        const search =
-          searchQuery
-            .toLowerCase()
-            .trim();
-
-        const searchMatch =
-          search === "" ||
-          title
-            .toLowerCase()
-            .includes(search) ||
-          model
-            .toLowerCase()
-            .includes(search);
-
-        return (
-          brandMatch &&
-          categoryMatch &&
-          searchMatch
-        );
-      }
-    );
-  }, [
-    products,
-    brandFilter,
-    categoryFilter,
-    searchQuery,
-  ]);
 
   /*
    * =========================================================
@@ -377,37 +317,54 @@ export default function ProductsShowcase({ data }: Props) {
 
   if (loading) {
     return (
-      <section className="py-20 text-center">
-        Memuat produk...
-      </section>
-    );
-  }
-
-  /*
-   * =========================================================
-   * EMPTY STATE
-   * =========================================================
-   */
-
-  if (
-    selectedProductIds.length === 0
-  ) {
-    return (
       <section className="bg-accent/5 py-14 sm:py-20 md:py-28">
-        <div className="container mx-auto px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl">
-            <div className="mb-4 inline-flex rounded-full bg-accent px-4 py-2 text-sm font-semibold text-primary">
-              {data?.product_eyebrow ?? ""}
-            </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
-            <h2 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl">
-              {data?.product_title ?? ""}
-            </h2>
+          <div className="mx-auto mb-10 max-w-4xl text-center sm:mb-14 md:mb-16">
 
-            <p className="text-muted-foreground">
-              {data?.product_description ?? ""}
-            </p>
+            {eyebrow && (
+              <div className="mb-4 inline-flex rounded-full bg-accent px-3 py-2 text-xs font-semibold text-primary sm:px-4 sm:text-sm">
+                {eyebrow}
+              </div>
+            )}
+
+            {title && (
+              <h2
+                className="
+                  mb-4
+                  text-3xl
+                  font-bold
+                  leading-tight
+                  sm:text-4xl
+                  md:mb-6
+                  md:text-5xl
+                "
+              >
+                {title}
+              </h2>
+            )}
+
+            {description && (
+              <p
+                className="
+                  mx-auto
+                  max-w-3xl
+                  text-sm
+                  text-muted-foreground
+                  sm:text-base
+                  md:text-lg
+                "
+              >
+                {description}
+              </p>
+            )}
+
           </div>
+
+          <div className="py-10 text-center text-muted-foreground">
+            Memuat produk...
+          </div>
+
         </div>
       </section>
     );
@@ -423,19 +380,17 @@ export default function ProductsShowcase({ data }: Props) {
     <section className="bg-accent/5 py-14 sm:py-20 md:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+        {/* HEADER */}
 
-        <div className="mb-10 max-w-4xl sm:mb-14 md:mb-16">
+        <div className="mx-auto mb-10 max-w-4xl text-center sm:mb-14 md:mb-16">
 
-          {data?.product_eyebrow && (
+          {eyebrow && (
             <div className="mb-4 inline-flex rounded-full bg-accent px-3 py-2 text-xs font-semibold text-primary sm:px-4 sm:text-sm">
-              {data.product_eyebrow}
+              {eyebrow}
             </div>
           )}
 
-          {data?.product_title && (
+          {title && (
             <h2
               className="
                 mb-4
@@ -447,13 +402,14 @@ export default function ProductsShowcase({ data }: Props) {
                 md:text-5xl
               "
             >
-              {data.product_title}
+              {title}
             </h2>
           )}
 
-          {data?.product_description && (
+          {description && (
             <p
               className="
+                mx-auto
                 max-w-3xl
                 text-sm
                 text-muted-foreground
@@ -461,152 +417,35 @@ export default function ProductsShowcase({ data }: Props) {
                 md:text-lg
               "
             >
-              {data.product_description}
+              {description}
             </p>
           )}
+
         </div>
 
-        {/* =================================================
-            FILTERS
-        ================================================= */}
+        {/* NO PRODUCT SELECTED */}
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-
-          {/* Search */}
-
-          <div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) =>
-                setSearchQuery(
-                  e.target.value
-                )
-              }
-              placeholder="Cari produk..."
-              className="
-                w-full
-                rounded-lg
-                border
-                border-border
-                bg-white
-                px-4
-                py-3
-                text-sm
-                text-black
-                outline-none
-                transition
-                focus:border-primary
-              "
-            />
-          </div>
-
-          {/* Brand */}
-
-          <div>
-            <select
-              value={brandFilter}
-              onChange={(e) =>
-                setBrandFilter(
-                  e.target.value
-                )
-              }
-              className="
-                w-full
-                rounded-lg
-                border
-                border-border
-                bg-white
-                px-4
-                py-3
-                text-sm
-                text-black
-                outline-none
-                focus:border-primary
-              "
-            >
-              <option value="all">
-                Semua Brand
-              </option>
-
-              {brands.map(
-                (brand: any) => (
-                  <option
-                    key={
-                      brand.id ??
-                      brand.slug
-                    }
-                    value={
-                      brand.slug
-                    }
-                  >
-                    {brand.name}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-
-          {/* Product Type */}
-
-          <div>
-            <select
-              value={categoryFilter}
-              onChange={(e) =>
-                setCategoryFilter(
-                  e.target.value
-                )
-              }
-              className="
-                w-full
-                rounded-lg
-                border
-                border-border
-                bg-white
-                px-4
-                py-3
-                text-sm
-                text-black
-                outline-none
-                focus:border-primary
-              "
-            >
-              <option value="all">
-                Semua Jenis Produk
-              </option>
-
-              {productTypes.map(
-                (type: any) => (
-                  <option
-                    key={
-                      type.id ??
-                      type.slug
-                    }
-                    value={
-                      type.slug
-                    }
-                  >
-                    {type.name}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-        </div>
-
-        {/* =================================================
-            PRODUCT GRID
-        ================================================= */}
-
-        {filteredProducts.length ===
-        0 ? (
+        {selectedProductIds.length === 0 && (
           <div className="rounded-xl border border-border bg-card px-6 py-12 text-center">
             <p className="text-muted-foreground">
-              Tidak ada produk yang
-              sesuai dengan filter.
+              Belum ada produk yang dipilih untuk ditampilkan.
             </p>
           </div>
-        ) : (
+        )}
+
+        {/* PRODUCT NOT FOUND */}
+
+        {selectedProductIds.length > 0 && products.length === 0 && (
+          <div className="rounded-xl border border-border bg-card px-6 py-12 text-center">
+            <p className="text-muted-foreground">
+              Produk yang dipilih tidak ditemukan.
+            </p>
+          </div>
+        )}
+
+        {/* PRODUCT GRID */}
+
+        {products.length > 0 && (
           <div
             className="
               grid
@@ -618,248 +457,226 @@ export default function ProductsShowcase({ data }: Props) {
               lg:gap-8
             "
           >
-            {filteredProducts.map(
-              (product) => {
+            {products.map((product: any) => {
 
-                const image =
-                  product?._embedded?.[
-                    "wp:featuredmedia"
-                  ]?.[0]
-                    ?.source_url ??
-                  "/placeholder.png";
+              const image = product?.gallery?.[0] ?? "/placeholder.png";
 
-                const title =
-                  product?.title
-                    ?.rendered ??
-                  "Untitled Product";
+              const productTitle =
+                product?.title ??
+                product?.acf?.nama_produk ??
+                "Untitled Product";
 
-                const model =
-                  product?.acf
-                    ?.model_produk ??
-                  "";
+              const model = product?.acf?.model_produk ?? "";
 
-                const description =
-                  product?.acf
-                    ?.short_description ??
-                  "";
+              const productDescription =
+                product?.acf?.short_description ?? "";
 
-                const specification =
-                  product?.acf
-                    ?.spesifikasi ??
-                  "";
+              const specification = product?.acf?.spesifikasi ?? "";
 
-                return (
+              return (
+                <div
+                  key={product.id}
+                  className="
+                    group
+                    flex
+                    flex-col
+                    overflow-hidden
+                    rounded-xl
+                    border
+                    border-border
+                    bg-card
+                    transition-all
+                    duration-300
+                    hover:border-primary
+                  "
+                >
+
+                  {/* IMAGE */}
+
                   <div
-                    key={product.id}
                     className="
-                      group
-                      flex
-                      flex-col
+                      relative
+                      aspect-[4/3]
                       overflow-hidden
-                      rounded-xl
-                      border
-                      border-border
-                      bg-card
-                      transition-all
-                      duration-300
-                      hover:border-primary
+                      sm:aspect-[5/4]
+                    "
+                  >
+                    <Image
+                      src={image}
+                      alt={productTitle}
+                      fill
+                      className="
+                        object-cover
+                        transition-transform
+                        duration-500
+                        group-hover:scale-105
+                      "
+                      sizes="
+                        (max-width:640px) 100vw,
+                        (max-width:1024px) 50vw,
+                        33vw
+                      "
+                      unoptimized
+                    />
+
+                    <div
+                      className="
+                        absolute
+                        inset-0
+                        bg-black/10
+                        transition
+                        group-hover:bg-black/25
+                      "
+                    />
+
+                    {/* BRAND + CATEGORY */}
+
+                    <span
+                      className="
+                        absolute
+                        left-3
+                        right-3
+                        top-3
+                        w-fit
+                        max-w-[90%]
+                        truncate
+                        rounded-full
+                        bg-primary
+                        px-3
+                        py-1.5
+                        text-[11px]
+                        font-semibold
+                        text-primary-foreground
+                        sm:text-xs
+                      "
+                    >
+                      {getBrandName(product)}
+
+                      {" · "}
+
+                      {getCategoryName(product)}
+                    </span>
+                  </div>
+
+                  {/* BODY */}
+
+                  <div
+                    className="
+                      flex
+                      flex-1
+                      flex-col
+                      p-4
+                      sm:p-5
+                      lg:p-6
                     "
                   >
 
-                    {/* =====================================
-                        IMAGE
-                    ===================================== */}
+                    {/* MODEL */}
 
-                    <div
-                      className="
-                        relative
-                        aspect-[4/3]
-                        overflow-hidden
-                        sm:aspect-[5/4]
-                      "
-                    >
-                      <Image
-                        src={image}
-                        alt={title}
-                        fill
-                        className="
-                          object-cover
-                          transition-transform
-                          duration-500
-                          group-hover:scale-105
-                        "
-                        sizes="
-                          (max-width:640px) 100vw,
-                          (max-width:1024px) 50vw,
-                          33vw
-                        "
-                        unoptimized
-                      />
-
-                      <div
-                        className="
-                          absolute
-                          inset-0
-                          bg-black/10
-                          transition
-                          group-hover:bg-black/25
-                        "
-                      />
-
-                      {/* Brand + Category */}
-
+                    {model && (
                       <span
                         className="
-                          absolute
-                          left-3
-                          right-3
-                          top-3
-                          w-fit
-                          max-w-[90%]
-                          truncate
-                          rounded-full
-                          bg-primary
-                          px-3
-                          py-1.5
                           text-[11px]
                           font-semibold
-                          text-primary-foreground
+                          uppercase
+                          tracking-wider
+                          text-primary
                           sm:text-xs
                         "
                       >
-                        {getBrandName(
-                          product
-                        )}{" "}
-                        ·{" "}
-                        {getCategoryName(
-                          product
-                        )}
+                        {model}
                       </span>
-                    </div>
+                    )}
 
-                    {/* =====================================
-                        BODY
-                    ===================================== */}
+                    {/* TITLE */}
 
-                    <div
+                    <h3
                       className="
-                        flex
-                        flex-1
-                        flex-col
-                        p-4
-                        sm:p-5
-                        lg:p-6
+                        mb-3
+                        mt-2
+                        line-clamp-2
+                        text-base
+                        font-bold
+                        sm:text-lg
                       "
                     >
+                      {productTitle}
+                    </h3>
 
-                      {/* Model */}
+                    {/* DESCRIPTION */}
 
-                      {model && (
-                        <span
-                          className="
-                            text-[11px]
-                            font-semibold
-                            uppercase
-                            tracking-wider
-                            text-primary
-                            sm:text-xs
-                          "
-                        >
-                          {model}
-                        </span>
-                      )}
-
-                      {/* Title */}
-
-                      <h3
+                    {productDescription && (
+                      <p
                         className="
-                          mb-3
-                          mt-2
-                          line-clamp-2
-                          text-base
-                          font-bold
-                          sm:text-lg
+                          mb-5
+                          min-h-[60px]
+                          line-clamp-3
+                          text-xs
+                          text-muted-foreground
+                          sm:text-sm
                         "
                       >
-                        {title}
-                      </h3>
+                        {productDescription}
+                      </p>
+                    )}
 
-                      {/* Description */}
+                    {/* SPECIFICATION */}
 
-                      {description && (
-                        <p
-                          className="
-                            mb-5
-                            line-clamp-3
-                            min-h-[60px]
-                            text-xs
-                            text-muted-foreground
-                            sm:text-sm
-                          "
-                        >
-                          {description}
-                        </p>
-                      )}
-
-                      {/* Specifications */}
-
-                      {specification && (
-                        <div
-                          className="
-                            prose
-                            prose-sm
-                            mb-5
-                            max-w-none
-                            border-b
-                            border-border
-                            pb-5
-                            text-xs
-                            sm:text-sm
-                            prose-li:break-words
-                            prose-li:before:hidden
-                            prose-ul:space-y-1
-                          "
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              specification,
-                          }}
-                        />
-                      )}
-
-                      {/* =================================
-                          BUTTON
-                      ================================= */}
-
-                      <Link
-                        href={`/products/${product.slug}?lang=${language}`}
+                    {specification && (
+                      <div
                         className="
-                          mt-auto
-                          block
-                          w-full
-                          rounded-lg
-                          border
-                          border-primary
-                          px-4
-                          py-2.5
-                          text-center
-                          text-sm
-                          font-semibold
-                          text-primary
-                          transition-colors
-                          hover:bg-primary
-                          hover:text-primary-foreground
-                          sm:text-base
+                          prose
+                          prose-sm
+                          mb-5
+                          max-w-none
+                          border-b
+                          border-border
+                          pb-5
+                          text-xs
+                          sm:text-sm
+                          prose-li:break-words
+                          prose-li:before:hidden
+                          prose-ul:space-y-1
                         "
-                      >
-                        Detail Produk
-                      </Link>
-                    </div>
+                        dangerouslySetInnerHTML={{
+                          __html: specification,
+                        }}
+                      />
+                    )}
+
+                    {/* BUTTON */}
+
+                    <Link
+                      href={`/products/${product.slug}?lang=${language}`}
+                      className="
+                        mt-auto
+                        block
+                        w-full
+                        rounded-lg
+                        border
+                        border-primary
+                        px-4
+                        py-2.5
+                        text-center
+                        text-sm
+                        font-semibold
+                        text-primary
+                        transition-colors
+                        hover:bg-primary
+                        hover:text-primary-foreground
+                        sm:text-base
+                      "
+                    >
+                      {language === "en" ? "Product Detail" : "Detail Produk"}
+                    </Link>
+
                   </div>
-                );
-              }
-            )}
+                </div>
+              );
+            })}
           </div>
         )}
+
       </div>
     </section>
   );

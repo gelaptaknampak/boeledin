@@ -310,103 +310,136 @@ export const homeSectionConfig = {
     ],
   },
 
-  statSection: {
-    id: {
-      en: 206,
-      id: 591,
+ statSection: {
+  id: {
+    en: 206,
+    id: 591,
+  },
+
+  title: "Statistics",
+
+  fields: [
+    {
+      name: "numbers.0",
+      label: "Stat Number 1",
+      type: "text",
+      acf: "stat_number_1",
+    },
+    {
+      name: "numbers.1",
+      label: "Stat Number 2",
+      type: "text",
+      acf: "stat_number_2",
+    },
+    {
+      name: "numbers.2",
+      label: "Stat Number 3",
+      type: "text",
+      acf: "stat_number_3",
+    },
+    {
+      name: "numbers.3",
+      label: "Stat Number 4",
+      type: "text",
+      acf: "stat_number_4",
     },
 
-    title: "Statistics",
+    {
+      name: "labels.0",
+      label: "Label 1",
+      type: "text",
+      acf: "label_1",
+    },
+    {
+      name: "labels.1",
+      label: "Label 2",
+      type: "text",
+      acf: "label_2",
+    },
+    {
+      name: "labels.2",
+      label: "Label 3",
+      type: "text",
+      acf: "label_3",
+    },
+    {
+      name: "labels.3",
+      label: "Label 4",
+      type: "text",
+      acf: "label_4",
+    },
 
-    fields: [
-      {
-        name: "numbers.0",
-        label: "Stat Number 1",
-        type: "text",
-        acf: "stat_number_1",
-      },
-      {
-        name: "numbers.1",
-        label: "Stat Number 2",
-        type: "text",
-        acf: "stat_number_2",
-      },
-      {
-        name: "numbers.2",
-        label: "Stat Number 3",
-        type: "text",
-        acf: "stat_number_3",
-      },
-      {
-        name: "numbers.3",
-        label: "Stat Number 4",
-        type: "text",
-        acf: "stat_number_4",
-      },
+    {
+      name: "support",
+      label: "Support",
+      type: "text",
+      acf: "stat_support",
+    },
 
-      {
-        name: "labels.0",
-        label: "Label 1",
-        type: "text",
-        acf: "label_1",
-      },
-      {
-        name: "labels.1",
-        label: "Label 2",
-        type: "text",
-        acf: "label_2",
-      },
-      {
-        name: "labels.2",
-        label: "Label 3",
-        type: "text",
-        acf: "label_3",
-      },
-      {
-        name: "labels.3",
-        label: "Label 4",
-        type: "text",
-        acf: "label_4",
-      },
+    // BARU
+    {
+      name: "hideAndShow",
+      label: "Hide And Show",
+      type: "true_false",
+      acf: "hide_and_show",
+      checkboxLabel:
+        "Sembunyikan bagian Stat Number & Label di frontend",
+    },
 
-      {
-        name: "support",
-        label: "Support",
-        type: "text",
-        acf: "stat_support",
-      },
-      {
-        name: "brands",
-        label: "Brand List",
-        type: "brand-list",
-        acf: "index_brand_list",
-      },
-    ],
-  },
+    {
+      name: "brands",
+      label: "Brand List",
+      type: "brand-list",
+      acf: "index_brand_list",
+    },
+  ],
+},
 
   news: {
-    id: {
-      en: 208,
-      id: 593,
+  id: {
+    en: 208,
+    id: 593,
+  },
+
+  title: "News Section",
+
+  fields: [
+    {
+      name: "eyebrow",
+      label: "Eyebrow",
+      type: "text",
+      acf: "news_eyebrow",
+    },
+    {
+      name: "title",
+      label: "Title",
+      type: "text",
+      acf: "news_title",
     },
 
-    title: "News Section",
+    // BARU
+    {
+      name: "articles",
+      label: "News Articles",
+      type: "post_object",
+      acf: "news_articles",
 
-    fields: [
-      {
-        name: "eyebrow",
-        label: "Eyebrow",
-        type: "text",
-        acf: "news_eyebrow",
+      selectedLabel: "Artikel Terpilih",
+      searchLabel: "Cari Artikel",
+      searchPlaceholder: "Cari berdasarkan judul artikel...",
+      listLabel: "Daftar Artikel",
+      helperText:
+        "Pilih artikel sesuai urutan yang ingin ditampilkan.",
+
+      postSource: {
+        endpoint: "/api/wordpress/posts",
+        titleField: "title",
+        subtitleField: "excerpt",
+        searchFields: ["title", "excerpt"],
       },
-      {
-        name: "title",
-        label: "Title",
-        type: "text",
-        acf: "news_title",
-      },
-    ],
-  },
+    },
+  ],
+},
 
   cta: {
     id: {

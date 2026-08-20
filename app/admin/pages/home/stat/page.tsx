@@ -70,19 +70,24 @@ export default async function Page({
 
   const data: any = {};
 
-  config.fields.forEach((field) => {
-    let value = acf[field.acf];
+ config.fields.forEach((field) => {
+  let value = acf[field.acf];
 
-    if (
-      // field.type === "link" &&
-      value &&
-      typeof value === "object"
-    ) {
-      value = value.url;
-    }
+  if (
+    // field.type === "link" &&
+    value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  ) {
+    value = value.url;
+  }
 
-    setValue(data, field.name, value ?? "");
-  });
+  setValue(
+    data,
+    field.name,
+    value ?? (Array.isArray(value) ? [] : "")
+  );
+});
 
   return (
     <SectionForm

@@ -73,15 +73,29 @@ export default async function Page({
   config.fields.forEach((field) => {
     let value = acf[field.acf];
 
+    /*
+     * IMPORTANT:
+     * Cuma field type "link" yang perlu di-unwrap
+     * jadi value.url. Field array (post_object,
+     * brand-list, dll) HARUS dilewati, kalau tidak
+     * value-nya bakal ke-flatten jadi undefined lalu
+     * "" (lihat kasus Brand List sebelumnya).
+     */
+
     if (
       // field.type === "link" &&
       value &&
-      typeof value === "object"
+      typeof value === "object" &&
+      !Array.isArray(value)
     ) {
       value = value.url;
     }
 
-    setValue(data, field.name, value ?? "");
+    setValue(
+      data,
+      field.name,
+      value ?? (Array.isArray(value) ? [] : "")
+    );
   });
 
   return (
