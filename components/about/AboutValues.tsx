@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentType } from "react";
 import * as LucideIcons from "lucide-react";
 
 import {
@@ -68,9 +69,7 @@ const brandIconMap = {
  * "WhatsApp"
  * "TikTok"
  */
-function getIcon(
-  iconName?: string | null,
-): React.ComponentType<any> {
+function getIcon(iconName?: string | null): ComponentType<any> {
   /**
    * Default icon jika icon kosong
    * atau tidak ditemukan.
@@ -92,10 +91,7 @@ function getIcon(
    * 1. BRAND ICON
    * ------------------------------------------
    */
-  const BrandIcon =
-    brandIconMap[
-      name as keyof typeof brandIconMap
-    ];
+  const BrandIcon = brandIconMap[name as keyof typeof brandIconMap];
 
   if (BrandIcon) {
     return BrandIcon;
@@ -109,10 +105,7 @@ function getIcon(
    * Ambil icon berdasarkan nama secara dynamic.
    */
   const LucideIcon = (
-    LucideIcons as Record<
-      string,
-      React.ComponentType<any> | undefined
-    >
+    LucideIcons as Record<string, ComponentType<any> | undefined>
   )[name];
 
   if (LucideIcon) {
@@ -146,10 +139,7 @@ function getIcon(
 
   if (aliasName) {
     const AliasIcon = (
-      LucideIcons as Record<
-        string,
-        React.ComponentType<any> | undefined
-      >
+      LucideIcons as Record<string, ComponentType<any> | undefined>
     )[aliasName];
 
     if (AliasIcon) {
@@ -169,71 +159,72 @@ function getIcon(
   return fallbackIcon;
 }
 
-export default function AboutValues({
-  acf,
-}: Props) {
+export default function AboutValues({ acf = {} }: Props) {
   /**
    * ==========================================
    * VALUES
    * ==========================================
+   *
+   * Card yang title & description-nya
+   * sama-sama kosong difilter, supaya tidak
+   * ada kotak kosong ikut tampil di grid.
    */
 
-  const values = [
+  const rawValues = [
     {
       title: acf.about_value_1_title,
-
       desc: acf.about_value_1_description,
-
-      icon: getIcon(
-        acf.about_value_1_icon,
-      ),
+      icon: getIcon(acf.about_value_1_icon),
     },
-
     {
       title: acf.about_value_2_title,
-
       desc: acf.about_value_2_description,
-
-      icon: getIcon(
-        acf.about_value_2_icon,
-      ),
+      icon: getIcon(acf.about_value_2_icon),
     },
-
     {
       title: acf.about_value_3_title,
-
       desc: acf.about_value_3_description,
-
-      icon: getIcon(
-        acf.about_value_3_icon,
-      ),
+      icon: getIcon(acf.about_value_3_icon),
+    },
+    {
+      title: acf.about_value_4_title,
+      desc: acf.about_value_4_description,
+      icon: getIcon(acf.about_value_4_icon),
     },
   ];
 
+  const values = rawValues.filter((value) => value.title || value.desc);
+
+  if (values.length === 0) {
+    return null;
+  }
+
   return (
     <section className="bg-accent/10 py-16 md:py-24 lg:py-28">
-      <div className="container mx-auto px-4">
-
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* ========================================
             HEADING
         ======================================== */}
 
-        <div className="mb-12 max-w-3xl lg:mb-16">
-
+        <div className="mb-10 max-w-3xl md:mb-12 lg:mb-16">
           {acf.about_values_eyebrow && (
             <div
               className="
-                mb-5
+                mb-4
                 inline-flex
                 rounded-full
                 border
                 border-primary/20
                 bg-primary/10
-                px-5
-                py-2
-                text-sm
+                px-4
+                py-1.5
+                text-xs
                 font-semibold
                 text-primary
+                sm:mb-5
+                sm:px-5
+                sm:py-2
+                sm:text-sm
               "
             >
               {acf.about_values_eyebrow}
@@ -243,10 +234,11 @@ export default function AboutValues({
           {acf.about_values_title && (
             <h2
               className="
-                text-3xl
+                text-2xl
                 font-bold
                 leading-tight
                 text-foreground
+                sm:text-3xl
                 md:text-4xl
                 lg:text-5xl
               "
@@ -254,7 +246,6 @@ export default function AboutValues({
               {acf.about_values_title}
             </h2>
           )}
-
         </div>
 
         {/* ========================================
@@ -265,108 +256,105 @@ export default function AboutValues({
           className="
             grid
             grid-cols-1
-            gap-6
-            md:grid-cols-2
-            xl:grid-cols-3
+            gap-5
+            sm:grid-cols-2
+            sm:gap-6
+            lg:grid-cols-4
           "
         >
+          {values.map((value, idx) => {
+            const Icon = value.icon;
 
-          {values.map(
-            (value, idx) => {
-              const Icon = value.icon;
+            return (
+              <div
+                key={`value-${idx}`}
+                className="
+                  group
+                  flex
+                  h-full
+                  flex-col
+                  rounded-2xl
+                  border
+                  border-border
+                  bg-card
+                  p-6
+                  shadow-sm
+                  transition-all
+                  duration-300
+                  hover:-translate-y-2
+                  hover:border-primary/30
+                  hover:shadow-xl
+                  sm:p-7
+                  lg:p-8
+                "
+              >
+                {/* ==================================
+                    ICON
+                ================================== */}
 
-              return (
                 <div
-                  key={idx}
                   className="
-                    group
+                    mb-5
                     flex
-                    h-full
-                    flex-col
+                    h-14
+                    w-14
+                    items-center
+                    justify-center
                     rounded-2xl
-                    border
-                    border-border
-                    bg-card
-                    p-8
-                    shadow-sm
-                    transition-all
+                    bg-gradient-to-br
+                    from-primary/15
+                    to-primary/5
+                    transition-transform
                     duration-300
-                    hover:-translate-y-2
-                    hover:border-primary/30
-                    hover:shadow-xl
+                    group-hover:scale-110
+                    sm:mb-6
+                    sm:h-16
+                    sm:w-16
                   "
                 >
+                  <Icon className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
+                </div>
 
-                  {/* ==================================
-                      ICON
-                  ================================== */}
+                {/* ==================================
+                    TITLE
+                ================================== */}
 
-                  <div
+                {value.title && (
+                  <h3
                     className="
-                      mb-6
-                      flex
-                      h-16
-                      w-16
-                      items-center
-                      justify-center
-                      rounded-2xl
-                      bg-gradient-to-br
-                      from-primary/15
-                      to-primary/5
-                      transition-transform
-                      duration-300
-                      group-hover:scale-110
+                      mb-3
+                      text-lg
+                      font-semibold
+                      text-foreground
+                      sm:mb-4
+                      sm:text-xl
                     "
                   >
-                    <Icon
-                      className="
-                        h-8
-                        w-8
-                        text-primary
-                      "
-                      size={32}
-                    />
-                  </div>
+                    {value.title}
+                  </h3>
+                )}
 
-                  {/* ==================================
-                      TITLE
-                  ================================== */}
+                {/* ==================================
+                    DESCRIPTION
+                ================================== */}
 
-                  {value.title && (
-                    <h3
-                      className="
-                        mb-4
-                        text-xl
-                        font-semibold
-                        text-foreground
-                      "
-                    >
-                      {value.title}
-                    </h3>
-                  )}
-
-                  {/* ==================================
-                      DESCRIPTION
-                  ================================== */}
-
-                  {value.desc && (
-                    <p
-                      className="
-                        flex-1
-                        text-base
-                        leading-7
-                        text-foreground/80
-                      "
-                    >
-                      {value.desc}
-                    </p>
-                  )}
-
-                </div>
-              );
-            },
-          )}
-
+                {value.desc && (
+                  <p
+                    className="
+                      flex-1
+                      text-sm
+                      leading-6
+                      text-foreground/80
+                      sm:text-base
+                      sm:leading-7
+                    "
+                  >
+                    {value.desc}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

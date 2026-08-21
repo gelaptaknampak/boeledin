@@ -188,6 +188,14 @@
   height: auto;
 }
 
+/* Jaring pengaman: gambar mentah dari CKEditor yang nggak
+   dibungkus <figure class="image"> (misalnya di-paste
+   langsung) tetap dipaksa responsive, nggak overflow. */
+.ck-content img {
+  max-width: 100%;
+  height: auto;
+}
+
 .ck-content .image-style-align-left {
   margin-right: auto;
   margin-left: 0;

@@ -94,12 +94,12 @@ const aboutSections = [
     href: "/admin/pages/about/AboutValues",
     icon: Gem,
   },
-  {
-    title: "Journey",
-    description: "Timeline perusahaan",
-    href: "/admin/pages/about/AboutJourney",
-    icon: Route,
-  },
+  // {
+  //   title: "Journey",
+  //   description: "Timeline perusahaan",
+  //   href: "/admin/pages/about/AboutJourney",
+  //   icon: Route,
+  // },
   {
     title: "CTA",
     description: "Call To Action",

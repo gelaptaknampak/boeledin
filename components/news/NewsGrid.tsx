@@ -95,7 +95,7 @@ gap-8
           {news.map((post) => (
             <Link
               key={post.id}
-              href={`/news/${post.slug}`}
+              href={`/news/${post.slug}?lang=${language}`}
               className="
 group
 bg-card

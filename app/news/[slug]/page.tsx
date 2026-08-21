@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
+
+import Navigation from "@/components/Navigation";
 
 interface Props {
   params: Promise<{
@@ -104,8 +108,18 @@ export default async function NewsDetail({
   }
 
   const image =
-    post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ??
-    "/placeholder-news.jpg";
+    post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ?? "";
+
+  const publishedDate = post.date
+    ? new Date(post.date).toLocaleDateString(
+        lang === "en" ? "en-US" : "id-ID",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        },
+      )
+    : "";
 
   /**
    * =========================================================
@@ -113,37 +127,106 @@ export default async function NewsDetail({
    * =========================================================
    */
 
-  const content = renderYoutubeEmbeds(
-    post.content.rendered,
-  );
+  const content = renderYoutubeEmbeds(post.content.rendered);
+
+  /**
+   * =========================================================
+   * STATIC UI TEXT
+   * =========================================================
+   *
+   * Komponen ini Server Component (bukan client), jadi
+   * teks di-localize manual pakai `lang`, bukan lewat
+   * hook useTranslation.
+   */
+
+  // const uiText = {
+  //   eyebrow: lang === "en" ? "News & Insights" : "Berita & Wawasan",
+  //   back: lang === "en" ? "Back to News" : "Kembali ke Berita",
+  // };
 
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-4 max-w-5xl">
+    <>
+      <Navigation />
 
-        {/* Featured Image */}
-        {/* 
-        <div className="relative aspect-video rounded-xl overflow-hidden mb-10">
-          <Image
-            src={image}
-            alt={post.title.rendered}
-            fill
-            className="object-cover"
-          />
+      {/* ============================================
+          HERO
+          ============================================
+          Sama seperti AboutHero: featured image jadi
+          background penuh, dengan gradient overlay biar
+          judul tetap kebaca di atas foto apapun.
+      */}
+
+      <section className="relative isolate overflow-hidden">
+        <div className="absolute inset-0">
+          {image ? (
+            <Image
+              src={image}
+              alt={post.title.rendered}
+              fill
+              priority
+              unoptimized
+              className="object-cover"
+            />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-accent/30 via-background to-background" />
+          )}
+
+          {/* Gradient supaya teks di kiri tetap kontras */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/30" />
+
+          {/* Vignette bawah biar transisi ke konten artikel halus */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent sm:h-28" />
         </div>
-        */}
 
-        {/* Isi Artikel */}
-        <article className="max-w-4xl mx-auto px-4 py-16">
-          <div
-            className="ck-content"
-            dangerouslySetInnerHTML={{
-              __html: content,
-            }}
-          />
-        </article>
+        <div className="container relative z-10 mx-auto flex min-h-[320px] items-center px-4 py-14 sm:min-h-[380px] sm:px-6 md:py-20 lg:min-h-[420px] lg:px-8">
+          <div className="max-w-3xl">
+            {/* <Link
+              href={`/news?lang=${lang}`}
+              className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-foreground/70 transition-colors hover:text-primary"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {uiText.back}
+            </Link>
 
-      </div>
-    </section>
+            <div className="mb-4 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary sm:px-5 sm:py-2 sm:text-sm">
+              {uiText.eyebrow}
+            </div> */}
+
+            <h1
+              className="text-2xl font-bold leading-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl"
+              dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+            />
+
+            {publishedDate && (
+              <p className="mt-4 text-sm text-foreground/70 sm:text-base">
+                {publishedDate}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          ARTIKEL
+          ============================================
+          Nggak dibungkus card/border lagi — sebelumnya
+          padding card bikin lebar konten (termasuk
+          gambar-gambar di dalamnya) jadi lebih sempit
+          dari yang seharusnya.
+      ============================================ */}
+
+      <section className="bg-background py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <article className="mx-auto max-w-4xl">
+            <div
+              className="ck-content"
+              dangerouslySetInnerHTML={{
+                __html: content,
+              }}
+            />
+          </article>
+        </div>
+      </section>
+    </>
   );
 }

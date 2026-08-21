@@ -722,6 +722,26 @@ export const aboutSectionConfig = {
         type: "textarea",
         acf: "about_value_3_description",
       },
+
+      {
+        name: "values.3.icon",
+        label: "Value 4 Icon",
+        type: "icon",
+        acf: "about_value_4_icon",
+      },
+      {
+        name: "values.3.title",
+        label: "Value 4 Title",
+        type: "text",
+        acf: "about_value_4_title",
+      },
+      {
+        name: "values.3.description",
+        label: "Value 4 Description",
+        type: "textarea",
+        acf: "about_value_4_description",
+      },
+      
     ],
   },
 

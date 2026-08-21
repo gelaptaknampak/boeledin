@@ -109,9 +109,9 @@ export default async function AboutPage({
         />
 
 
-        <AboutJourney
+        {/* <AboutJourney
           acf={journey?.acf ?? {}}
-        />
+        /> */}
 
 
         <AboutCTA

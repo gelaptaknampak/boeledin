@@ -86,14 +86,26 @@ export default function ProductsGrid() {
 
   /* =========================
      FETCH PRODUCTS
-  ========================= */
+     ========================= 
+     
+     Perubahan dari versi lama:
+     1. List produk sekarang lewat proxy /api/wordpress/products
+        (bukan langsung ke wp.boeledin.com dari browser).
+     2. Gambar TIDAK lagi di-fetch satu-satu per media ID.
+        Semua media ID dari semua produk dikumpulkan dulu,
+        lalu diambil sekaligus lewat satu batch request ke
+        /api/wordpress/media/batch. Ini yang sebelumnya
+        nyebabin "Failed to fetch" dan gambar kosong di
+        sebagian produk (kena CORS / rate limit karena
+        terlalu banyak request paralel).
+  */
 
   async function fetchProducts() {
     try {
       setLoading(true);
 
       const res = await fetch(
-        `https://wp.boeledin.com/wp-json/boeledin/v1/products?lang=${currentLanguage}&_=${Date.now()}`,
+        `/api/wordpress/products?lang=${currentLanguage}&_=${Date.now()}`,
         {
           cache: "no-store",
         },
@@ -107,43 +119,53 @@ export default function ProductsGrid() {
 
       console.log("PRODUCTS:", currentLanguage, data);
 
-      const products = Array.isArray(data) ? data : [];
+      const rawProducts = Array.isArray(data) ? data : [];
 
-      const productsWithGallery = await Promise.all(
-        products.map(async (product: any) => {
-          const ids = String(product.acf?.feature_image ?? "")
-            .split(/[\n,]+/)
-            .map((id: string) => id.trim())
-            .filter(Boolean);
+      // Kumpulkan id media per produk (urutannya dijaga,
+      // supaya gallery tiap produk tetap sesuai urutan aslinya).
+      const idsByProduct = rawProducts.map((product: any) =>
+        String(product.acf?.feature_image ?? "")
+          .split(/[\n,]+/)
+          .map((id: string) => id.trim())
+          .filter(Boolean),
+      );
 
-          const urls = await Promise.all(
-            ids.map(async (id: string) => {
-              try {
-                const res = await fetch(
-                  `https://wp.boeledin.com/wp-json/wp/v2/media/${id}`,
-                  {
-                    cache: "no-store",
-                  },
-                );
+      const allIds = Array.from(new Set(idsByProduct.flat()));
 
-                if (!res.ok) {
-                  return null;
-                }
+      let mediaMap: Record<string, string> = {};
 
-                const media = await res.json();
-
-                return media?.source_url ?? null;
-              } catch {
-                return null;
-              }
-            }),
+      if (allIds.length > 0) {
+        try {
+          const mediaRes = await fetch(
+            `/api/wordpress/media?ids=${allIds.join(",")}&_=${Date.now()}`,
+            {
+              cache: "no-store",
+            },
           );
+
+          if (mediaRes.ok) {
+            mediaMap = await mediaRes.json();
+          } else {
+            console.error("Failed fetching media batch:", mediaRes.status);
+          }
+        } catch (err) {
+          console.error("Failed loading product media:", err);
+        }
+      }
+
+      const productsWithGallery = rawProducts.map(
+        (product: any, index: number) => {
+          const ids = idsByProduct[index];
+
+          const urls = ids
+            .map((id: string) => mediaMap[id])
+            .filter((url: string | undefined): url is string => Boolean(url));
 
           return {
             ...product,
-            gallery: urls.filter(Boolean),
+            gallery: urls,
           };
-        }),
+        },
       );
 
       setProducts(productsWithGallery);
