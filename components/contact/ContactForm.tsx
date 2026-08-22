@@ -1,243 +1,292 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import toast from "react-hot-toast";
+import { useState } from "react";
+
+import type { LangCode } from "@/lib/wordpress";
+import type { ContactFormAcf } from "@/type/contact";
 
 type Props = {
-  acf: any;
+  acf: ContactFormAcf;
+  lang: LangCode;
 };
 
-export default function ContactForm({ acf }: Props) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+type Status = "idle" | "submitting" | "success" | "error";
 
-  const contactSchema = useMemo(() => {
-    return z.object({
-      name: acf?.full_name_required
-        ? z.string().min(2, "Nama lengkap harus diisi")
-        : z.string().optional(),
+export default function ContactForm({ acf, lang }: Props) {
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorText, setErrorText] = useState("");
 
-      company: z.string().optional(),
-
-      email: acf?.email_required
-        ? z.string().email("Email tidak valid")
-        : z.string().optional(),
-
-      phone: z.string().optional(),
-
-      interest: z.string().optional(),
-
-      message: acf?.message_required
-        ? z.string().min(10, "Pesan minimal 10 karakter")
-        : z.string().optional(),
-    });
-  }, [acf]);
-
-  type ContactFormData = z.infer<typeof contactSchema>;
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      interest: "",
-    },
+  const [formData, setFormData] = useState({
+    name: "",
+    company: "",
+    email: "",
+    phone: "",
+    interest: "",
+    message: "",
   });
 
-  const onSubmit = async (data: ContactFormData) => {
-    setIsSubmitting(true);
+  /**
+   * =========================================================
+   * INTEREST OPTIONS
+   * =========================================================
+   *
+   * Dibangun dari 5 pasang label/value di ACF. Slot yang
+   * value-nya kosong (belum diisi editor) otomatis di-skip,
+   * jadi dropdown-nya nyesuain jumlah opsi yang aktual diisi.
+   */
+
+  const rawInterestOptions: { label?: string; value?: string }[] = [
+    { label: acf.interest_1_label, value: acf.interest_1_value },
+    { label: acf.interest_2_label, value: acf.interest_2_value },
+    { label: acf.interest_3_label, value: acf.interest_3_value },
+    { label: acf.interest_4_label, value: acf.interest_4_value },
+    { label: acf.interest_5_label, value: acf.interest_5_value },
+  ];
+
+  const interestOptions: { label?: string; value: string }[] =
+    rawInterestOptions.filter(
+      (option): option is { label?: string; value: string } =>
+        Boolean(option.value),
+    );
+
+  function handleChange(
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    setStatus("submitting");
+    setErrorText("");
 
     try {
-      // TODO:
-      // Kirim ke API contact
-      console.log(data);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...formData, lang }),
+      });
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const data = await res.json();
 
-      toast.success(
-        acf?.success_message ?? "Terima kasih! Pesan Anda telah kami terima.",
-      );
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to send message");
+      }
 
-      reset();
-    } catch (err) {
-      console.error(err);
+      setStatus("success");
 
-      toast.error(acf?.error_message ?? "Gagal mengirim pesan.");
-    } finally {
-      setIsSubmitting(false);
+      setFormData({
+        name: "",
+        company: "",
+        email: "",
+        phone: "",
+        interest: "",
+        message: "",
+      });
+    } catch (err: any) {
+      setStatus("error");
+      setErrorText(err.message || "");
     }
-  };
+  }
 
   return (
-    <div className="rounded-3xl bg-card border border-border p-8 shadow-lg">
-      <h2 className="text-3xl font-bold">
-        {acf?.form_title ?? "Form Inquiry"}
-      </h2>
-
-      {acf?.form_description && (
-        <p className="mt-3 text-muted-foreground">{acf.form_description}</p>
+    <div>
+      {acf.form_title && (
+        <h2 className="mb-2 text-2xl font-bold text-foreground sm:text-3xl">
+          {acf.form_title}
+        </h2>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
-        {/* Name & Company */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-semibold">
-              {acf?.full_name_label ?? "Nama Lengkap"}
+      {acf.form_description && (
+        <p className="mb-8 text-foreground/70">{acf.form_description}</p>
+      )}
 
-              {acf?.full_name_required && (
+      {/* ============================================
+          STATUS BANNER
+      ============================================ */}
+
+      {status === "success" && (
+        <div className="mb-6 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-600 dark:text-green-400">
+          {acf.success_message ||
+            "Thank you for your message. We will contact you soon."}
+        </div>
+      )}
+
+      {status === "error" && (
+        <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+          {errorText ||
+            acf.error_message ||
+            "Something went wrong. Please try again."}
+        </div>
+      )}
+
+      {/* ============================================
+          FORM
+      ============================================ */}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid gap-5 sm:grid-cols-2">
+          {/* FULL NAME */}
+          <div>
+            <label
+              htmlFor="name"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              {acf.full_name_label || "Full Name"}
+
+              {acf.full_name_required && (
                 <span className="ml-1 text-red-500">*</span>
               )}
             </label>
 
             <input
+              id="name"
+              name="name"
               type="text"
-              placeholder={acf?.full_name_placeholder ?? "Nama Lengkap"}
-              {...register("name")}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              value={formData.name}
+              onChange={handleChange}
+              required={Boolean(acf.full_name_required)}
+              placeholder={acf.full_name_placeholder || ""}
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-            )}
           </div>
 
+          {/* COMPANY */}
           <div>
-            <label className="mb-2 block text-sm font-semibold">
-              {acf?.company_label ?? "Perusahaan / Instansi"}
+            <label
+              htmlFor="company"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              {acf.company_label || "Company Name"}
             </label>
 
             <input
+              id="company"
+              name="company"
               type="text"
-              placeholder={acf?.company_placeholder ?? "PT Contoh Indonesia"}
-              {...register("company")}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              value={formData.company}
+              onChange={handleChange}
+              placeholder={acf.company_placeholder || ""}
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
 
-        {/* Email & Phone */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
+          {/* EMAIL */}
           <div>
-            <label className="mb-2 block text-sm font-semibold">
-              {acf?.email_label ?? "Email"}
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              {acf.email_label || "Email"}
 
-              {acf?.email_required && (
+              {acf.email_required && (
                 <span className="ml-1 text-red-500">*</span>
               )}
             </label>
 
             <input
+              id="email"
+              name="email"
               type="email"
-              placeholder={acf?.email_placeholder ?? "email@example.com"}
-              {...register("email")}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              value={formData.email}
+              onChange={handleChange}
+              required={Boolean(acf.email_required)}
+              placeholder={acf.email_placeholder || ""}
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.email.message}
-              </p>
-            )}
           </div>
 
+          {/* PHONE */}
           <div>
-            <label className="mb-2 block text-sm font-semibold">
-              {acf?.phone_label ?? "Nomor Telepon"}
+            <label
+              htmlFor="phone"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              {acf.phone_label || "Phone No / Mobile Phone"}
             </label>
 
             <input
+              id="phone"
+              name="phone"
               type="tel"
-              placeholder={acf?.phone_placeholder ?? "+62 812..."}
-              {...register("phone")}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder={acf.phone_placeholder || ""}
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
 
-        {/* Interest */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold">
-            {acf?.interest_label ?? "Produk yang Diminati"}
-          </label>
+        {/* PRODUCT INTEREST */}
+        {interestOptions.length > 0 && (
+          <div>
+            <label
+              htmlFor="interest"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
+              {acf.interest_label || "Product Interest"}
+            </label>
 
-          <select
-            {...register("interest")}
-            className="w-full rounded-lg border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+            <select
+              id="interest"
+              name="interest"
+              value={formData.interest}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">
+                {acf.interest_placeholder || "Select an option..."}
+              </option>
+
+              {interestOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label || option.value}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* MESSAGE */}
+        <div>
+          <label
+            htmlFor="message"
+            className="mb-2 block text-sm font-medium text-foreground"
           >
-            <option value="">
-              {acf?.interest_placeholder ?? "Pilih kebutuhan"}
-            </option>
+            {acf.message_label || "Message"}
 
-            {acf?.interest_1_label && (
-              <option value={acf.interest_1_value}>
-                {acf.interest_1_label}
-              </option>
+            {acf.message_required && (
+              <span className="ml-1 text-red-500">*</span>
             )}
-
-            {acf?.interest_2_label && (
-              <option value={acf.interest_2_value}>
-                {acf.interest_2_label}
-              </option>
-            )}
-
-            {acf?.interest_3_label && (
-              <option value={acf.interest_3_value}>
-                {acf.interest_3_label}
-              </option>
-            )}
-
-            {acf?.interest_4_label && (
-              <option value={acf.interest_4_value}>
-                {acf.interest_4_label}
-              </option>
-            )}
-
-            {acf?.interest_5_label && (
-              <option value={acf.interest_5_value}>
-                {acf.interest_5_label}
-              </option>
-            )}
-          </select>
-        </div>
-        {/* Message */}
-        <div>
-          <label className="block text-sm font-semibold mb-2">
-            {acf?.message_label ?? "Pesan"}
-
-            {acf?.message_required && <span className="text-red-500"> *</span>}
           </label>
 
           <textarea
+            id="message"
+            name="message"
             rows={5}
-            placeholder={
-              acf?.message_placeholder ?? "Ceritakan kebutuhan proyek Anda..."
-            }
-            {...register("message")}
-            className="w-full resize-none rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            value={formData.message}
+            onChange={handleChange}
+            required={Boolean(acf.message_required)}
+            placeholder={acf.message_placeholder || ""}
+            className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-
-          {errors.message && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.message.message}
-            </p>
-          )}
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={status === "submitting"}
+          className="w-full rounded-xl bg-primary px-6 py-3.5 text-center font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting
-            ? (acf?.button_loading ?? acf?.submit_loading ?? "Mengirim...")
-            : (acf?.submit_text ?? acf?.button_text ?? "Kirim Pesan")}
+          {status === "submitting" ? "..." : acf.submit_text || "Submit"}
         </button>
       </form>
     </div>

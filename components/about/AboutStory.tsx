@@ -22,7 +22,14 @@ export default function AboutStory({ acf = {} }: Props) {
   return (
     <section className="bg-accent/10 py-16 md:py-24 lg:py-28">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+        {/*
+          Rasio kolom dibikin rata 50/50 (bukan 1.15/0.85
+          lagi) supaya kolom kanan dapet ruang cukup buat
+          nampung Vision & Mission berdampingan. items-center
+          biar kalau masih ada sisa selisih tinggi, kolom kiri
+          ke-center, bukan numpuk jadi ruang kosong di bawah.
+        */}
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           {/* ========================================
               STORY
           ======================================== */}
@@ -64,13 +71,14 @@ export default function AboutStory({ acf = {} }: Props) {
           {/* ========================================
               VISION & MISSION
               ========================================
-              Dipecah jadi 2 card terpisah dengan ikon,
-              bukan 1 card panjang yang dibagi garis lagi.
+              Sekarang berdampingan (bukan ditumpuk), dan
+              secara default CSS Grid otomatis nyamain
+              tinggi keduanya walau isi teksnya beda panjang.
           ======================================== */}
 
-          <div className="space-y-5 sm:space-y-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
             {hasVision && (
-              <div className="rounded-2xl border border-l-4 border-border border-l-primary bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-7 lg:p-8">
+              <div className="rounded-2xl border border-l-4 border-border border-l-primary bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-7">
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Eye className="h-5 w-5" />
@@ -81,14 +89,14 @@ export default function AboutStory({ acf = {} }: Props) {
                   </span>
                 </div>
 
-                <p className="text-base leading-7 text-foreground/85 sm:text-lg sm:leading-8">
+                <p className="text-base leading-7 text-foreground/85">
                   {acf.about_story_vision}
                 </p>
               </div>
             )}
 
             {hasMission && (
-              <div className="rounded-2xl border border-l-4 border-border border-l-primary bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-7 lg:p-8">
+              <div className="rounded-2xl border border-l-4 border-border border-l-primary bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-7">
                 <div className="mb-4 flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Target className="h-5 w-5" />
@@ -99,7 +107,7 @@ export default function AboutStory({ acf = {} }: Props) {
                   </span>
                 </div>
 
-                <p className="text-base leading-7 text-foreground/85 sm:text-lg sm:leading-8">
+                <p className="text-base leading-7 text-foreground/85">
                   {acf.about_story_mission}
                 </p>
               </div>

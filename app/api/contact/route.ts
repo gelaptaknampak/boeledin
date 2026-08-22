@@ -1,29 +1,85 @@
 import { NextRequest } from "next/server";
 import axios from "axios";
 
-function escapeHtml(value: string = "") {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+import { getPostById, type LangCode } from "@/lib/wordpress";
+import type { ContactFormAcf } from "@/type/contact";
+
+// TODO: sesuaikan import ini dengan sectionConfig kamu yang
+// sebenarnya (yang nyimpen post ID config form contact per-bahasa,
+// mirip pola `newsSectionConfig.hero.id[lang]` di NewsPage).
+import { contactSectionConfig } from "@/components/admin/sections/sectionConfig";
+
+type RequiredFieldKey = "name" | "email" | "message";
+
+const REQUIRED_FIELD_LABELS: Record<RequiredFieldKey, string> = {
+  name: "Name",
+  email: "Email",
+  message: "Message",
+};
+
+function getRequiredFields(acf: ContactFormAcf): RequiredFieldKey[] {
+  const required: RequiredFieldKey[] = [];
+
+  if (acf.full_name_required) required.push("name");
+  if (acf.email_required) required.push("email");
+  if (acf.message_required) required.push("message");
+
+  return required;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, phone, company, interest, message } =
+    const { name, email, phone, company, interest, message, website, lang } =
       await request.json();
 
-    // =========================
-    // VALIDATION
-    // =========================
+    const resolvedLang: LangCode = lang === "en" ? "en" : "id";
 
-    if (!name || !email || !message) {
+    // =========================
+    // DYNAMIC VALIDATION (dari ACF)
+    // =========================
+    //
+    // Field mana yang wajib diambil ULANG dari WordPress di sini,
+    // bukan dipercaya dari body request. Kalau dipercaya dari
+    // client, orang bisa POST langsung ke endpoint ini sambil
+    // ngaku "nggak ada yang required" dan lolos validasi.
+
+    let requiredFields: RequiredFieldKey[] = ["name", "email", "message"];
+
+    try {
+      const formConfigId = contactSectionConfig.form.id[resolvedLang];
+
+      if (formConfigId) {
+        const formConfigPost = await getPostById(formConfigId, resolvedLang);
+
+        const acf: ContactFormAcf = formConfigPost?.acf ?? {};
+
+        requiredFields = getRequiredFields(acf);
+      }
+    } catch (configError) {
+      // Config gagal diambil (WP down, dll) -> fallback ke default
+      // aman (name/email/message tetap wajib), bukan nge-skip
+      // validasi sama sekali.
+      console.error(
+        "Failed to fetch contact form config, falling back to default required fields:",
+        configError,
+      );
+    }
+
+    const values: Record<RequiredFieldKey, unknown> = {
+      name,
+      email,
+      message,
+    };
+
+    const missingFields = requiredFields.filter((field) => !values[field]);
+
+    if (missingFields.length > 0) {
       return Response.json(
         {
           success: false,
-          error: "Name, email, and message are required",
+          error: `${missingFields
+            .map((field) => REQUIRED_FIELD_LABELS[field])
+            .join(", ")} ${missingFields.length > 1 ? "are" : "is"} required`,
         },
         { status: 400 },
       );
@@ -35,225 +91,84 @@ export async function POST(request: NextRequest) {
 
     const wpUrl = "https://wp.boeledin.com";
 
-    const sendgridKey = process.env.SENDGRID_API_KEY;
-    const fromEmail = "sales@boeledin.com";
-    const toEmail = process.env.CONTACT_EMAIL_TO || "sales@boeledin.com";
+    const apiKey = "Boeledin@123";
 
-    // =========================
-    // ESCAPE USER INPUT
-    // =========================
-
-    const safeName = escapeHtml(name);
-    const safeEmail = escapeHtml(email);
-    const safePhone = escapeHtml(phone || "");
-    const safeCompany = escapeHtml(company || "");
-    const safeInterest = escapeHtml(interest || "");
-    const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
-
-    // =========================
-    // SAVE TO WORDPRESS
-    // =========================
-
-    if (wpUrl) {
-      try {
-        await axios.post(
-          `${wpUrl}/wp-json/wp/v2/contact_submissions`,
-          {
-            title: `Contact from ${name}`,
-            content: message,
-            status: "publish",
-
-            meta: {
-              contact_name: name,
-              contact_email: email,
-              contact_phone: phone || "",
-              contact_company: company || "",
-              contact_interest: interest || "",
-            },
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        console.log("Contact submission saved to WordPress.");
-      } catch (wpError) {
-        console.error(
-          "Failed to save contact submission to WordPress:",
-          wpError,
-        );
-
-        // Jangan menghentikan proses.
-        // Email tetap akan dikirim ke sales.
-      }
-    } else {
-      console.warn(
-        "WORDPRESS_API_URL is not configured. Skipping WordPress submission.",
-      );
-    }
-
-    // =========================
-    // SEND EMAIL USING SENDGRID
-    // =========================
-
-    if (!sendgridKey || !fromEmail) {
+    if (!apiKey) {
       console.error(
-        "SendGrid configuration is incomplete. Required: SENDGRID_API_KEY and CONTACT_EMAIL_FROM",
+        "BOELEDIN_CONTACT_API_KEY is not configured. Cannot submit contact form.",
       );
 
       return Response.json(
         {
           success: false,
-          error: "Email service is not configured.",
+          error: "Contact service is not configured.",
         },
         { status: 500 },
       );
     }
 
+    // =========================
+    // SUBMIT TO WORDPRESS PLUGIN
+    // =========================
+    //
+    // Endpoint ini (dari plugin Boeledin Email & SMTP) yang
+    // handle dua-duanya sekaligus: simpan submission sebagai
+    // CPT `contact_submission` DAN kirim email lewat SMTP
+    // yang dikonfigurasi di wp-admin. Nggak perlu panggil
+    // WordPress & email provider terpisah lagi.
+
     try {
-      await axios.post(
-        "https://api.sendgrid.com/v3/mail/send",
+      const wpResponse = await axios.post(
+        `${wpUrl}/wp-json/boeledin-email/v1/contact`,
         {
-          personalizations: [
-            {
-              to: [
-                {
-                  email: toEmail,
-                },
-              ],
-              subject: `New Sales Inquiry from ${name}`,
-            },
-          ],
-
-          from: {
-            email: fromEmail,
-            name: "BOELEDIN Website",
-          },
-
-          reply_to: {
-            email: email,
-            name: name,
-          },
-
-          content: [
-            {
-              type: "text/html",
-              value: `
-                <!DOCTYPE html>
-                <html>
-                  <body
-                    style="
-                      font-family: Arial, Helvetica, sans-serif;
-                      line-height: 1.6;
-                      color: #333;
-                    "
-                  >
-                    <h2>New Sales Inquiry</h2>
-
-                    <table
-                      cellpadding="8"
-                      cellspacing="0"
-                      style="
-                        border-collapse: collapse;
-                        width: 100%;
-                        max-width: 700px;
-                      "
-                    >
-                      <tr>
-                        <td style="font-weight: bold; width: 180px;">
-                          Name
-                        </td>
-                        <td>
-                          ${safeName}
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td style="font-weight: bold;">
-                          Email
-                        </td>
-                        <td>
-                          ${safeEmail}
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td style="font-weight: bold;">
-                          Phone
-                        </td>
-                        <td>
-                          ${safePhone || "Not provided"}
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td style="font-weight: bold;">
-                          Company
-                        </td>
-                        <td>
-                          ${safeCompany || "Not provided"}
-                        </td>
-                      </tr>
-
-                      <tr>
-                        <td style="font-weight: bold;">
-                          Product Interest
-                        </td>
-                        <td>
-                          ${safeInterest || "Not specified"}
-                        </td>
-                      </tr>
-                    </table>
-
-                    <h3>Message</h3>
-
-                    <div
-                      style="
-                        padding: 16px;
-                        background: #f5f5f5;
-                        border-radius: 8px;
-                      "
-                    >
-                      ${safeMessage}
-                    </div>
-
-                    <hr
-                      style="
-                        margin-top: 30px;
-                        border: none;
-                        border-top: 1px solid #ddd;
-                      "
-                    />
-
-                    <p
-                      style="
-                        font-size: 12px;
-                        color: #777;
-                      "
-                    >
-                      This message was submitted through the
-                      BOELEDIN website contact form.
-                    </p>
-                  </body>
-                </html>
-              `,
-            },
-          ],
+          name,
+          email,
+          phone: phone || "",
+          company: company || "",
+          interest: interest || "",
+          message,
+          // Honeypot: field ini seharusnya selalu kosong.
+          // Kalau frontend belum punya hidden field "website",
+          // ini tetap aman (undefined -> dianggap kosong).
+          website: website || "",
         },
         {
           headers: {
-            Authorization: `Bearer ${sendgridKey}`,
             "Content-Type": "application/json",
+            "X-Boeledin-Contact-Key": apiKey,
           },
         },
       );
 
-      console.log(`Contact email successfully sent to ${toEmail}`);
-    } catch (emailError) {
-      console.error("Failed to send email through SendGrid:", emailError);
+      console.log(
+        `Contact submission sent to WordPress (id: ${
+          wpResponse.data?.submission_id ?? "unknown"
+        }).`,
+      );
 
+      return Response.json({
+        success: true,
+        message: "Thank you for your message. We will contact you soon.",
+      });
+    } catch (wpError: any) {
+      console.error(
+        "Failed to submit contact form to WordPress:",
+        wpError.response?.data || wpError.message,
+      );
+
+      // Kalau WordPress ngasih pesan error yang jelas (400/401/429),
+      // teruskan apa adanya biar user tau alasannya (misal rate limit).
+      if (wpError.response?.data?.error) {
+        return Response.json(
+          {
+            success: false,
+            error: wpError.response.data.error,
+          },
+          { status: wpError.response.status || 500 },
+        );
+      }
+
+      // WordPress tidak bisa dihubungi sama sekali (network error, dsb).
       return Response.json(
         {
           success: false,
@@ -262,15 +177,6 @@ export async function POST(request: NextRequest) {
         { status: 500 },
       );
     }
-
-    // =========================
-    // SUCCESS
-    // =========================
-
-    return Response.json({
-      success: true,
-      message: "Thank you for your message. We will contact you soon.",
-    });
   } catch (error) {
     console.error("Contact form error:", error);
 
