@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: "/admin/pages", label: "Halaman", icon: FileText },
     { href: "/admin/products", label: "Produk", icon: ShoppingCart },
     { href: "/admin/news", label: "Berita", icon: FileText },
-    // { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
+    { href: "/admin/settings", label: "Pengaturan", icon: Settings },
   ];
 
   function handleLanguageChange(newLang: "en" | "id") {

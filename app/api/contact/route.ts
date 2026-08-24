@@ -88,10 +88,15 @@ export async function POST(request: NextRequest) {
     // =========================
     // ENVIRONMENT VARIABLES
     // =========================
+    //
+    // process.env.X di sini SELALU sama tulisannya, mau nanti
+    // deploy ke Vercel, Hostinger, VPS, dll. Yang beda cuma cara
+    // kamu SET nilainya di server masing-masing (lihat penjelasan
+    // di chat).
 
     const wpUrl = "https://wp.boeledin.com";
 
-    const apiKey = "Boeledin@123";
+    const apiKey = process.env.BOELEDIN_CONTACT_API_KEY;
 
     if (!apiKey) {
       console.error(

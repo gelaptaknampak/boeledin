@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminLayout from "@/components/admin/AdminLayout";
-import SettingsPage from "@/components/admin/SettingsPage";
+import EmailSettingsForm from "@/components/admin/EmailSettingsForm";
 
 export const metadata = {
   title: "Pengaturan — Admin BOELEDIN",
@@ -16,7 +16,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <AdminLayout>
-      <SettingsPage />
+      <EmailSettingsForm />
     </AdminLayout>
   );
 }
