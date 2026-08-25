@@ -3,19 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import {
-  Menu,
-  X,
-  Globe,
-  Moon,
-  Sun,
-} from "lucide-react";
+import { Menu, X, Globe, Moon, Sun } from "lucide-react";
 
-import {
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { useTranslation } from "@/hooks/useTranslation";
 import { useTheme } from "@/hooks/useTheme";
@@ -24,17 +14,9 @@ import ProductSearch from "./ProductSearch";
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const {
-    t,
-    language,
-    setLanguage,
-  } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
 
-  const {
-    theme,
-    toggleTheme,
-    mounted,
-  } = useTheme();
+  const { theme, toggleTheme, mounted } = useTheme();
 
   const pathname = usePathname();
   const router = useRouter();
@@ -56,19 +38,12 @@ export default function Navigation() {
   useEffect(() => {
     const urlLanguage = searchParams.get("lang");
 
-    const nextLanguage =
-      urlLanguage === "en"
-        ? "en"
-        : "id";
+    const nextLanguage = urlLanguage === "en" ? "en" : "id";
 
     if (language !== nextLanguage) {
       setLanguage(nextLanguage);
     }
-  }, [
-    searchParams,
-    language,
-    setLanguage,
-  ]);
+  }, [searchParams, language, setLanguage]);
 
   /*
    * =========================
@@ -76,15 +51,9 @@ export default function Navigation() {
    * =========================
    */
   function changeLanguage() {
-    const currentLanguage =
-      searchParams.get("lang") === "en"
-        ? "en"
-        : "id";
+    const currentLanguage = searchParams.get("lang") === "en" ? "en" : "id";
 
-    const nextLanguage =
-      currentLanguage === "id"
-        ? "en"
-        : "id";
+    const nextLanguage = currentLanguage === "id" ? "en" : "id";
 
     /*
      * Update Zustand
@@ -94,9 +63,7 @@ export default function Navigation() {
     /*
      * Update URL
      */
-    const params = new URLSearchParams(
-      searchParams.toString()
-    );
+    const params = new URLSearchParams(searchParams.toString());
 
     params.set("lang", nextLanguage);
 
@@ -104,9 +71,17 @@ export default function Navigation() {
      * Refresh server component
      * dengan bahasa baru.
      */
-    router.replace(
-      `${pathname}?${params.toString()}`
-    );
+    router.replace(`${pathname}?${params.toString()}`);
+
+    /*
+     * router.replace() doang kadang nggak maksa
+     * Next.js narik ulang data server (bisa kepake
+     * versi cache router yang lama). router.refresh()
+     * maksa Next.js re-fetch konten server buat
+     * halaman yang lagi dibuka, biar kontennya
+     * beneran ganti bahasa.
+     */
+    router.refresh();
 
     /*
      * Tutup mobile menu
@@ -165,30 +140,23 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="border-b border-border bg-background">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background">
       {/* =========================
           MAIN NAVBAR
       ========================= */}
 
       <div className="container mx-auto relative flex h-16 items-center justify-between px-4">
-
         {/* =========================
             LOGO
         ========================= */}
 
         <Link
           href={localizedHref("/")}
-          onClick={() =>
-            setMobileMenuOpen(false)
-          }
+          onClick={() => setMobileMenuOpen(false)}
           className="shrink-0"
         >
           <Image
-            src={
-              theme === "dark"
-                ? "/logo-white.png"
-                : "/logo-black.png"
-            }
+            src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
             alt="BOELEDIN"
             width={70}
             height={70}
@@ -223,13 +191,9 @@ export default function Navigation() {
           {navLinks.map((link) => (
             <Link
               key={link.href}
-              href={localizedHref(
-                link.href
-              )}
+              href={localizedHref(link.href)}
               className={`whitespace-nowrap text-sm font-medium transition-colors hover:text-primary ${
-                isActive(link.href)
-                  ? "text-primary"
-                  : "text-muted-foreground"
+                isActive(link.href) ? "text-primary" : "text-muted-foreground"
               }`}
             >
               {link.label}
@@ -242,7 +206,6 @@ export default function Navigation() {
         ========================= */}
 
         <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-
           {/* Theme */}
 
           {mounted && (
@@ -279,19 +242,13 @@ export default function Navigation() {
               transition-colors
               hover:bg-accent
             "
-            aria-label={t(
-              "common.language"
-            )}
-            title={t(
-              "common.language"
-            )}
+            aria-label={t("common.language")}
+            title={t("common.language")}
           >
             <Globe className="h-4 w-4" />
 
             <span className="text-sm font-medium">
-              {language === "en"
-                ? "EN"
-                : "ID"}
+              {language === "en" ? "EN" : "ID"}
             </span>
           </button>
 
@@ -310,11 +267,7 @@ export default function Navigation() {
               hover:bg-accent
               md:hidden
             "
-            onClick={() =>
-              setMobileMenuOpen(
-                !mobileMenuOpen
-              )
-            }
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
@@ -333,18 +286,13 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div className="border-t border-border py-4 md:hidden">
           <div className="container mx-auto flex flex-col gap-4 px-4">
-
             {/* Links */}
 
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={localizedHref(
-                  link.href
-                )}
-                onClick={() =>
-                  setMobileMenuOpen(false)
-                }
+                href={localizedHref(link.href)}
+                onClick={() => setMobileMenuOpen(false)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:text-primary ${
                   isActive(link.href)
                     ? "bg-accent text-primary"
@@ -358,7 +306,6 @@ export default function Navigation() {
             {/* Mobile Actions */}
 
             <div className="flex gap-2 px-4 py-2">
-
               {/* Theme */}
 
               {mounted && (
@@ -429,7 +376,6 @@ export default function Navigation() {
                   ? t("common.english")
                   : t("common.indonesian")}
               </button>
-
             </div>
           </div>
         </div>
