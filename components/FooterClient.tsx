@@ -68,12 +68,6 @@ export default function FooterClient({ data }: FooterProps) {
   /* =========================================================
      LANGUAGE
   ========================================================= */
-  //
-  // Sama kayak Navigation.tsx: ambil bahasa aktif dari store
-  // yang sama, terus setiap link internal di footer WAJIB
-  // nempelin ?lang= itu -- kalau enggak, halaman berikutnya
-  // nggak tau bahasa yang lagi aktif dan Navigation bakal
-  // auto-fallback ke "id".
 
   const { language } = useTranslation();
 
@@ -128,9 +122,7 @@ export default function FooterClient({ data }: FooterProps) {
             }
 
             try {
-              const res = await fetch(
-                `/api/wordpress/media/page/${item.logo}`,
-              );
+              const res = await fetch(`/api/wordpress/media/page/${item.logo}`);
 
               const media = await res.json();
 
@@ -216,32 +208,23 @@ export default function FooterClient({ data }: FooterProps) {
     data?.footer_description ??
     "Jaminan Kualitas Terbaik untuk semua produk dan layanan kami.";
 
-  const copyright =
-    data?.copyright_text ?? "BOELEDIN. All rights reserved.";
+  const copyright = data?.copyright_text ?? "BOELEDIN. All rights reserved.";
 
-  const navigationTitle =
-    data?.navigation_title ?? "Navigasi";
+  const navigationTitle = data?.navigation_title ?? "Navigasi";
 
-  const serviceTitle =
-    data?.service_title ?? "Layanan";
+  const serviceTitle = data?.service_title ?? "Layanan";
 
-  const contactTitle =
-    data?.contact_title ?? "Contact Us";
+  const contactTitle = data?.contact_title ?? "Contact Us";
 
-  const address =
-    data?.address ?? "Rukan Exclusive, Jakarta";
+  const address = data?.address ?? "Rukan Exclusive, Jakarta";
 
-  const phone =
-    data?.phone ?? "+62 813-1906-0606";
+  const phone = data?.phone ?? "+62 813-1906-0606";
 
-  const email =
-    data?.email ?? "info@boeledin.com";
+  const email = data?.email ?? "info@boeledin.com";
 
-  const logoWidth =
-    Number(data?.image_logo_width) || 220;
+  const logoWidth = Number(data?.image_logo_width) || 220;
 
-  const logoHeight =
-    Number(data?.image_logo_height) || 70;
+  const logoHeight = Number(data?.image_logo_height) || 70;
 
   return (
     <footer
@@ -251,12 +234,19 @@ export default function FooterClient({ data }: FooterProps) {
         color: "#ffffff",
       }}
     >
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-
+      <div className="container mx-auto px-4 py-12 sm:px-6 md:py-16 lg:px-8 lg:py-20">
+        {/*
+          Grid disesuaikan jadi 3 kolom ASLI di desktop (bukan 4
+          kayak sebelumnya, padahal Services lagi di-comment jadi
+          cuma 3 yang render). Company dikasih porsi lebih lebar
+          (1.4fr) karena isinya lebih banyak -- logo, deskripsi,
+          ikon sosmed -- dibanding Navigation/Contact yang cuma
+          daftar singkat.
+        */}
+        <div className="grid gap-10 sm:grid-cols-2 sm:gap-12 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-16">
           {/* Company */}
-          <div>
-            <Link href={localizedHref("/")}>
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link href={localizedHref("/")} className="inline-block">
               <Image
                 src={logo}
                 alt="BOELEDIN"
@@ -271,7 +261,7 @@ export default function FooterClient({ data }: FooterProps) {
               />
             </Link>
 
-            <p className="mb-4 text-sm leading-relaxed text-[#b8c5d3]">
+            <p className="mb-6 max-w-sm text-sm leading-relaxed text-[#b8c5d3]">
               {description}
             </p>
 
@@ -282,14 +272,14 @@ export default function FooterClient({ data }: FooterProps) {
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-lg bg-[#12263d] p-2 transition hover:bg-[#1992ff]"
+                  className="rounded-lg bg-[#12263d] p-2.5 transition-all hover:-translate-y-0.5 hover:bg-[#1992ff]"
                 >
                   <Image
                     src={item.logo}
                     alt="social"
                     width={24}
                     height={24}
-                    className="h-6 w-6 object-contain"
+                    className="h-5 w-5 object-contain"
                     unoptimized
                   />
                 </Link>
@@ -299,16 +289,16 @@ export default function FooterClient({ data }: FooterProps) {
 
           {/* Navigation */}
           <div>
-            <h4 className="mb-4 font-semibold text-white">
+            <h4 className="mb-5 text-base font-semibold text-white lg:text-lg">
               {navigationTitle}
             </h4>
 
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {navigationItems.map((item: any) => (
                 <li key={item.link}>
                   <Link
                     href={localizedHref(item.link)}
-                    className="text-sm text-[#b8c5d3] transition hover:text-[#5db8ff]"
+                    className="text-sm text-[#b8c5d3] transition-colors hover:text-[#5db8ff]"
                   >
                     {item.label}
                   </Link>
@@ -319,16 +309,16 @@ export default function FooterClient({ data }: FooterProps) {
 
           {/* Services */}
           {/* <div>
-            <h4 className="mb-4 font-semibold text-white">
+            <h4 className="mb-5 text-base font-semibold text-white lg:text-lg">
               {serviceTitle}
             </h4>
 
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {serviceItems.map((item: any) => (
                 <li key={item.link}>
                   <Link
                     href={localizedHref(item.link)}
-                    className="text-sm text-[#b8c5d3] transition hover:text-[#5db8ff]"
+                    className="text-sm text-[#b8c5d3] transition-colors hover:text-[#5db8ff]"
                   >
                     {item.label}
                   </Link>
@@ -339,34 +329,34 @@ export default function FooterClient({ data }: FooterProps) {
 
           {/* Contact */}
           <div>
-            <h4 className="mb-4 font-semibold text-white">
+            <h4 className="mb-5 text-base font-semibold text-white lg:text-lg">
               {contactTitle}
             </h4>
 
-            <ul className="space-y-3">
-              <li className="flex gap-2 text-sm text-[#b8c5d3]">
-                <MapPin className="mt-1 h-4 w-4 shrink-0 text-[#5db8ff]" />
+            <ul className="space-y-4">
+              <li className="flex gap-3 text-sm text-[#b8c5d3]">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#5db8ff]" />
 
-                <span>{address}</span>
+                <span className="leading-relaxed">{address}</span>
               </li>
 
-              <li className="flex gap-2 text-sm text-[#b8c5d3]">
+              <li className="flex items-center gap-3 text-sm text-[#b8c5d3]">
                 <Phone className="h-4 w-4 shrink-0 text-[#5db8ff]" />
 
                 <a
                   href={`tel:${phone}`}
-                  className="transition hover:text-[#5db8ff]"
+                  className="transition-colors hover:text-[#5db8ff]"
                 >
                   {phone}
                 </a>
               </li>
 
-              <li className="flex gap-2 text-sm text-[#b8c5d3]">
+              <li className="flex items-center gap-3 text-sm text-[#b8c5d3]">
                 <Mail className="h-4 w-4 shrink-0 text-[#5db8ff]" />
 
                 <a
                   href={`mailto:${email}`}
-                  className="transition hover:text-[#5db8ff]"
+                  className="transition-colors hover:text-[#5db8ff]"
                 >
                   {email}
                 </a>
@@ -376,7 +366,7 @@ export default function FooterClient({ data }: FooterProps) {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 border-t border-[#1b3856] pt-8">
+        <div className="mt-12 border-t border-[#1b3856] pt-8 lg:mt-16">
           <p className="text-sm text-[#8fa3b8]">
             © {new Date().getFullYear()} {copyright}
           </p>
