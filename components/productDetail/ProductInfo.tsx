@@ -11,16 +11,11 @@ interface Props {
 export default function ProductInfo({ product }: Props) {
   const { language } = useTranslation();
 
-  const currentLanguage =
-    language === "en"
-      ? "en"
-      : "id";
+  const currentLanguage = language === "en" ? "en" : "id";
 
-  const [brandData, setBrandData] =
-    useState<any>(null);
+  const [brandData, setBrandData] = useState<any>(null);
 
-  const [loadingBrand, setLoadingBrand] =
-    useState(true);
+  const [loadingBrand, setLoadingBrand] = useState(true);
 
   /*
    * =================================================
@@ -28,19 +23,13 @@ export default function ProductInfo({ product }: Props) {
    * =================================================
    */
 
-  const brandTerm =
-    product._embedded?.["wp:term"]
-      ?.flat()
-      ?.find(
-        (term: any) =>
-          term.taxonomy === "brand"
-      );
+  const brandTerm = product._embedded?.["wp:term"]
+    ?.flat()
+    ?.find((term: any) => term.taxonomy === "brand");
 
-  const brand =
-    brandTerm?.name ?? "-";
+  const brand = brandTerm?.name ?? "-";
 
-  const brandId =
-    brandTerm?.id ?? null;
+  const brandId = brandTerm?.id ?? null;
 
   /*
    * =================================================
@@ -63,65 +52,40 @@ export default function ProductInfo({ product }: Props) {
           `/api/wordpress/brands?lang=${currentLanguage}&_=${Date.now()}`,
           {
             cache: "no-store",
-          }
+          },
         );
 
         if (!res.ok) {
-          throw new Error(
-            "Gagal mengambil data brand"
-          );
+          throw new Error("Gagal mengambil data brand");
         }
 
         const data = await res.json();
 
-        const brands =
-          Array.isArray(data)
-            ? data
-            : [];
+        const brands = Array.isArray(data) ? data : [];
 
         /*
          * Cari brand berdasarkan ID
          */
-        const matchedBrand =
-          brands.find(
-            (item: any) =>
-              Number(item.id) ===
-              Number(brandId)
-          );
-
-        console.log(
-          "PRODUCT BRAND:",
-          brandTerm
+        const matchedBrand = brands.find(
+          (item: any) => Number(item.id) === Number(brandId),
         );
 
-        console.log(
-          "BRAND DATA:",
-          matchedBrand
-        );
+        console.log("PRODUCT BRAND:", brandTerm);
 
-        setBrandData(
-          matchedBrand ?? null
-        );
+        console.log("BRAND DATA:", matchedBrand);
 
+        setBrandData(matchedBrand ?? null);
       } catch (error) {
-        console.error(
-          "Failed loading brand:",
-          error
-        );
+        console.error("Failed loading brand:", error);
 
         setBrandData(null);
-
       } finally {
         setLoadingBrand(false);
       }
     }
 
     fetchBrand();
-
-  }, [
-    brandId,
-    currentLanguage,
-  ]);
+  }, [brandId, currentLanguage]);
 
   /*
    * =================================================
@@ -129,33 +93,30 @@ export default function ProductInfo({ product }: Props) {
    * =================================================
    */
 
-  const brandLogo =
-    brandData?.acf?.brand_logo_url ??
-    "";
+  const brandLogo = brandData?.acf?.brand_logo_url ?? "";
 
   return (
     <section className="space-y-8">
-
       {/* =========================================
           BRAND
           ========================================= */}
 
       <div className="flex items-center gap-3">
-  <p
-    className="
+        <p
+          className="
       text-sm
       font-bold
       uppercase
       tracking-widest
       text-primary
     "
-  >
-    {brand}
-  </p>
+        >
+          {brand}
+        </p>
 
-  {!loadingBrand && brandLogo && (
-    <div
-      className="
+        {!loadingBrand && brandLogo && (
+          <div
+            className="
         relative
         flex
         h-10
@@ -164,18 +125,17 @@ export default function ProductInfo({ product }: Props) {
         justify-center
         overflow-hidden
       "
-    >
-      <Image
-        src={brandLogo}
-        alt={brand}
-        fill
-        sizes="80px"
-        className="object-contain"
-      />
-    </div>
-  )}
-</div>
-
+          >
+            <Image
+              src={brandLogo}
+              alt={brand}
+              fill
+              sizes="80px"
+              className="object-contain"
+            />
+          </div>
+        )}
+      </div>
 
       {/* =========================================
           PRODUCT NAME
@@ -191,7 +151,6 @@ export default function ProductInfo({ product }: Props) {
         {product.acf?.nama_produk}
       </h1>
 
-
       {/* =========================================
           MODEL
           ========================================= */}
@@ -204,28 +163,30 @@ export default function ProductInfo({ product }: Props) {
             text-muted-foreground
           "
         >
-          Model :{" "}
-          {product.acf.model_produk}
+          Model : {product.acf.model_produk}
         </p>
       )}
 
-
       {/* =========================================
           DESCRIPTION
+          =========================================
+          leading-8 (32px) sebelumnya kejauhan buat
+          konten kayak daftar poin pendek gini --
+          diturunin ke leading-6 (24px) biar lebih
+          rapat dan nggak kelihatan longgar.
           ========================================= */}
 
       {product.acf?.description && (
         <div
           className="
             text-muted-foreground
-            leading-8
+            leading-6
             whitespace-pre-line
           "
         >
           {product.acf.description}
         </div>
       )}
-
 
       {/* =========================================
           BROCHURE
@@ -252,7 +213,6 @@ export default function ProductInfo({ product }: Props) {
           Download Brosur
         </a>
       )}
-
     </section>
   );
 }
