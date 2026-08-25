@@ -29,23 +29,42 @@ export async function GET(req: Request) {
     ]);
 
     const recentItems = [
+      // Products & Pages lewat endpoint CORE WordPress
+      // (/wp/v2/products, /wp/v2/pages) -- title berbentuk
+      // {rendered: string}, dan last_edited_by/at sekarang
+      // ikut muncul lewat register_rest_field() di plugin.
       ...products.slice(0, 3).map((item: any) => ({
         id: item.id,
         title: item.acf?.nama_produk || item.title?.rendered || "-",
         type: "product",
         date: item.modified?.split("T")[0],
+        lastEditedBy: item.last_edited_by ?? null,
+        lastEditedAt: item.last_edited_at ?? null,
       })),
+
+      // Berita lewat endpoint CUSTOM kita (boeledin/v1/berita).
+      // PENTING: title di endpoint ini berbentuk string BIASA
+      // (dari get_the_title()), BUKAN {rendered: string} kayak
+      // endpoint core. Sebelumnya kode ini pakai item.title?.rendered
+      // yang selalu undefined buat berita -- itu penyebab judul
+      // Berita kosong di dashboard. Sekarang dibenerin jadi
+      // item.title langsung.
       ...news.slice(0, 3).map((item: any) => ({
         id: item.id,
-        title: item.title?.rendered,
+        title: item.title || "-",
         type: "news",
         date: item.modified?.split("T")[0],
+        lastEditedBy: item.last_edited_by ?? null,
+        lastEditedAt: item.last_edited_at ?? null,
       })),
+
       ...pages.slice(0, 3).map((item: any) => ({
         id: item.id,
-        title: item.title?.rendered,
+        title: item.title?.rendered || "-",
         type: "page",
         date: item.modified?.split("T")[0],
+        lastEditedBy: item.last_edited_by ?? null,
+        lastEditedAt: item.last_edited_at ?? null,
       })),
     ]
       .sort(

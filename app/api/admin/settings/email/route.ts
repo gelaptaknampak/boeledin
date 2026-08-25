@@ -8,26 +8,20 @@ const WP_URL = "https://wp.boeledin.com";
  * =========================================================
  * GET - baca setting email saat ini
  * =========================================================
+ *
+ * PERUBAHAN: sebelumnya kirim header statis
+ * X-Boeledin-Admin-Key (sama buat semua orang yang login).
+ * Sekarang kirim Authorization: Bearer <wp_token milik user
+ * yang login>, sama persis pola yang dipakai updatePostACF()
+ * di lib/wordpress.ts. WordPress yang menentukan boleh/
+ * tidaknya berdasarkan role ASLI user itu (manage_options).
  */
 
 export async function GET() {
-  const token = (await cookies()).get("wp_token");
+  const token = (await cookies()).get("wp_token")?.value;
 
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  const adminKey = process.env.BOELEDIN_ADMIN_SETTINGS_KEY;
-
-  if (!adminKey) {
-    console.error(
-      "BOELEDIN_ADMIN_SETTINGS_KEY is not configured. Cannot fetch email settings.",
-    );
-
-    return NextResponse.json(
-      { message: "Settings service is not configured." },
-      { status: 500 },
-    );
   }
 
   try {
@@ -35,15 +29,13 @@ export async function GET() {
       `${WP_URL}/wp-json/boeledin-email/v1/settings`,
       {
         headers: {
-          "X-Boeledin-Admin-Key": adminKey,
+          Authorization: `Bearer ${token}`,
         },
       },
     );
 
     return NextResponse.json(res.data);
   } catch (error: any) {
-    // Log LENGKAP ke terminal server (bukan browser console) --
-    // di sinilah alasan asli kegagalannya kelihatan.
     console.error(
       "Failed to fetch email settings. Status:",
       error.response?.status,
@@ -53,17 +45,16 @@ export async function GET() {
       error.message,
     );
 
-    // Teruskan pesan error dari WordPress kalau ada, biar
-    // ketahuan penyebabnya (key salah, endpoint belum ada di
-    // plugin, dll) -- bukan cuma pesan generik yang nutupin
-    // masalah aslinya.
+    // 403 dari WordPress di sini artinya user yang login
+    // BUKAN Administrator (role dia nggak punya manage_options).
     return NextResponse.json(
       {
         message:
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch settings",
+          error.response?.status === 403
+            ? "Kamu tidak punya izin untuk mengakses pengaturan ini. Hubungi Administrator."
+            : error.response?.data?.message ||
+              error.message ||
+              "Failed to fetch settings",
       },
       { status: error.response?.status || 500 },
     );
@@ -74,35 +65,17 @@ export async function GET() {
  * =========================================================
  * POST - update setting email
  * =========================================================
- *
- * Body: { from_name?, from_email?, recipient_email? }
- * Field yang tidak dikirim otomatis dipertahankan nilainya
- * (sudah di-handle di sisi plugin WordPress).
  */
 
 export async function POST(request: NextRequest) {
-  const token = (await cookies()).get("wp_token");
+  const token = (await cookies()).get("wp_token")?.value;
 
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const adminKey = process.env.BOELEDIN_ADMIN_SETTINGS_KEY;
-
-  if (!adminKey) {
-    console.error(
-      "BOELEDIN_ADMIN_SETTINGS_KEY is not configured. Cannot update email settings.",
-    );
-
-    return NextResponse.json(
-      { message: "Settings service is not configured." },
-      { status: 500 },
-    );
-  }
-
   const body = await request.json();
 
-  // Validasi ringan di sisi Next.js sebelum diteruskan ke WP.
   const emailFields = ["from_email", "recipient_email"] as const;
 
   for (const field of emailFields) {
@@ -123,7 +96,7 @@ export async function POST(request: NextRequest) {
       {
         headers: {
           "Content-Type": "application/json",
-          "X-Boeledin-Admin-Key": adminKey,
+          Authorization: `Bearer ${token}`,
         },
       },
     );
@@ -142,10 +115,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message:
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to update settings",
+          error.response?.status === 403
+            ? "Kamu tidak punya izin untuk mengubah pengaturan ini. Hubungi Administrator."
+            : error.response?.data?.message ||
+              error.message ||
+              "Failed to update settings",
       },
       { status: error.response?.status || 500 },
     );

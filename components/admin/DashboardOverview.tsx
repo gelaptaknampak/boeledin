@@ -3,13 +3,85 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FileText, ShoppingCart, Newspaper, TrendingUp } from "lucide-react";
+import { FileText, ShoppingCart, Newspaper, TrendingUp, User } from "lucide-react";
 
 interface DashboardStats {
   totalPages: number;
   totalProducts: number;
   totalNews: number;
-  recentItems: Array<{ id: number; title: string; type: string; date: string }>;
+  recentItems: Array<{
+    id: number;
+    title: string;
+    type: string;
+    date: string;
+    // BARU -- dari _boeledin_last_edited_by / _boeledin_last_edited_at
+    // yang sekarang dikirim WordPress lewat plugin Multilingual API.
+    lastEditedBy?: {
+      id: number;
+      name: string;
+    } | null;
+    lastEditedAt?: string | null;
+  }>;
+}
+
+/**
+ * =========================================================
+ * ROUTE SEGMENT PER TIPE ITEM
+ * =========================================================
+ *
+ * Sebelumnya link "Edit" dibangun dengan `${item.type}s`,
+ * yang buat item.type === "news" menghasilkan "/admin/newss/..."
+ * (double "s", typo). Sekarang dipetakan eksplisit.
+ *
+ * CATATAN: aku belum yakin 100% pola "/admin/{segment}/{id}/edit"
+ * ini persis sama dengan routing admin kamu yang sebenarnya --
+ * dari contoh Footer sebelumnya, halaman section malah pakai
+ * pola /admin/pages/footer?lang=en (slug, bukan id+edit). Kalau
+ * link Edit di dashboard ternyata masih 404, kirim struktur
+ * routing admin produk/berita/halaman kamu yang sebenarnya biar
+ * aku sesuaikan persis.
+ */
+
+const TYPE_ROUTE_SEGMENT: Record<string, string> = {
+  page: "pages",
+  product: "products",
+  news: "news",
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  page: "Halaman",
+  product: "Produk",
+  news: "Berita",
+};
+
+/**
+ * =========================================================
+ * FORMAT TANGGAL KONSISTEN
+ * =========================================================
+ *
+ * Data date dari API kadang berupa "2026-08-23" (tanggal
+ * doang) dan kadang "2026-08-19 07:06:07" (lengkap dengan
+ * jam) -- bikin tabel keliatan nggak konsisten. Ini
+ * menyeragamkan jadi format tanggal pendek buat semuanya.
+ */
+
+function formatShortDate(dateStr?: string | null) {
+  if (!dateStr) return "-";
+
+  // Ambil bagian tanggal doang (sebelum spasi kalau ada jam)
+  const datePart = dateStr.split(" ")[0];
+
+  const parsed = new Date(datePart);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return datePart;
+  }
+
+  return parsed.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export default function DashboardOverview() {
@@ -77,6 +149,19 @@ export default function DashboardOverview() {
     },
   ];
 
+  /**
+   * "Terakhir Diupdate" sekarang dihitung dari item terbaru
+   * di recentItems (diasumsikan API sudah mengurutkan dari
+   * yang paling baru). Sebelumnya hardcoded "15 Feb 2024" --
+   * tanggal statis yang nggak pernah berubah walau datanya
+   * sendiri terus update.
+   */
+
+  const lastUpdated =
+    stats.recentItems.length > 0
+      ? formatShortDate(stats.recentItems[0].date)
+      : "-";
+
   return (
     <div className="space-y-8">
       {/* Overview Cards */}
@@ -122,7 +207,7 @@ export default function DashboardOverview() {
             <p className="text-muted-foreground text-sm mb-1">
               Terakhir Diupdate
             </p>
-            <p className="text-sm text-foreground">15 Feb 2024</p>
+            <p className="text-sm text-foreground">{lastUpdated}</p>
           </div>
           <div className="p-4 bg-accent rounded-lg">
             <p className="text-muted-foreground text-sm mb-1">Status</p>
@@ -147,6 +232,9 @@ export default function DashboardOverview() {
                   Tipe
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
+                  Diedit Oleh
+                </th>
+                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
                   Tanggal
                 </th>
                 <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
@@ -157,22 +245,36 @@ export default function DashboardOverview() {
             <tbody className="divide-y divide-border">
               {stats.recentItems.map((item) => (
                 <tr key={item.id} className="hover:bg-accent transition-colors">
-                  <td className="px-4 py-3 font-medium">{item.title}</td>
+                  <td className="px-4 py-3 font-medium">
+                    {item.title || (
+                      <span className="italic text-muted-foreground">
+                        (Tanpa judul)
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <span className="inline-block px-3 py-1 bg-accent rounded-full text-xs font-semibold text-primary">
-                      {item.type === "page"
-                        ? "Halaman"
-                        : item.type === "product"
-                          ? "Produk"
-                          : "Berita"}
+                      {TYPE_LABEL[item.type] ?? item.type}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    {item.lastEditedBy ? (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <User className="h-3.5 w-3.5 shrink-0" />
+                        <span>{item.lastEditedBy.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {item.date}
+                    {formatShortDate(item.lastEditedAt || item.date)}
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/admin/${item.type}s/${item.id}/edit`}
+                      href={`/admin/${
+                        TYPE_ROUTE_SEGMENT[item.type] ?? item.type
+                      }/${item.id}/edit`}
                       className="text-primary hover:underline font-medium"
                     >
                       Edit
@@ -194,7 +296,7 @@ export default function DashboardOverview() {
           <div className="flex justify-between">
             <span className="text-muted-foreground">WordPress URL:</span>
             <span className="font-mono text-foreground">
-              {process.env.NEXT_PUBLIC_WORDPRESS_URL}
+              {process.env.NEXT_PUBLIC_WORDPRESS_URL || "(belum di-set)"}
             </span>
           </div>
           <div className="flex justify-between">
