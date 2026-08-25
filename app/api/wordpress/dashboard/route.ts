@@ -8,6 +8,12 @@ import {
   getPostsCount,
 } from "@/lib/wordpress";
 
+// Paksa route ini selalu dijalanin ulang tiap request, jangan
+// di-cache statis sama Next.js -- kalau nggak, dashboard bisa
+// nampilin data lama terus walau WordPress-nya udah ke-update.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   try {
     const lang = new URL(req.url).searchParams.get("lang") || "id";

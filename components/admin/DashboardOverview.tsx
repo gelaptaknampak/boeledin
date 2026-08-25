@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  FileText,
-  ShoppingCart,
-  Newspaper,
-  TrendingUp,
-  User,
-} from "lucide-react";
+import { FileText, ShoppingCart, Newspaper, TrendingUp, User } from "lucide-react";
 
 interface DashboardStats {
   totalPages: number;
@@ -109,7 +103,9 @@ export default function DashboardOverview() {
   async function fetchDashboard() {
     try {
       setError(null);
-      const res = await fetch(`/api/wordpress/dashboard?lang=${lang}`);
+      const res = await fetch(`/api/wordpress/dashboard?lang=${lang}`, {
+        cache: "no-store",
+      });
 
       if (!res.ok) {
         const errorBody = await res.text();
@@ -243,9 +239,9 @@ export default function DashboardOverview() {
                 <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
                   Tanggal
                 </th>
-                <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
+                {/* <th className="px-4 py-3 text-left font-semibold text-muted-foreground">
                   Aksi
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -276,7 +272,7 @@ export default function DashboardOverview() {
                   <td className="px-4 py-3 text-muted-foreground">
                     {formatShortDate(item.lastEditedAt || item.date)}
                   </td>
-                  <td className="px-4 py-3">
+                  {/* <td className="px-4 py-3">
                     <Link
                       href={`/admin/${
                         TYPE_ROUTE_SEGMENT[item.type] ?? item.type
@@ -285,7 +281,7 @@ export default function DashboardOverview() {
                     >
                       Edit
                     </Link>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -299,6 +295,12 @@ export default function DashboardOverview() {
           Informasi Koneksi WordPress
         </h2>
         <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">WordPress URL:</span>
+            <span className="font-mono text-foreground">
+              {process.env.NEXT_PUBLIC_WORDPRESS_URL || "(belum di-set)"}
+            </span>
+          </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">API Status:</span>
             <span className="text-green-600 dark:text-green-400 font-semibold">
