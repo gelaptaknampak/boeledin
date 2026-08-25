@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { FileText, ShoppingCart, Newspaper, TrendingUp, User } from "lucide-react";
+import {
+  FileText,
+  ShoppingCart,
+  Newspaper,
+  TrendingUp,
+  User,
+} from "lucide-react";
 
 interface DashboardStats {
   totalPages: number;
@@ -293,12 +299,6 @@ export default function DashboardOverview() {
           Informasi Koneksi WordPress
         </h2>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">WordPress URL:</span>
-            <span className="font-mono text-foreground">
-              {process.env.NEXT_PUBLIC_WORDPRESS_URL || "(belum di-set)"}
-            </span>
-          </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">API Status:</span>
             <span className="text-green-600 dark:text-green-400 font-semibold">
