@@ -7,6 +7,8 @@ import Image from "next/image";
 
 import { Mail, Phone, MapPin } from "lucide-react";
 
+import { useTranslation } from "@/hooks/useTranslation";
+
 type SocialMediaItem = {
   logo: number;
   link: string;
@@ -62,6 +64,26 @@ export default function FooterClient({ data }: FooterProps) {
       link: string;
     }[]
   >([]);
+
+  /* =========================================================
+     LANGUAGE
+  ========================================================= */
+  //
+  // Sama kayak Navigation.tsx: ambil bahasa aktif dari store
+  // yang sama, terus setiap link internal di footer WAJIB
+  // nempelin ?lang= itu -- kalau enggak, halaman berikutnya
+  // nggak tau bahasa yang lagi aktif dan Navigation bakal
+  // auto-fallback ke "id".
+
+  const { language } = useTranslation();
+
+  function localizedHref(href: string) {
+    const params = new URLSearchParams();
+
+    params.set("lang", language);
+
+    return `${href}?${params.toString()}`;
+  }
 
   useEffect(() => {
     async function loadAssets() {
@@ -234,18 +256,20 @@ export default function FooterClient({ data }: FooterProps) {
 
           {/* Company */}
           <div>
-            <Image
-              src={logo}
-              alt="BOELEDIN"
-              width={logoWidth}
-              height={logoHeight}
-              style={{
-                width: `${logoWidth}px`,
-                height: `${logoHeight}px`,
-              }}
-              className="mb-5 object-contain"
-              unoptimized
-            />
+            <Link href={localizedHref("/")}>
+              <Image
+                src={logo}
+                alt="BOELEDIN"
+                width={logoWidth}
+                height={logoHeight}
+                style={{
+                  width: `${logoWidth}px`,
+                  height: `${logoHeight}px`,
+                }}
+                className="mb-5 object-contain"
+                unoptimized
+              />
+            </Link>
 
             <p className="mb-4 text-sm leading-relaxed text-[#b8c5d3]">
               {description}
@@ -283,7 +307,7 @@ export default function FooterClient({ data }: FooterProps) {
               {navigationItems.map((item: any) => (
                 <li key={item.link}>
                   <Link
-                    href={item.link}
+                    href={localizedHref(item.link)}
                     className="text-sm text-[#b8c5d3] transition hover:text-[#5db8ff]"
                   >
                     {item.label}
@@ -294,7 +318,7 @@ export default function FooterClient({ data }: FooterProps) {
           </div>
 
           {/* Services */}
-          <div>
+          {/* <div>
             <h4 className="mb-4 font-semibold text-white">
               {serviceTitle}
             </h4>
@@ -303,7 +327,7 @@ export default function FooterClient({ data }: FooterProps) {
               {serviceItems.map((item: any) => (
                 <li key={item.link}>
                   <Link
-                    href={item.link}
+                    href={localizedHref(item.link)}
                     className="text-sm text-[#b8c5d3] transition hover:text-[#5db8ff]"
                   >
                     {item.label}
@@ -311,7 +335,7 @@ export default function FooterClient({ data }: FooterProps) {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
 
           {/* Contact */}
           <div>
