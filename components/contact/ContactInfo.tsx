@@ -131,7 +131,11 @@ export default function ContactInfo({ acf }: Props) {
       {/* Map */}
       <div className="mt-8">
         <div className="h-64 overflow-hidden rounded-lg border border-border md:h-80">
-          <ContactMapWrapper />
+          <ContactMapWrapper
+            lat={acf?.map_latitude}
+            lng={acf?.map_longitude}
+            label={acf?.company_name}
+          />
         </div>
       </div>
     </div>
