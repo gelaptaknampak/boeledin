@@ -1,21 +1,5 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-
-// Fix default marker icon
-const icon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
 interface Props {
   lat?: number | string;
   lng?: number | string;
@@ -45,33 +29,20 @@ export default function ContactMap({
   const finalLat = toValidCoord(lat, DEFAULT_LAT);
   const finalLng = toValidCoord(lng, DEFAULT_LNG);
 
+  // Embed Google Maps pakai URL "output=embed" -- ini cara paling
+  // simpel, nggak butuh API key sama sekali. Query-nya berupa
+  // "lat,lng" jadi pin-nya otomatis nempel di koordinat itu.
+  const mapSrc = `https://maps.google.com/maps?q=${finalLat},${finalLng}&z=14&output=embed`;
+
   return (
     <div className="w-full h-96 rounded-lg overflow-hidden border border-border">
-      <MapContainer
-        // key dipasang biar map beneran RE-MOUNT kalau koordinat
-        // berubah (misal habis data dari CMS selesai di-fetch).
-        // react-leaflet by default nggak reaktif ke perubahan
-        // center/zoom setelah mount pertama, jadi tanpa key ini
-        // map bisa "nyangkut" di posisi lama walau props-nya
-        // udah beda.
-        key={`${finalLat}-${finalLng}`}
-        className="z-0"
-        center={[finalLat, finalLng]}
-        zoom={14}
-        scrollWheelZoom={false}
-        style={{ height: "100%", width: "100%" }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        <Marker position={[finalLat, finalLng]} icon={icon}>
-          <Popup>
-            <div className="text-sm font-semibold">{label}</div>
-          </Popup>
-        </Marker>
-      </MapContainer>
+      <iframe
+        title={label}
+        src={mapSrc}
+        className="w-full h-full border-0"
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
     </div>
   );
 }
