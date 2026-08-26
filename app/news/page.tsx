@@ -4,20 +4,15 @@ import Footer from "@/components/Footer";
 import NewsHero from "@/components/news/NewsHero";
 import NewsGrid from "@/components/news/NewsGrid";
 
-import {
-  getPostById,
-  type LangCode,
-} from "@/lib/wordpress";
+import { getPostById, type LangCode } from "@/lib/wordpress";
 
 import { newsSectionConfig } from "@/components/admin/sections/sectionConfig";
 
-
 export const metadata = {
-  title: "Berita & Wawasan — BOELEDIN",
+  title: "News — PT Future Boeled Indonesia",
   description:
-    "Artikel dan panduan seputar LED display, interactive flat panel, digital signage, dan tren teknologi tampilan terbaru dari BOELEDIN Indonesia.",
+    "Articles and guides on LED displays, interactive flat panels, digital signage, and the latest display technology trends from PT Future Boeled Indonesia.",
 };
-
 
 export default async function NewsPage({
   searchParams,
@@ -26,7 +21,6 @@ export default async function NewsPage({
     lang?: string | string[];
   }>;
 }) {
-
   /*
   =========================
   LANGUAGE
@@ -35,15 +29,9 @@ export default async function NewsPage({
 
   const params = await searchParams;
 
-  const rawLang = Array.isArray(params.lang)
-    ? params.lang[0]
-    : params.lang;
+  const rawLang = Array.isArray(params.lang) ? params.lang[0] : params.lang;
 
-  const lang: LangCode =
-    rawLang === "en"
-      ? "en"
-      : "id";
-
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
 
   /*
   =========================
@@ -51,26 +39,15 @@ export default async function NewsPage({
   =========================
   */
 
-  const heroConfig =
-    newsSectionConfig.hero;
+  const heroConfig = newsSectionConfig.hero;
 
-  const heroPostId =
-    heroConfig.id[lang];
-
+  const heroPostId = heroConfig.id[lang];
 
   if (!heroPostId) {
-    throw new Error(
-      `News Hero untuk bahasa ${lang} belum dikonfigurasi`
-    );
+    throw new Error(`News Hero untuk bahasa ${lang} belum dikonfigurasi`);
   }
 
-
-  const hero =
-    await getPostById(
-      heroPostId,
-      lang
-    );
-
+  const hero = await getPostById(heroPostId, lang);
 
   /*
   =========================
@@ -83,9 +60,7 @@ export default async function NewsPage({
       <Navigation />
 
       <main>
-        <NewsHero
-          acf={hero?.acf ?? {}}
-        />
+        <NewsHero acf={hero?.acf ?? {}} />
 
         <NewsGrid />
       </main>

@@ -12,9 +12,9 @@ import { contactSectionConfig } from "@/components/admin/sections/sectionConfig"
 
 
 export const metadata = {
-  title: "Hubungi Kami — BOELEDIN",
+  title: "Contact Us — PT Future Boeled Indonesia",
   description:
-    "Hubungi PT Future Boeled Indonesia untuk konsultasi digital signage, interactive flat panel, dan LED display.",
+    "Contact PT Future Boeled Indonesia for consultations on digital signage, interactive flat panels, and LED displays.",
 };
 
 

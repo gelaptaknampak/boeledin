@@ -15,9 +15,9 @@ import { aboutSectionConfig } from "@/components/admin/sections/sectionConfig";
 
 
 export const metadata = {
-  title: "Tentang Kami — BOELEDIN Indonesia",
+  title: "About Us — PT Future Boeled Indonesia",
   description:
-    "PT Future Boeled Indonesia, bagian dari BOE Technology Group, menghadirkan solusi display digital terkemuka di Indonesia sejak 2014.",
+    "PT Future Boeled Indonesia, part of the BOE Technology Group, has been providing leading digital display solutions in Indonesia since 2014.",
 };
 
 

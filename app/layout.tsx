@@ -12,9 +12,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "BOELEDIN Solusi Display Digital Terkemuka",
+  title: "PT Future Boeled Indonesia | Display Technology Solutions",
   description:
-    "BOELEDIN Indonesia menyediakan solusi teknologi display terkemuka termasuk Digital Signage, Interactive Flat Panel, dan LED Display berkualitas tinggi.",
+    "PT Future Boeled Indonesia designs and integrates LED displays, digital signage, FIDS, and interactive flat panels for corporations and public institutions in Indonesia.",
   icons: {
     icon: "logo-icon.png",
     apple:
