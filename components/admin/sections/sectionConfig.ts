@@ -310,136 +310,134 @@ export const homeSectionConfig = {
     ],
   },
 
- statSection: {
-  id: {
-    en: 206,
-    id: 591,
+  statSection: {
+    id: {
+      en: 206,
+      id: 591,
+    },
+
+    title: "Statistics",
+
+    fields: [
+      {
+        name: "numbers.0",
+        label: "Stat Number 1",
+        type: "text",
+        acf: "stat_number_1",
+      },
+      {
+        name: "numbers.1",
+        label: "Stat Number 2",
+        type: "text",
+        acf: "stat_number_2",
+      },
+      {
+        name: "numbers.2",
+        label: "Stat Number 3",
+        type: "text",
+        acf: "stat_number_3",
+      },
+      {
+        name: "numbers.3",
+        label: "Stat Number 4",
+        type: "text",
+        acf: "stat_number_4",
+      },
+
+      {
+        name: "labels.0",
+        label: "Label 1",
+        type: "text",
+        acf: "label_1",
+      },
+      {
+        name: "labels.1",
+        label: "Label 2",
+        type: "text",
+        acf: "label_2",
+      },
+      {
+        name: "labels.2",
+        label: "Label 3",
+        type: "text",
+        acf: "label_3",
+      },
+      {
+        name: "labels.3",
+        label: "Label 4",
+        type: "text",
+        acf: "label_4",
+      },
+
+      {
+        name: "support",
+        label: "Support",
+        type: "text",
+        acf: "stat_support",
+      },
+
+      // BARU
+      {
+        name: "hideAndShow",
+        label: "Hide And Show",
+        type: "true_false",
+        acf: "hide_and_show",
+        checkboxLabel: "Sembunyikan bagian Stat Number & Label di frontend",
+      },
+
+      {
+        name: "brands",
+        label: "Brand List",
+        type: "brand-list",
+        acf: "index_brand_list",
+      },
+    ],
   },
-
-  title: "Statistics",
-
-  fields: [
-    {
-      name: "numbers.0",
-      label: "Stat Number 1",
-      type: "text",
-      acf: "stat_number_1",
-    },
-    {
-      name: "numbers.1",
-      label: "Stat Number 2",
-      type: "text",
-      acf: "stat_number_2",
-    },
-    {
-      name: "numbers.2",
-      label: "Stat Number 3",
-      type: "text",
-      acf: "stat_number_3",
-    },
-    {
-      name: "numbers.3",
-      label: "Stat Number 4",
-      type: "text",
-      acf: "stat_number_4",
-    },
-
-    {
-      name: "labels.0",
-      label: "Label 1",
-      type: "text",
-      acf: "label_1",
-    },
-    {
-      name: "labels.1",
-      label: "Label 2",
-      type: "text",
-      acf: "label_2",
-    },
-    {
-      name: "labels.2",
-      label: "Label 3",
-      type: "text",
-      acf: "label_3",
-    },
-    {
-      name: "labels.3",
-      label: "Label 4",
-      type: "text",
-      acf: "label_4",
-    },
-
-    {
-      name: "support",
-      label: "Support",
-      type: "text",
-      acf: "stat_support",
-    },
-
-    // BARU
-    {
-      name: "hideAndShow",
-      label: "Hide And Show",
-      type: "true_false",
-      acf: "hide_and_show",
-      checkboxLabel:
-        "Sembunyikan bagian Stat Number & Label di frontend",
-    },
-
-    {
-      name: "brands",
-      label: "Brand List",
-      type: "brand-list",
-      acf: "index_brand_list",
-    },
-  ],
-},
 
   news: {
-  id: {
-    en: 208,
-    id: 593,
-  },
-
-  title: "News Section",
-
-  fields: [
-    {
-      name: "eyebrow",
-      label: "Eyebrow",
-      type: "text",
-      acf: "news_eyebrow",
-    },
-    {
-      name: "title",
-      label: "Title",
-      type: "text",
-      acf: "news_title",
+    id: {
+      en: 208,
+      id: 593,
     },
 
-    // BARU
-    {
-      name: "articles",
-      label: "News Articles",
-      type: "post_object",
-      acf: "news_articles",
+    title: "News Section",
 
-      selectedLabel: "Artikel Terpilih",
-      searchLabel: "Cari Artikel",
-      searchPlaceholder: "Cari berdasarkan judul artikel...",
-      listLabel: "Daftar Artikel",
-      helperText:
-        "Pilih artikel sesuai urutan yang ingin ditampilkan.",
-
-      postSource: {
-        endpoint: "/api/wordpress/posts",
-        titleField: "title",
-        subtitleField: "excerpt",
-        searchFields: ["title", "excerpt"],
+    fields: [
+      {
+        name: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        acf: "news_eyebrow",
       },
-    },
-  ],
-},
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "news_title",
+      },
+
+      // BARU
+      {
+        name: "articles",
+        label: "News Articles",
+        type: "post_object",
+        acf: "news_articles",
+
+        selectedLabel: "Artikel Terpilih",
+        searchLabel: "Cari Artikel",
+        searchPlaceholder: "Cari berdasarkan judul artikel...",
+        listLabel: "Daftar Artikel",
+        helperText: "Pilih artikel sesuai urutan yang ingin ditampilkan.",
+
+        postSource: {
+          endpoint: "/api/wordpress/posts",
+          titleField: "title",
+          subtitleField: "excerpt",
+          searchFields: ["title", "excerpt"],
+        },
+      },
+    ],
+  },
 
   cta: {
     id: {
@@ -741,7 +739,6 @@ export const aboutSectionConfig = {
         type: "textarea",
         acf: "about_value_4_description",
       },
-      
     ],
   },
 
@@ -1207,6 +1204,18 @@ export const contactSectionConfig = {
         label: "Business Time 2",
         type: "text",
         acf: "business_time_2",
+      },
+      {
+        name: "latitude",
+        label: "Map Latitude",
+        type: "text",
+        acf: "map_latitude",
+      },
+      {
+        name: "longitude",
+        label: "Map Longitude",
+        type: "text",
+        acf: "map_longitude",
       },
     ],
   },
