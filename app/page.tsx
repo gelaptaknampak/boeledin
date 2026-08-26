@@ -30,12 +30,17 @@ export default async function Home({
   // =========================================================
   // LANGUAGE
   // =========================================================
+  //
+  // Sebelumnya: rawLang === "en" ? "en" : "id" -- defaultnya
+  // ID kalau ?lang= nggak ada sama sekali (kasus buka
+  // boeledin.com polos). Dibalik sekarang jadi default EN,
+  // pola sama persis kayak fix di Navigation.tsx.
 
   const params = await searchParams;
 
   const rawLang = Array.isArray(params.lang) ? params.lang[0] : params.lang;
 
-  const lang: LangCode = rawLang === "en" ? "en" : "id";
+  const lang: LangCode = rawLang === "id" ? "id" : "en";
 
   console.log("================================");
   console.log("HOME LANGUAGE:", lang);
