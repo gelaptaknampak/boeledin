@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 
 import ProductsHero from "@/components/products/ProductsHero";
 import ProductsGrid from "@/components/products/ProductsGrid";
+import ProductCTA from "@/components/productDetail/ProductCTA";
 
 import { getPostById, type LangCode } from "@/lib/wordpress";
 
@@ -63,6 +64,8 @@ export default async function ProductsPage({
         <ProductsHero acf={hero?.acf ?? {}} />
 
         <ProductsGrid />
+
+        <ProductCTA />
       </main>
 
       <Footer lang={lang} />

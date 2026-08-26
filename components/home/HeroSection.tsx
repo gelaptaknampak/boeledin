@@ -74,15 +74,15 @@ export default function HeroSection({ data }: Props) {
               }}
               className="
                 max-w-3xl
-                text-3xl
+                text-xl
                 font-bold
                 leading-tight
                 tracking-[-0.03em]
                 text-balance
-                sm:text-4xl
-                md:text-5xl
-                lg:text-6xl
-                xl:text-7xl
+                sm:text-2xl
+                md:text-3xl
+                lg:text-4xl
+                xl:text-5xl
               "
             >
               {data?.title ?? ""}

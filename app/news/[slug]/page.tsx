@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import ProductCTA from "@/components/productDetail/ProductCTA";
 
 import Navigation from "@/components/Navigation";
 
@@ -227,6 +228,7 @@ export default async function NewsDetail({
           </article>
         </div>
       </section>
+      <ProductCTA />
     </>
   );
 }

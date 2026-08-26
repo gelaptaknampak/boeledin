@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 
 import NewsHero from "@/components/news/NewsHero";
 import NewsGrid from "@/components/news/NewsGrid";
+import ProductCTA from "@/components/productDetail/ProductCTA";
 
 import { getPostById, type LangCode } from "@/lib/wordpress";
 
@@ -63,6 +64,8 @@ export default async function NewsPage({
         <NewsHero acf={hero?.acf ?? {}} />
 
         <NewsGrid />
+
+        <ProductCTA />
       </main>
 
       <Footer lang={lang} />
