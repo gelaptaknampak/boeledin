@@ -5,6 +5,9 @@ import { ArrowLeft } from "lucide-react";
 import ProductCTA from "@/components/productDetail/ProductCTA";
 
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+
+import type { LangCode } from "@/lib/wordpress";
 
 interface Props {
   params: Promise<{
@@ -100,7 +103,8 @@ export default async function NewsDetail({
 }: Props) {
   const { slug } = await params;
 
-  const lang = searchParams?.lang || "id";
+  const rawLang = searchParams?.lang;
+  const lang: LangCode = rawLang === "en" ? "en" : "id";
 
   const post = await getPost(slug, lang);
 
@@ -228,7 +232,10 @@ export default async function NewsDetail({
           </article>
         </div>
       </section>
-      <ProductCTA />
+      <div className="mx-auto px-4 py-16">
+        <ProductCTA />
+      </div>
+      <Footer lang={lang} />
     </>
   );
 }

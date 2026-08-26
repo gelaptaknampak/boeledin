@@ -65,7 +65,9 @@ export default async function ProductsPage({
 
         <ProductsGrid />
 
-        <ProductCTA />
+        <div className="mx-auto px-4 py-16">
+          <ProductCTA />
+        </div>
       </main>
 
       <Footer lang={lang} />
