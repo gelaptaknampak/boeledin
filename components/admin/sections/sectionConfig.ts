@@ -226,7 +226,7 @@ export const homeSectionConfig = {
 
   productShowcase: {
     id: {
-      en: 485,
+      en: 202,
       id: 586,
     },
 
