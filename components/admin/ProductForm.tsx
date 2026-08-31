@@ -39,6 +39,23 @@ interface Category {
   slug: string;
 }
 
+/**
+ * =========================================================
+ * SANITIZE BULLET CHARS (WORD/PPT)
+ * =========================================================
+ *
+ * Bullet dari Word/PowerPoint (Wingdings/Symbol) pakai
+ * karakter di Unicode Private Use Area (U+E000 - U+F8FF).
+ * Font biasa gak punya glyph-nya → tampil kotak kosong (□).
+ *
+ * Ganti semua karakter di range itu jadi "-" biar aman
+ * ditampilkan di textarea/browser manapun.
+ */
+function sanitizeBulletChars(value: string): string {
+  if (!value) return value;
+  return value.replace(/[\uE000-\uF8FF]/g, "-");
+}
+
 export default function ProductForm({ mode, productId }: ProductFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -181,12 +198,6 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
 
   /**
    * =========================================================
-   * LOAD BRAND & CATEGORY
-   * =========================================================
-   */
-
-  /**
-   * =========================================================
    * HANDLE INPUT
    * =========================================================
    */
@@ -202,6 +213,35 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
       ...prev,
       [name]:
         name === "brand" || name === "jenis_produk" ? Number(value) : value,
+    }));
+  }
+
+  /**
+   * =========================================================
+   * HANDLE PASTE (sanitize bullet char dari Word/PPT)
+   * =========================================================
+   */
+
+  function handlePasteSanitize(
+    e: React.ClipboardEvent<HTMLTextAreaElement>,
+    fieldName: "short_description" | "description" | "spesifikasi",
+  ) {
+    const pasted = e.clipboardData.getData("text/plain");
+    const cleaned = sanitizeBulletChars(pasted);
+
+    // Gak ada karakter aneh → biarin paste jalan normal (default browser)
+    if (cleaned === pasted) return;
+
+    e.preventDefault();
+
+    const target = e.currentTarget;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+
+    setForm((prev) => ({
+      ...prev,
+      [fieldName]:
+        prev[fieldName].slice(0, start) + cleaned + prev[fieldName].slice(end),
     }));
   }
 
@@ -264,18 +304,19 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     }
 
     if (!value.includes("<")) {
-      return value;
+      return sanitizeBulletChars(value);
     }
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(value, "text/html");
 
-    return (
+    const text =
       doc.body.textContent
         ?.replace(/\r\n/g, "\n")
         .replace(/\n{3,}/g, "\n\n")
-        .trim() ?? ""
-    );
+        .trim() ?? "";
+
+    return sanitizeBulletChars(text);
   }
 
   async function fetchProduct() {
@@ -451,46 +492,30 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
        */
 
       setForm({
-  nama_produk:
-    product.acf?.nama_produk ?? "",
+        nama_produk: product.acf?.nama_produk ?? "",
 
-  model_produk:
-    product.acf?.model_produk ?? "",
+        model_produk: product.acf?.model_produk ?? "",
 
-  brand: brandId,
+        brand: brandId,
 
-  jenis_produk:
-    jenisProdukId,
+        jenis_produk: jenisProdukId,
 
-  short_description:
-    htmlToPlainText(
-      product.acf?.short_description
-    ),
+        short_description: htmlToPlainText(product.acf?.short_description),
 
-  description:
-    htmlToPlainText(
-      product.acf?.description
-    ),
+        description: htmlToPlainText(product.acf?.description),
 
-  spesifikasi:
-    htmlToPlainText(
-      product.acf?.spesifikasi
-    ),
+        spesifikasi: htmlToPlainText(product.acf?.spesifikasi),
 
-  feature_image:
-    rawGallery,
+        feature_image: rawGallery,
 
-  feature_image_urls:
-    validUrls,
+        feature_image_urls: validUrls,
 
-  download_brosur:
-    product.acf?.download_brosur
-      ? Number(product.acf.download_brosur)
-      : null,
+        download_brosur: product.acf?.download_brosur
+          ? Number(product.acf.download_brosur)
+          : null,
 
-  download_brosur_url:
-    pdfUrl,
-});
+        download_brosur_url: pdfUrl,
+      });
 
       console.log("========================================");
       console.log("FORM VALUES SET:");
@@ -508,160 +533,124 @@ export default function ProductForm({ mode, productId }: ProductFormProps) {
     }
   }
 
-async function resizeImage(file: File): Promise<File> {
-  const MAX_SIZE = 1600;
-  const JPEG_QUALITY = 0.85;
+  async function resizeImage(file: File): Promise<File> {
+    const MAX_SIZE = 1600;
+    const JPEG_QUALITY = 0.85;
 
-  // Bukan gambar → jangan diproses
-  if (!file.type.startsWith("image/")) {
-    return file;
-  }
+    // Bukan gambar → jangan diproses
+    if (!file.type.startsWith("image/")) {
+      return file;
+    }
 
-  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image();
 
-    const objectUrl = URL.createObjectURL(file);
+      const objectUrl = URL.createObjectURL(file);
 
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      resolve(img);
-    };
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(img);
+      };
 
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(
-        new Error(`Gagal membaca gambar: ${file.name}`),
-      );
-    };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error(`Gagal membaca gambar: ${file.name}`));
+      };
 
-    img.src = objectUrl;
-  });
+      img.src = objectUrl;
+    });
 
-  const originalWidth = image.naturalWidth;
-  const originalHeight = image.naturalHeight;
+    const originalWidth = image.naturalWidth;
+    const originalHeight = image.naturalHeight;
 
-  console.log(
-    `[IMAGE] ${file.name}`,
-    `${originalWidth} × ${originalHeight}`,
-    file.type,
-  );
-
-  const scale = Math.min(
-    MAX_SIZE / originalWidth,
-    MAX_SIZE / originalHeight,
-    1,
-  );
-
-  const newWidth = Math.round(originalWidth * scale);
-  const newHeight = Math.round(originalHeight * scale);
-
-  console.log(
-    `[IMAGE] RESIZED`,
-    `${newWidth} × ${newHeight}`,
-  );
-
-  const canvas = document.createElement("canvas");
-
-  canvas.width = newWidth;
-  canvas.height = newHeight;
-
-  const context = canvas.getContext("2d");
-
-  if (!context) {
-    throw new Error("Canvas tidak tersedia di browser.");
-  }
-
-  context.imageSmoothingEnabled = true;
-  context.imageSmoothingQuality = "high";
-
-  // Pastikan canvas transparan
-  context.clearRect(0, 0, newWidth, newHeight);
-
-  context.drawImage(
-    image,
-    0,
-    0,
-    newWidth,
-    newHeight,
-  );
-
-  /**
-   * =========================================================
-   * PERTAHANKAN TRANSPARENCY
-   * =========================================================
-   *
-   * PNG dan WebP bisa memiliki alpha channel.
-   * Jangan convert keduanya ke JPEG.
-   */
-
-  const isPng = file.type === "image/png";
-  const isWebp = file.type === "image/webp";
-
-  const outputType =
-    isPng || isWebp
-      ? file.type
-      : "image/jpeg";
-
-  const extension =
-    outputType === "image/png"
-      ? "png"
-      : outputType === "image/webp"
-        ? "webp"
-        : "jpg";
-
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (result) => {
-        if (!result) {
-          reject(
-            new Error(
-              `Gagal melakukan kompresi ${file.name}`,
-            ),
-          );
-
-          return;
-        }
-
-        resolve(result);
-      },
-      outputType,
-      outputType === "image/jpeg"
-        ? JPEG_QUALITY
-        : undefined,
+    console.log(
+      `[IMAGE] ${file.name}`,
+      `${originalWidth} × ${originalHeight}`,
+      file.type,
     );
-  });
 
-  const originalName = file.name.replace(
-    /\.[^/.]+$/,
-    "",
-  );
+    const scale = Math.min(
+      MAX_SIZE / originalWidth,
+      MAX_SIZE / originalHeight,
+      1,
+    );
 
-  const resizedFile = new File(
-    [blob],
-    `${originalName}.${extension}`,
-    {
+    const newWidth = Math.round(originalWidth * scale);
+    const newHeight = Math.round(originalHeight * scale);
+
+    console.log(`[IMAGE] RESIZED`, `${newWidth} × ${newHeight}`);
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Canvas tidak tersedia di browser.");
+    }
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+
+    // Pastikan canvas transparan
+    context.clearRect(0, 0, newWidth, newHeight);
+
+    context.drawImage(image, 0, 0, newWidth, newHeight);
+
+    /**
+     * =========================================================
+     * PERTAHANKAN TRANSPARENCY
+     * =========================================================
+     *
+     * PNG dan WebP bisa memiliki alpha channel.
+     * Jangan convert keduanya ke JPEG.
+     */
+
+    const isPng = file.type === "image/png";
+    const isWebp = file.type === "image/webp";
+
+    const outputType = isPng || isWebp ? file.type : "image/jpeg";
+
+    const extension =
+      outputType === "image/png"
+        ? "png"
+        : outputType === "image/webp"
+          ? "webp"
+          : "jpg";
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (result) => {
+          if (!result) {
+            reject(new Error(`Gagal melakukan kompresi ${file.name}`));
+
+            return;
+          }
+
+          resolve(result);
+        },
+        outputType,
+        outputType === "image/jpeg" ? JPEG_QUALITY : undefined,
+      );
+    });
+
+    const originalName = file.name.replace(/\.[^/.]+$/, "");
+
+    const resizedFile = new File([blob], `${originalName}.${extension}`, {
       type: outputType,
       lastModified: Date.now(),
-    },
-  );
+    });
 
-  console.log(
-    `[IMAGE] OUTPUT`,
-    `${file.name} → ${resizedFile.name}`,
-  );
+    console.log(`[IMAGE] OUTPUT`, `${file.name} → ${resizedFile.name}`);
 
-  console.log(
-    `[IMAGE] TYPE`,
-    `${file.type} → ${resizedFile.type}`,
-  );
+    console.log(`[IMAGE] TYPE`, `${file.type} → ${resizedFile.type}`);
 
-  console.log(
-    `[IMAGE] SIZE`,
-    `${file.size} → ${resizedFile.size} bytes`,
-  );
+    console.log(`[IMAGE] SIZE`, `${file.size} → ${resizedFile.size} bytes`);
 
-  return resizedFile;
-} 
+    return resizedFile;
+  }
   /**
    * =========================================================
    * UPLOAD MEDIA
@@ -669,43 +658,31 @@ async function resizeImage(file: File): Promise<File> {
    */
 
   async function uploadMedia(file: File) {
-  /**
-   * Resize/compress dilakukan DI BROWSER
-   * sebelum file dikirim ke API.
-   */
-  const processedFile = await resizeImage(file);
+    /**
+     * Resize/compress dilakukan DI BROWSER
+     * sebelum file dikirim ke API.
+     */
+    const processedFile = await resizeImage(file);
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  formData.append(
-    "file",
-    processedFile,
-    processedFile.name,
-  );
+    formData.append("file", processedFile, processedFile.name);
 
-  const res = await fetch("/api/wordpress/media", {
-    method: "POST",
-    body: formData,
-  });
+    const res = await fetch("/api/wordpress/media", {
+      method: "POST",
+      body: formData,
+    });
 
-  if (!res.ok) {
-    const errorData = await res.json().catch(
-      () => null,
-    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
 
-    console.error(
-      "UPLOAD MEDIA ERROR:",
-      errorData,
-    );
+      console.error("UPLOAD MEDIA ERROR:", errorData);
 
-    throw new Error(
-      errorData?.message ||
-        "Upload media gagal",
-    );
+      throw new Error(errorData?.message || "Upload media gagal");
+    }
+
+    return res.json();
   }
-
-  return res.json();
-}
 
   /**
    * =========================================================
@@ -769,28 +746,25 @@ async function resizeImage(file: File): Promise<File> {
       const uploadedIds: number[] = [];
 
       if (selectedImages.length > 0) {
-  for (const file of selectedImages) {
-    const media = await uploadMedia(file);
+        for (const file of selectedImages) {
+          const media = await uploadMedia(file);
 
-    const mediaId = Number(media.id);
+          const mediaId = Number(media.id);
 
-    if (mediaId > 0) {
-      uploadedIds.push(mediaId);
-    }
-  }
+          if (mediaId > 0) {
+            uploadedIds.push(mediaId);
+          }
+        }
 
-  const existingIds = form.feature_image
-    .split(/[\n,]+/)
-    .map((id) => Number(id.trim()))
-    .filter((id) => id > 0);
+        const existingIds = form.feature_image
+          .split(/[\n,]+/)
+          .map((id) => Number(id.trim()))
+          .filter((id) => id > 0);
 
-  const allGalleryIds = [
-    ...existingIds,
-    ...uploadedIds,
-  ];
+        const allGalleryIds = [...existingIds, ...uploadedIds];
 
-  gallery = allGalleryIds.join("\n");
-}
+        gallery = allGalleryIds.join("\n");
+      }
 
       /**
        * =====================================================
@@ -817,6 +791,10 @@ async function resizeImage(file: File): Promise<File> {
        *
        * brand -> [brand]
        * jenis-produk -> [jenisProduk]
+       *
+       * short_description/description/spesifikasi disanitize
+       * lagi di sini sebagai jaring pengaman terakhir, jaga-jaga
+       * kalau ada karakter bullet Word/PPT yang lolos dari onPaste.
        */
 
       const payload = {
@@ -828,11 +806,11 @@ async function resizeImage(file: File): Promise<File> {
 
         "jenis-produk": Number(form.jenis_produk),
 
-        short_description: form.short_description,
+        short_description: sanitizeBulletChars(form.short_description),
 
-        description: form.description,
+        description: sanitizeBulletChars(form.description),
 
-        spesifikasi: form.spesifikasi,
+        spesifikasi: sanitizeBulletChars(form.spesifikasi),
 
         feature_image: gallery,
 
@@ -934,80 +912,73 @@ async function resizeImage(file: File): Promise<File> {
    */
 
   function removeImage(index: number) {
-  setForm((prev) => {
-    // ID gambar lama yang saat ini tersimpan
-    const existingIds = prev.feature_image
-      .split(/[\n,]+/)
-      .map((id) => Number(id.trim()))
-      .filter((id) => id > 0);
+    setForm((prev) => {
+      // ID gambar lama yang saat ini tersimpan
+      const existingIds = prev.feature_image
+        .split(/[\n,]+/)
+        .map((id) => Number(id.trim()))
+        .filter((id) => id > 0);
 
-    /**
-     * =====================================================
-     * REMOVE EXISTING IMAGE
-     * =====================================================
-     *
-     * Kalau index masih berada di dalam existingIds,
-     * berarti yang dihapus adalah gambar yang sudah ada
-     * di WordPress.
-     */
-    if (index < existingIds.length) {
-      const removedId = existingIds[index];
+      /**
+       * =====================================================
+       * REMOVE EXISTING IMAGE
+       * =====================================================
+       *
+       * Kalau index masih berada di dalam existingIds,
+       * berarti yang dihapus adalah gambar yang sudah ada
+       * di WordPress.
+       */
+      if (index < existingIds.length) {
+        const removedId = existingIds[index];
 
-      const newIds = existingIds.filter(
-        (_, i) => i !== index,
-      );
+        const newIds = existingIds.filter((_, i) => i !== index);
 
-      console.log("[IMAGE] REMOVE EXISTING MEDIA:", removedId);
-      console.log("[IMAGE] REMAINING MEDIA:", newIds);
+        console.log("[IMAGE] REMOVE EXISTING MEDIA:", removedId);
+        console.log("[IMAGE] REMAINING MEDIA:", newIds);
+
+        return {
+          ...prev,
+
+          // HAPUS ID MEDIA DARI GALLERY
+          feature_image: newIds.join("\n"),
+
+          // HAPUS PREVIEW
+          feature_image_urls: prev.feature_image_urls.filter(
+            (_, i) => i !== index,
+          ),
+        };
+      }
+
+      /**
+       * =====================================================
+       * REMOVE NEW IMAGE
+       * =====================================================
+       *
+       * Gambar baru tidak ada di feature_image.
+       *
+       * Misalnya:
+       *
+       * existingIds = [755, 756]
+       * selectedImages = [fileA, fileB]
+       *
+       * index 2 berarti fileA
+       * index 3 berarti fileB
+       */
+      const newImageIndex = index - existingIds.length;
+
+      console.log("[IMAGE] REMOVE NEW IMAGE:", newImageIndex);
+
+      setSelectedImages((files) => files.filter((_, i) => i !== newImageIndex));
 
       return {
         ...prev,
 
-        // HAPUS ID MEDIA DARI GALLERY
-        feature_image: newIds.join("\n"),
-
-        // HAPUS PREVIEW
         feature_image_urls: prev.feature_image_urls.filter(
           (_, i) => i !== index,
         ),
       };
-    }
-
-    /**
-     * =====================================================
-     * REMOVE NEW IMAGE
-     * =====================================================
-     *
-     * Gambar baru tidak ada di feature_image.
-     *
-     * Misalnya:
-     *
-     * existingIds = [755, 756]
-     * selectedImages = [fileA, fileB]
-     *
-     * index 2 berarti fileA
-     * index 3 berarti fileB
-     */
-    const newImageIndex = index - existingIds.length;
-
-    console.log(
-      "[IMAGE] REMOVE NEW IMAGE:",
-      newImageIndex,
-    );
-
-    setSelectedImages((files) =>
-      files.filter((_, i) => i !== newImageIndex),
-    );
-
-    return {
-      ...prev,
-
-      feature_image_urls: prev.feature_image_urls.filter(
-        (_, i) => i !== index,
-      ),
-    };
-  });
-}
+    });
+  }
 
   /**
    * =========================================================
@@ -1133,6 +1104,7 @@ async function resizeImage(file: File): Promise<File> {
           name="short_description"
           value={form.short_description}
           onChange={handleChange}
+          onPaste={(e) => handlePasteSanitize(e, "short_description")}
           className="w-full border rounded-lg px-4 py-2"
         />
       </div>
@@ -1147,6 +1119,7 @@ async function resizeImage(file: File): Promise<File> {
           name="description"
           value={form.description}
           onChange={handleChange}
+          onPaste={(e) => handlePasteSanitize(e, "description")}
           className="w-full border rounded-lg px-4 py-2"
         />
       </div>
@@ -1161,6 +1134,7 @@ async function resizeImage(file: File): Promise<File> {
           name="spesifikasi"
           value={form.spesifikasi}
           onChange={handleChange}
+          onPaste={(e) => handlePasteSanitize(e, "spesifikasi")}
           className="w-full border rounded-lg px-4 py-2"
         />
       </div>
