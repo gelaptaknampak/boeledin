@@ -119,16 +119,13 @@ export default async function AboutPage({
           acf={story?.acf ?? {}}
         />
 
-
-        <AboutCoreServices
-          acf={coreServices?.acf ?? {}}
-        />
-
-
         <AboutStats
           acf={stats?.acf ?? {}}
         />
 
+        <AboutCoreServices
+          acf={coreServices?.acf ?? {}}
+        />
 
         <AboutValues
           acf={values?.acf ?? {}}
