@@ -1,0 +1,434 @@
+[
+  {
+    "key": "group_71a26d2592ec4",
+    "title": "About One Portfolio",
+    "fields": [
+      {
+        "key": "field_d5c6081944ae4",
+        "label": "Eyebrow",
+        "name": "about_portfolio_eyebrow",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_3cf8f3cda73f4",
+        "label": "Title",
+        "name": "about_portfolio_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_2d26feb00c5a4",
+        "label": "Description",
+        "name": "about_portfolio_description",
+        "aria-label": "",
+        "type": "textarea",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "rows": "",
+        "placeholder": "",
+        "new_lines": ""
+      },
+      {
+        "key": "field_3e758631feea4",
+        "label": "Item 1 Icon",
+        "name": "about_portfolio_item_1_icon",
+        "aria-label": "",
+        "type": "icon_picker",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "return_format": "array",
+        "library": "all",
+        "tabs": "all"
+      },
+      {
+        "key": "field_63e5cca10bd54",
+        "label": "Item 1 Title",
+        "name": "about_portfolio_item_1_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_58c33c75dc8a4",
+        "label": "Item 1 Subtitle",
+        "name": "about_portfolio_item_1_subtitle",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_21cf3c21b7ec4",
+        "label": "Item 2 Icon",
+        "name": "about_portfolio_item_2_icon",
+        "aria-label": "",
+        "type": "icon_picker",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "return_format": "array",
+        "library": "all",
+        "tabs": "all"
+      },
+      {
+        "key": "field_ab7d8114ba254",
+        "label": "Item 2 Title",
+        "name": "about_portfolio_item_2_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_b62395fa80b84",
+        "label": "Item 2 Subtitle",
+        "name": "about_portfolio_item_2_subtitle",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_7c8ac187d5c94",
+        "label": "Item 3 Icon",
+        "name": "about_portfolio_item_3_icon",
+        "aria-label": "",
+        "type": "icon_picker",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "return_format": "array",
+        "library": "all",
+        "tabs": "all"
+      },
+      {
+        "key": "field_a853fd2a262b4",
+        "label": "Item 3 Title",
+        "name": "about_portfolio_item_3_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_1253e5f6bb3a4",
+        "label": "Item 3 Subtitle",
+        "name": "about_portfolio_item_3_subtitle",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_99b22ddf4b694",
+        "label": "Item 4 Icon",
+        "name": "about_portfolio_item_4_icon",
+        "aria-label": "",
+        "type": "icon_picker",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "return_format": "array",
+        "library": "all",
+        "tabs": "all"
+      },
+      {
+        "key": "field_0b27a51e02dc4",
+        "label": "Item 4 Title",
+        "name": "about_portfolio_item_4_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_910ac6fc99a54",
+        "label": "Item 4 Subtitle",
+        "name": "about_portfolio_item_4_subtitle",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_56c3bbcab0af4",
+        "label": "Item 5 Icon",
+        "name": "about_portfolio_item_5_icon",
+        "aria-label": "",
+        "type": "icon_picker",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "return_format": "array",
+        "library": "all",
+        "tabs": "all"
+      },
+      {
+        "key": "field_832f5c6e90a84",
+        "label": "Item 5 Title",
+        "name": "about_portfolio_item_5_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_4b9f73f626964",
+        "label": "Item 5 Subtitle",
+        "name": "about_portfolio_item_5_subtitle",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_0c9a3b7a11cb4",
+        "label": "Item 6 Icon",
+        "name": "about_portfolio_item_6_icon",
+        "aria-label": "",
+        "type": "icon_picker",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "return_format": "array",
+        "library": "all",
+        "tabs": "all"
+      },
+      {
+        "key": "field_a5f20825a3074",
+        "label": "Item 6 Title",
+        "name": "about_portfolio_item_6_title",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      },
+      {
+        "key": "field_166463823ad54",
+        "label": "Item 6 Subtitle",
+        "name": "about_portfolio_item_6_subtitle",
+        "aria-label": "",
+        "type": "text",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "wrapper": {
+          "width": "",
+          "class": "",
+          "id": ""
+        },
+        "default_value": "",
+        "maxlength": "",
+        "placeholder": "",
+        "prepend": "",
+        "append": ""
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "page_template",
+          "operator": "==",
+          "value": "default"
+        }
+      ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 1
+  }
+]

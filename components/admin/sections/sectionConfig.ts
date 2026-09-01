@@ -579,6 +579,120 @@ export const aboutSectionConfig = {
     ],
   },
 
+  // BARU — masuk di bawah "story"
+  coreServices: {
+    id: {
+      en: 938, // TODO: isi Post ID halaman EN setelah dibuat di WP
+      id: 940, // TODO: isi Post ID halaman ID setelah dibuat di WP
+    },
+
+    title: "About Core Services",
+
+    fields: [
+      {
+        name: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        acf: "about_coreservices_eyebrow",
+      },
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "about_coreservices_title",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        acf: "about_coreservices_description",
+      },
+
+      {
+        name: "services.0.icon",
+        label: "Service 1 Icon",
+        type: "icon",
+        acf: "about_coreservices_service_1_icon",
+      },
+      {
+        name: "services.0.title",
+        label: "Service 1 Title",
+        type: "text",
+        acf: "about_coreservices_service_1_title",
+      },
+      {
+        name: "services.0.description",
+        label: "Service 1 Description",
+        type: "textarea",
+        acf: "about_coreservices_service_1_description",
+      },
+
+      {
+        name: "services.1.icon",
+        label: "Service 2 Icon",
+        type: "icon",
+        acf: "about_coreservices_service_2_icon",
+      },
+      {
+        name: "services.1.title",
+        label: "Service 2 Title",
+        type: "text",
+        acf: "about_coreservices_service_2_title",
+      },
+      {
+        name: "services.1.description",
+        label: "Service 2 Description",
+        type: "textarea",
+        acf: "about_coreservices_service_2_description",
+      },
+
+      {
+        name: "services.2.icon",
+        label: "Service 3 Icon",
+        type: "icon",
+        acf: "about_coreservices_service_3_icon",
+      },
+      {
+        name: "services.2.title",
+        label: "Service 3 Title",
+        type: "text",
+        acf: "about_coreservices_service_3_title",
+      },
+      {
+        name: "services.2.description",
+        label: "Service 3 Description",
+        type: "textarea",
+        acf: "about_coreservices_service_3_description",
+      },
+
+      {
+        name: "services.3.icon",
+        label: "Service 4 Icon",
+        type: "icon",
+        acf: "about_coreservices_service_4_icon",
+      },
+      {
+        name: "services.3.title",
+        label: "Service 4 Title",
+        type: "text",
+        acf: "about_coreservices_service_4_title",
+      },
+      {
+        name: "services.3.description",
+        label: "Service 4 Description",
+        type: "textarea",
+        acf: "about_coreservices_service_4_description",
+      },
+
+      // {
+      //   name: "footnote",
+      //   label: "Footnote",
+      //   type: "text",
+      //   acf: "about_coreservices_footnote",
+      // },
+    ],
+  },
+
   stats: {
     id: {
       en: 260,
@@ -738,6 +852,277 @@ export const aboutSectionConfig = {
         label: "Value 4 Description",
         type: "textarea",
         acf: "about_value_4_description",
+      },
+    ],
+  },
+
+  // BARU — masuk setelah "values"
+  industriesWeServe: {
+    id: {
+      en: 942, // TODO: isi Post ID halaman EN setelah dibuat di WP
+      id: 944, // TODO: isi Post ID halaman ID setelah dibuat di WP
+    },
+
+    title: "About Industries We Serve",
+
+    fields: [
+      {
+        name: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        acf: "about_industries_eyebrow",
+      },
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "about_industries_title",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        acf: "about_industries_description",
+      },
+
+      {
+        name: "industries.0.icon",
+        label: "Industry 1 Icon",
+        type: "icon",
+        acf: "about_industries_item_1_icon",
+      },
+      {
+        name: "industries.0.title",
+        label: "Industry 1 Title",
+        type: "text",
+        acf: "about_industries_item_1_title",
+      },
+      {
+        name: "industries.0.description",
+        label: "Industry 1 Description",
+        type: "textarea",
+        acf: "about_industries_item_1_description",
+      },
+
+      {
+        name: "industries.1.icon",
+        label: "Industry 2 Icon",
+        type: "icon",
+        acf: "about_industries_item_2_icon",
+      },
+      {
+        name: "industries.1.title",
+        label: "Industry 2 Title",
+        type: "text",
+        acf: "about_industries_item_2_title",
+      },
+      {
+        name: "industries.1.description",
+        label: "Industry 2 Description",
+        type: "textarea",
+        acf: "about_industries_item_2_description",
+      },
+
+      {
+        name: "industries.2.icon",
+        label: "Industry 3 Icon",
+        type: "icon",
+        acf: "about_industries_item_3_icon",
+      },
+      {
+        name: "industries.2.title",
+        label: "Industry 3 Title",
+        type: "text",
+        acf: "about_industries_item_3_title",
+      },
+      {
+        name: "industries.2.description",
+        label: "Industry 3 Description",
+        type: "textarea",
+        acf: "about_industries_item_3_description",
+      },
+
+      {
+        name: "industries.3.icon",
+        label: "Industry 4 Icon",
+        type: "icon",
+        acf: "about_industries_item_4_icon",
+      },
+      {
+        name: "industries.3.title",
+        label: "Industry 4 Title",
+        type: "text",
+        acf: "about_industries_item_4_title",
+      },
+      {
+        name: "industries.3.description",
+        label: "Industry 4 Description",
+        type: "textarea",
+        acf: "about_industries_item_4_description",
+      },
+
+      {
+        name: "industries.4.icon",
+        label: "Industry 5 Icon",
+        type: "icon",
+        acf: "about_industries_item_5_icon",
+      },
+      {
+        name: "industries.4.title",
+        label: "Industry 5 Title",
+        type: "text",
+        acf: "about_industries_item_5_title",
+      },
+      {
+        name: "industries.4.description",
+        label: "Industry 5 Description",
+        type: "textarea",
+        acf: "about_industries_item_5_description",
+      },
+    ],
+  },
+
+  // BARU — masuk setelah "industriesWeServe"
+  onePortfolio: {
+    id: {
+      en: 946, // TODO: isi Post ID halaman EN setelah dibuat di WP
+      id: 948, // TODO: isi Post ID halaman ID setelah dibuat di WP
+    },
+
+    title: "About One Portfolio",
+
+    fields: [
+      {
+        name: "eyebrow",
+        label: "Eyebrow",
+        type: "text",
+        acf: "about_portfolio_eyebrow",
+      },
+      {
+        name: "title",
+        label: "Title",
+        type: "text",
+        acf: "about_portfolio_title",
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        acf: "about_portfolio_description",
+      },
+
+      {
+        name: "items.0.icon",
+        label: "Item 1 Icon",
+        type: "image",
+        acf: "about_portfolio_item_1_icon",
+      },
+      {
+        name: "items.0.title",
+        label: "Item 1 Title",
+        type: "text",
+        acf: "about_portfolio_item_1_title",
+      },
+      {
+        name: "items.0.subtitle",
+        label: "Item 1 Subtitle",
+        type: "text",
+        acf: "about_portfolio_item_1_subtitle",
+      },
+
+      {
+        name: "items.1.icon",
+        label: "Item 2 Icon",
+        type: "image",
+        acf: "about_portfolio_item_2_icon",
+      },
+      {
+        name: "items.1.title",
+        label: "Item 2 Title",
+        type: "text",
+        acf: "about_portfolio_item_2_title",
+      },
+      {
+        name: "items.1.subtitle",
+        label: "Item 2 Subtitle",
+        type: "text",
+        acf: "about_portfolio_item_2_subtitle",
+      },
+
+      {
+        name: "items.2.icon",
+        label: "Item 3 Icon",
+        type: "image",
+        acf: "about_portfolio_item_3_icon",
+      },
+      {
+        name: "items.2.title",
+        label: "Item 3 Title",
+        type: "text",
+        acf: "about_portfolio_item_3_title",
+      },
+      {
+        name: "items.2.subtitle",
+        label: "Item 3 Subtitle",
+        type: "text",
+        acf: "about_portfolio_item_3_subtitle",
+      },
+
+      {
+        name: "items.3.icon",
+        label: "Item 4 Icon",
+        type: "image",
+        acf: "about_portfolio_item_4_icon",
+      },
+      {
+        name: "items.3.title",
+        label: "Item 4 Title",
+        type: "text",
+        acf: "about_portfolio_item_4_title",
+      },
+      {
+        name: "items.3.subtitle",
+        label: "Item 4 Subtitle",
+        type: "text",
+        acf: "about_portfolio_item_4_subtitle",
+      },
+
+      {
+        name: "items.4.icon",
+        label: "Item 5 Icon",
+        type: "image",
+        acf: "about_portfolio_item_5_icon",
+      },
+      {
+        name: "items.4.title",
+        label: "Item 5 Title",
+        type: "text",
+        acf: "about_portfolio_item_5_title",
+      },
+      {
+        name: "items.4.subtitle",
+        label: "Item 5 Subtitle",
+        type: "text",
+        acf: "about_portfolio_item_5_subtitle",
+      },
+
+      {
+        name: "items.5.icon",
+        label: "Item 6 Icon",
+        type: "image",
+        acf: "about_portfolio_item_6_icon",
+      },
+      {
+        name: "items.5.title",
+        label: "Item 6 Title",
+        type: "text",
+        acf: "about_portfolio_item_6_title",
+      },
+      {
+        name: "items.5.subtitle",
+        label: "Item 6 Subtitle",
+        type: "text",
+        acf: "about_portfolio_item_6_subtitle",
       },
     ],
   },

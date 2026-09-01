@@ -21,6 +21,9 @@ import {
   PhoneCall,
   MapPin,
   PanelBottom,
+  Wrench,
+  Building2,
+  MonitorPlay,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -83,6 +86,12 @@ const aboutSections = [
     icon: Landmark,
   },
   {
+    title: "Core Services",
+    description: "Layanan utama yang ditawarkan",
+    href: "/admin/pages/about/core-services",
+    icon: Wrench,
+  },
+  {
     title: "Statistics",
     description: "Statistik perusahaan",
     href: "/admin/pages/about/AboutStats",
@@ -93,6 +102,18 @@ const aboutSections = [
     description: "Core Values",
     href: "/admin/pages/about/AboutValues",
     icon: Gem,
+  },
+  {
+    title: "Industries We Serve",
+    description: "Industri yang dilayani",
+    href: "/admin/pages/about/industries-we-serve",
+    icon: Building2,
+  },
+  {
+    title: "Portfolio",
+    description: "Portofolio produk & solusi display",
+    href: "/admin/pages/about/one-portfolio",
+    icon: MonitorPlay,
   },
   // {
   //   title: "Journey",
