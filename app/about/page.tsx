@@ -3,8 +3,11 @@ import Footer from "@/components/Footer";
 
 import AboutHero from "@/components/about/AboutHero";
 import AboutStory from "@/components/about/AboutStory";
+import AboutCoreServices from "@/components/about/AboutCoreServices";
 import AboutStats from "@/components/about/AboutStats";
 import AboutValues from "@/components/about/AboutValues";
+import AboutIndustries from "@/components/about/AboutIndustries";
+import AboutPortfolio from "@/components/about/AboutPortfolio";
 import AboutJourney from "@/components/about/AboutJourney";
 import AboutCTA from "@/components/about/AboutCTA";
 
@@ -44,8 +47,11 @@ export default async function AboutPage({
   const [
     hero,
     story,
+    coreServices,
     stats,
     values,
+    industries,
+    portfolio,
     journey,
     cta,
   ] = await Promise.all([
@@ -61,12 +67,27 @@ export default async function AboutPage({
     ),
 
     getPostById(
+      aboutSectionConfig.coreServices.id[lang],
+      lang
+    ),
+
+    getPostById(
       aboutSectionConfig.stats.id[lang],
       lang
     ),
 
     getPostById(
       aboutSectionConfig.values.id[lang],
+      lang
+    ),
+
+    getPostById(
+      aboutSectionConfig.industriesWeServe.id[lang],
+      lang
+    ),
+
+    getPostById(
+      aboutSectionConfig.onePortfolio.id[lang],
       lang
     ),
 
@@ -99,6 +120,11 @@ export default async function AboutPage({
         />
 
 
+        <AboutCoreServices
+          acf={coreServices?.acf ?? {}}
+        />
+
+
         <AboutStats
           acf={stats?.acf ?? {}}
         />
@@ -106,6 +132,16 @@ export default async function AboutPage({
 
         <AboutValues
           acf={values?.acf ?? {}}
+        />
+
+
+        <AboutIndustries
+          acf={industries?.acf ?? {}}
+        />
+
+
+        <AboutPortfolio
+          acf={portfolio?.acf ?? {}}
         />
 
 
