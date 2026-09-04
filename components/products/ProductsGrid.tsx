@@ -8,6 +8,8 @@ import Link from "next/link";
 
 import ProductCarousel from "./ProductCarousel";
 
+const ITEMS_PER_PAGE = 6;
+
 export default function ProductsGrid() {
   const { language } = useTranslation();
 
@@ -20,6 +22,8 @@ export default function ProductsGrid() {
 
   const [brands, setBrands] = useState<any[]>([]);
   const [productTypes, setProductTypes] = useState<any[]>([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   /* =========================
      LANGUAGE
@@ -56,6 +60,10 @@ export default function ProductsGrid() {
 
     loading:
       currentLanguage === "en" ? "Loading products..." : "Memuat produk...",
+
+    prev: currentLanguage === "en" ? "Prev" : "Sebelumnya",
+
+    next: currentLanguage === "en" ? "Next" : "Selanjutnya",
   };
 
   /* =========================
@@ -83,6 +91,14 @@ export default function ProductsGrid() {
     fetchBrands();
     fetchProductTypes();
   }, [currentLanguage]);
+
+  /* =========================
+     RESET PAGE ON FILTER CHANGE
+  ========================= */
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [brandFilter, categoryFilter, searchQuery]);
 
   /* =========================
      FETCH PRODUCTS
@@ -312,6 +328,21 @@ export default function ProductsGrid() {
   }, [products, brandFilter, categoryFilter, searchQuery]);
 
   /* =========================
+     PAGINATION
+  ========================= */
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / ITEMS_PER_PAGE),
+  );
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+
+    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
+  /* =========================
      LOADING
   ========================= */
 
@@ -490,7 +521,7 @@ export default function ProductsGrid() {
               lg:grid-cols-3
             "
           >
-            {filteredProducts.map((product) => (
+            {paginatedProducts.map((product) => (
               <div
                 key={product.id}
                 className="
@@ -688,6 +719,87 @@ export default function ProductsGrid() {
               </div>
             ))}
           </div>
+
+          {/* =================================
+              PAGINATION
+          ================================= */}
+
+          {filteredProducts.length > 0 && totalPages > 1 && (
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="
+                    rounded-lg
+                    border
+                    border-border
+                    px-3
+                    py-2
+                    text-sm
+                    font-medium
+                    text-black
+                    transition
+                    hover:border-primary
+                    disabled:cursor-not-allowed
+                    disabled:opacity-40
+                  "
+              >
+                {uiText.prev}
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`
+                        flex
+                        h-10
+                        w-10
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        text-sm
+                        font-semibold
+                        transition
+
+                        ${
+                          currentPage === page
+                            ? "border-primary bg-primary text-white"
+                            : "border-border text-black hover:border-primary"
+                        }
+                      `}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="
+                    rounded-lg
+                    border
+                    border-border
+                    px-3
+                    py-2
+                    text-sm
+                    font-medium
+                    text-black
+                    transition
+                    hover:border-primary
+                    disabled:cursor-not-allowed
+                    disabled:opacity-40
+                  "
+              >
+                {uiText.next}
+              </button>
+            </div>
+          )}
 
           {/* =================================
               EMPTY STATE

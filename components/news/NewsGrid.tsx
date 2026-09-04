@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Clock } from "lucide-react";
@@ -8,14 +8,23 @@ import { Clock } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
 
+const ITEMS_PER_PAGE = 6;
+
+// Batas karakter (plain text, tanpa tag HTML) sebelum
+// tulisan "Read more" / "Selengkapnya" dimunculkan.
+// Disesuaikan kira-kira dengan kapasitas 3 baris di line-clamp-3.
+const EXCERPT_CHAR_LIMIT = 150;
+
 export default function NewsGrid() {
   const { language } = useTranslation();
 
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchNews();
+    setCurrentPage(1);
   }, [language]);
 
   async function fetchNews() {
@@ -77,6 +86,34 @@ export default function NewsGrid() {
     );
   }
 
+  /* =========================
+     EXCERPT PLAIN TEXT
+     (buat ngecek perlu "read more" atau enggak)
+  ========================= */
+
+  function getExcerptPlainText(html: string) {
+    return String(html ?? "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim();
+  }
+
+  function isExcerptLong(post: any) {
+    return getExcerptPlainText(post.excerpt).length > EXCERPT_CHAR_LIMIT;
+  }
+
+  /* =========================
+     PAGINATION
+  ========================= */
+
+  const totalPages = Math.max(1, Math.ceil(news.length / ITEMS_PER_PAGE));
+
+  const paginatedNews = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+
+    return news.slice(start, start + ITEMS_PER_PAGE);
+  }, [news, currentPage]);
+
   if (loading) {
     return <div>Memuat berita...</div>;
   }
@@ -92,7 +129,7 @@ lg:grid-cols-3
 gap-8
 "
         >
-          {news.map((post) => (
+          {paginatedNews.map((post) => (
             <Link
               key={post.id}
               href={`/news/${post.slug}?lang=${language}`}
@@ -176,18 +213,37 @@ transition-colors
                   }}
                 />
 
-                <div
-                  className="
+                {/* =================================
+                    EXCERPT (max 3 baris) + READ MORE
+                ================================= */}
+
+                <div className="mb-4 flex-grow">
+                  <div
+                    className="
 text-sm
 text-muted-foreground
-mb-4
 line-clamp-3
-flex-grow
 "
-                  dangerouslySetInnerHTML={{
-                    __html: post.excerpt,
-                  }}
-                />
+                    dangerouslySetInnerHTML={{
+                      __html: post.excerpt,
+                    }}
+                  />
+
+                  {isExcerptLong(post) && (
+                    <span
+                      className="
+mt-1
+inline-block
+text-sm
+font-medium
+text-primary
+group-hover:underline
+"
+                    >
+                      {language === "en" ? "Read more..." : "Selengkapnya..."}
+                    </span>
+                  )}
+                </div>
 
                 <div
                   className="
@@ -216,6 +272,84 @@ border-border
             </Link>
           ))}
         </div>
+
+        {/* =================================
+            PAGINATION
+        ================================= */}
+
+        {news.length > 0 && totalPages > 1 && (
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="
+rounded-lg
+border
+border-border
+px-3
+py-2
+text-sm
+font-medium
+transition
+hover:border-primary
+disabled:cursor-not-allowed
+disabled:opacity-40
+"
+            >
+              {language === "en" ? "Prev" : "Sebelumnya"}
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`
+flex
+h-10
+w-10
+items-center
+justify-center
+rounded-lg
+border
+text-sm
+font-semibold
+transition
+${
+  currentPage === page
+    ? "border-primary bg-primary text-white"
+    : "border-border hover:border-primary"
+}
+`}
+                >
+                  {page}
+                </button>
+              ),
+            )}
+
+            <button
+              onClick={() =>
+                setCurrentPage((p) => Math.min(totalPages, p + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="
+rounded-lg
+border
+border-border
+px-3
+py-2
+text-sm
+font-medium
+transition
+hover:border-primary
+disabled:cursor-not-allowed
+disabled:opacity-40
+"
+            >
+              {language === "en" ? "Next" : "Selanjutnya"}
+            </button>
+          </div>
+        )}
 
         {news.length === 0 && (
           <div

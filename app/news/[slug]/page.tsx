@@ -13,9 +13,9 @@ interface Props {
   params: Promise<{
     slug: string;
   }>;
-  searchParams?: {
+  searchParams?: Promise<{
     lang?: string;
-  };
+  }>;
 }
 
 async function getPost(slug: string, lang: string) {
@@ -103,7 +103,9 @@ export default async function NewsDetail({
 }: Props) {
   const { slug } = await params;
 
-  const rawLang = searchParams?.lang;
+  const resolvedSearchParams = await searchParams;
+
+  const rawLang = resolvedSearchParams?.lang;
   const lang: LangCode = rawLang === "en" ? "en" : "id";
 
   const post = await getPost(slug, lang);
@@ -232,7 +234,7 @@ export default async function NewsDetail({
           </article>
         </div>
       </section>
-      <div className="mx-auto px-4 py-16">
+      <div className="mx-auto px-6 py-16">
         <ProductCTA />
       </div>
       <Footer lang={lang} />
