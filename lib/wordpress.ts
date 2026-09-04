@@ -1022,16 +1022,22 @@ export async function deleteProductType(id: number, token: string) {
 
 // news / berita
 
-export async function getPosts(lang: LangCode = DEFAULT_LANG) {
+export async function getPosts(lang: LangCode = DEFAULT_LANG, token?: string) {
   try {
     const response = await axios.get(
       `${WORDPRESS_URL}/wp-json/boeledin/v1/berita`,
       {
         params: {
           lang,
+          // Kalau ada token (request dari admin CMS), minta juga
+          // status non-publish. Endpoint custom di WP perlu
+          // menghormati parameter ini + Authorization header
+          // supaya draft/pending ikut kebaca.
+          ...(token ? { status: "publish,draft,pending,future,private" } : {}),
         },
         headers: {
           "Cache-Control": "no-cache",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       },
     );
@@ -1041,6 +1047,36 @@ export async function getPosts(lang: LangCode = DEFAULT_LANG) {
     console.error("GET BERITA ERROR:", error.response?.data || error);
 
     return [];
+  }
+}
+
+export async function getPost(
+  id: number,
+  lang: LangCode = DEFAULT_LANG,
+  token?: string,
+) {
+  try {
+    const response = await axios.get(
+      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita/${id}`,
+      {
+        params: {
+          lang,
+          _: Date.now(),
+          ...(token ? { status: "publish,draft,pending,future,private" } : {}),
+        },
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      },
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error("GET BERITA BY ID ERROR:", error.response?.data || error);
+
+    return null;
   }
 }
 
@@ -1066,30 +1102,6 @@ export async function getPostsCount(lang: LangCode = DEFAULT_LANG) {
   } catch (error) {
     console.error("Error fetching berita count:", error);
     return 0;
-  }
-}
-
-export async function getPost(id: number, lang: LangCode = DEFAULT_LANG) {
-  try {
-    const response = await axios.get(
-      `${WORDPRESS_URL}/wp-json/boeledin/v1/berita/${id}`,
-      {
-        params: {
-          lang,
-          _: Date.now(),
-        },
-        headers: {
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-        },
-      },
-    );
-
-    return response.data;
-  } catch (error: any) {
-    console.error("GET BERITA BY ID ERROR:", error.response?.data || error);
-
-    return null;
   }
 }
 

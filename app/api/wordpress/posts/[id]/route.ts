@@ -14,7 +14,10 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { id } = await params;
     const lang = req.nextUrl.searchParams.get("lang") || "id";
 
-    const post = await getPost(Number(id), lang as any);
+    const cookieStore = await cookies();
+    const token = cookieStore.get("wp_token")?.value;
+
+    const post = await getPost(Number(id), lang as any, token);
 
     if (!post) {
       return NextResponse.json(

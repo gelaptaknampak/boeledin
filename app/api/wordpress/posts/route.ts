@@ -6,7 +6,11 @@ import { getPosts, createPost } from "@/lib/wordpress";
 export async function GET(req: NextRequest) {
   try {
     const lang = req.nextUrl.searchParams.get("lang") || "id";
-    const posts = await getPosts(lang as any);
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("wp_token")?.value;
+
+    const posts = await getPosts(lang as any, token);
 
     return NextResponse.json(posts);
   } catch (error) {
