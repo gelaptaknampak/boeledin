@@ -369,13 +369,6 @@ export const homeSectionConfig = {
         acf: "label_4",
       },
 
-      {
-        name: "support",
-        label: "Support",
-        type: "text",
-        acf: "stat_support",
-      },
-
       // BARU
       {
         name: "hideAndShow",
@@ -383,6 +376,13 @@ export const homeSectionConfig = {
         type: "true_false",
         acf: "hide_and_show",
         checkboxLabel: "Sembunyikan bagian Stat Number & Label di frontend",
+      },
+
+      {
+        name: "support",
+        label: "Support",
+        type: "text",
+        acf: "stat_support",
       },
 
       {

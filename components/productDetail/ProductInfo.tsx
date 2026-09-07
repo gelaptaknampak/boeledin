@@ -13,6 +13,10 @@ export default function ProductInfo({ product }: Props) {
 
   const currentLanguage = language === "en" ? "en" : "id";
 
+  const uiText = {
+    brosur: currentLanguage === "en" ? "Download Brochure" : "Unduh Brosur",
+  };
+
   const [brandData, setBrandData] = useState<any>(null);
 
   const [loadingBrand, setLoadingBrand] = useState(true);
@@ -210,7 +214,7 @@ export default function ProductInfo({ product }: Props) {
             hover:opacity-90
           "
         >
-          Download Brosur
+          {uiText.brosur}
         </a>
       )}
     </section>

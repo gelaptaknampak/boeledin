@@ -737,7 +737,7 @@ export default function ProductsGrid() {
                     py-2
                     text-sm
                     font-medium
-                    text-black
+                    text-primary
                     transition
                     hover:border-primary
                     disabled:cursor-not-allowed
