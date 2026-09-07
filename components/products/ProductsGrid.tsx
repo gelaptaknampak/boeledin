@@ -442,7 +442,7 @@ export default function ProductsGrid() {
 
                     ${
                       brandFilter === brand.slug
-                        ? "border-primary bg-primary text-white"
+                        ? "border-primary bg-primary text-primary-foreground"
                         : "border-border hover:border-primary"
                     }
                   `}
@@ -479,7 +479,7 @@ export default function ProductsGrid() {
 
                     ${
                       categoryFilter === cat.slug
-                        ? "border-primary bg-primary text-white"
+                        ? "border-primary bg-primary text-primary-foreground"
                         : "border-border hover:border-primary"
                     }
                   `}
@@ -722,6 +722,15 @@ export default function ProductsGrid() {
 
           {/* =================================
               PAGINATION
+              ================================= 
+              
+              Semua warna di sini pakai token theme
+              (text-foreground, border-border, bg-primary,
+              text-primary-foreground) yang sudah didefinisikan
+              di globals.css lewat CSS variable --foreground,
+              --border, --primary, dst untuk :root (light)
+              dan .dark (dark). Jadi otomatis nyesuain begitu
+              theme berubah, tanpa perlu logic JS tambahan.
           ================================= */}
 
           {filteredProducts.length > 0 && totalPages > 1 && (
@@ -737,9 +746,10 @@ export default function ProductsGrid() {
                     py-2
                     text-sm
                     font-medium
-                    text-primary
+                    text-foreground
                     transition
                     hover:border-primary
+                    hover:text-primary
                     disabled:cursor-not-allowed
                     disabled:opacity-40
                   "
@@ -766,8 +776,8 @@ export default function ProductsGrid() {
 
                         ${
                           currentPage === page
-                            ? "border-primary bg-primary text-white"
-                            : "border-border text-black hover:border-primary"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border text-foreground hover:border-primary hover:text-primary"
                         }
                       `}
                   >
@@ -789,9 +799,10 @@ export default function ProductsGrid() {
                     py-2
                     text-sm
                     font-medium
-                    text-black
+                    text-foreground
                     transition
                     hover:border-primary
+                    hover:text-primary
                     disabled:cursor-not-allowed
                     disabled:opacity-40
                   "
