@@ -4,51 +4,104 @@ interface AboutPortfolioProps {
   acf: Record<string, any>;
 }
 
-function resolveImage(raw: any, debugLabel: string): { url: string; alt: string } {
-  if (!raw) return { url: "", alt: "" };
+type ResolvedImage = { url: string; alt: string };
 
-  // Kemungkinan 1: value langsung berupa string URL
-  if (typeof raw === "string") {
+// Sesuaikan kalau kamu punya env var lain buat base URL WordPress-nya
+const WORDPRESS_URL =
+  process.env.WORDPRESS_API_URL ?? "https://wp.boeledin.com";
+
+/**
+ * Kalau raw value ternyata udah berupa URL string atau ACF image array
+ * (bukan ID), langsung pakai tanpa perlu fetch tambahan.
+ */
+function extractInlineImage(raw: any): ResolvedImage | null {
+  if (!raw) return null;
+
+  if (typeof raw === "string" && raw.startsWith("http")) {
     return { url: raw, alt: "" };
   }
 
-  // Kemungkinan 2: ACF image array standar { url, alt, ... }
-  if (typeof raw === "object") {
-    return { url: raw.url ?? raw.sizes?.large ?? "", alt: raw.alt ?? "" };
+  if (typeof raw === "object" && raw.url) {
+    return { url: raw.url, alt: raw.alt ?? "" };
   }
 
-  // Kemungkinan 3: cuma attachment ID mentah (angka) -> gak bisa dibikin src
-  // tanpa lookup tambahan. Ini nandain Return Format field ACF-nya masih
-  // "Image ID", padahal harusnya "Image Array".
-  if (typeof raw === "number") {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn(
-        `[AboutPortfolio] "${debugLabel}" cuma dapet attachment ID (${raw}), bukan URL/object. ` +
-          `Cek Return Format field ini di Custom Fields > Field Groups > About One Portfolio, ubah ke "Image Array".`
-      );
-    }
-    return { url: "", alt: "" };
-  }
-
-  return { url: "", alt: "" };
+  return null;
 }
 
-export default function AboutPortfolio({ acf }: AboutPortfolioProps) {
+/**
+ * Resolve banyak attachment ID sekaligus jadi { id: { url, alt } }
+ * lewat WordPress REST API publik (wp-json/wp/v2/media?include=...).
+ */
+async function resolveImagesByIds(
+  ids: number[],
+): Promise<Record<number, ResolvedImage>> {
+  if (ids.length === 0) return {};
+
+  try {
+    const res = await fetch(
+      `${WORDPRESS_URL}/wp-json/wp/v2/media?include=${ids.join(
+        ",",
+      )}&per_page=${ids.length}`,
+      {
+        // cache 1 jam, sesuaikan kalau butuh lebih fresh/lebih statis
+        next: { revalidate: 3600 },
+      },
+    );
+
+    if (!res.ok) {
+      console.error("[AboutPortfolio] Gagal fetch media by IDs:", res.status);
+      return {};
+    }
+
+    const mediaList = await res.json();
+
+    const map: Record<number, ResolvedImage> = {};
+
+    for (const media of mediaList) {
+      map[media.id] = {
+        url: media.source_url ?? "",
+        alt: media.alt_text ?? "",
+      };
+    }
+
+    return map;
+  } catch (error) {
+    console.error("[AboutPortfolio] Error fetch media by IDs:", error);
+    return {};
+  }
+}
+
+export default async function AboutPortfolio({ acf }: AboutPortfolioProps) {
   const eyebrow = acf.about_portfolio_eyebrow ?? "";
   const title = acf.about_portfolio_title ?? "";
   const description = acf.about_portfolio_description ?? "";
 
-  const items = [1, 2, 3, 4, 5, 6]
-    .map((i) => {
-      const image = resolveImage(
-        acf[`about_portfolio_item_${i}_icon`],
-        `Item ${i} Icon`
-      );
+  const rawItems = [1, 2, 3, 4, 5, 6].map((i) => ({
+    iconRaw: acf[`about_portfolio_item_${i}_icon`],
+    title: acf[`about_portfolio_item_${i}_title`] ?? "",
+    subtitle: acf[`about_portfolio_item_${i}_subtitle`] ?? "",
+  }));
+
+  // Kumpulin ID yang beneran perlu di-resolve lewat fetch
+  // (yang udah berupa URL/object langsung dilewatin, gak usah di-fetch)
+  const idsToResolve = rawItems
+    .filter((item) => !extractInlineImage(item.iconRaw))
+    .map((item) => Number(item.iconRaw))
+    .filter((id) => Number.isFinite(id) && id > 0);
+
+  const imageMap = await resolveImagesByIds(idsToResolve);
+
+  const items = rawItems
+    .map((item) => {
+      const inline = extractInlineImage(item.iconRaw);
+
+      const image: ResolvedImage = inline ??
+        imageMap[Number(item.iconRaw)] ?? { url: "", alt: "" };
 
       return {
         image,
-        title: acf[`about_portfolio_item_${i}_title`] ?? "",
-        subtitle: acf[`about_portfolio_item_${i}_subtitle`] ?? "",
+        title: item.title,
+        subtitle: item.subtitle,
       };
     })
     .filter((item) => item.title || item.image.url);
@@ -101,9 +154,7 @@ export default function AboutPortfolio({ acf }: AboutPortfolioProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent" />
 
                 <div className="absolute inset-x-0 bottom-0 p-5">
-                  <h3 className="text-lg font-bold text-white">
-                    {item.title}
-                  </h3>
+                  <h3 className="text-lg font-bold text-white">{item.title}</h3>
 
                   {item.subtitle && (
                     <p className="mt-1 text-sm text-white/85">
