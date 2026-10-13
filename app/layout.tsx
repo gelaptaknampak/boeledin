@@ -36,7 +36,7 @@ export const metadata: Metadata = {
       "LED displays, digital signage, FIDS, and interactive flat panel solutions for businesses and public institutions in Indonesia.",
     images: [
       {
-        url: "/logo-white.png",
+        url: "/logo-black.png",
         width: 1200,
         height: 630,
         alt: "PT Future Boeled Indonesia - Display Technology Solutions",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title: "PT Future Boeled Indonesia | Display Technology Solutions",
     description:
       "LED displays, digital signage, FIDS, and interactive flat panel solutions in Indonesia.",
-    images: ["/logo-white.png"],
+    images: ["/logo-black.png"],
   },
 };
 
